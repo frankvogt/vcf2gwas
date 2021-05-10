@@ -38,8 +38,8 @@ requirements:
     - scipy
     - scikit-learn
     - numba
-    - ipykernel
-    - jupyterlab
+    #- ipykernel
+    #- jupyterlab
     - psutil==5.8*
     - pandas==1.2*
     - seaborn==0.11*
