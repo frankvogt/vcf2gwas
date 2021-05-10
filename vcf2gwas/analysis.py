@@ -1,0 +1,349 @@
+#!/usr/bin/env python
+
+"""
+Copyright (C) 2021, Frank Vogt
+
+This file is part of vcf2gwas.
+
+vcf2gwas is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+vcf2gwas is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+from parsing import *
+from utils import *
+import time
+import concurrent.futures
+import multiprocessing as mp
+import itertools
+import os
+import shutil
+import pandas as pd
+import seaborn as sns
+
+#os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+argvals = None
+
+############################## Initialising Program ##############################
+
+timestamp = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
+start = time.perf_counter()
+# set argument parser
+P = Parser(argvals)
+# set variables
+pheno_file = P.set_pheno()
+pheno_file = listtostring(pheno_file)
+covar_file = P.set_covar()
+covar_file = listtostring(covar_file)
+pc_prefix = set_pc_prefix(pheno_file, covar_file, "_")
+# configure logger
+Log = Logger(pc_prefix)
+
+Log.print_log(f'\nBeginning with analysis of {pheno_file}\n')
+
+# set variables
+snp_file = P.set_geno()
+X = P.get_phenotypes()
+Y = P.get_covariates()
+min_af = P.set_q()
+A = P.set_A()
+B = P.set_B()
+pca = P.set_pca()
+keep = P.set_keep()
+memory = P.set_memory()
+threads = P.set_threads()
+
+lm = P.set_lm()
+gk = P.set_gk()
+eigen = P.set_eigen()
+lmm = P.set_lmm()
+bslmm = P.set_bslmm()
+
+model = set_model(lm, gk, eigen, lmm, bslmm)
+model2 = model.removeprefix("-")
+
+n_top = P.set_n_top()
+gene_file = P.set_gene_file()
+gene_thresh = P.set_gene_thresh()
+multi = P.set_multi()
+sigval = P.set_sigval()
+
+snp_file2 = f'input/{snp_file}'
+pheno_file2 = None
+covar_file2 = None
+
+if pheno_file != None:
+    pheno_file2 = f'input/{pheno_file}'
+if covar_file != None:
+    covar_file2 = f'input/{covar_file}'
+
+covar_file_name = None
+
+############################## Adjust Files ##############################
+
+Log.print_log("Preparing files\n")
+Log.print_log("Checking and adjusting files..")
+
+if snp_file.endswith(".vcf"):
+    Log.print_log("Compressing VCF file..")
+    snp_file2 = Converter.compress_snp_file(snp_file2)
+    Log.print_log("VCF file successfully compressed\n")
+
+snp_prefix = snp_file.removesuffix(".vcf.gz")
+
+chrom = Converter.set_chrom(snp_file2)
+
+subset = f'subset{pc_prefix}_{snp_prefix}'
+folder = f'files{pc_prefix}_{snp_prefix}'
+
+subset2 = f'filtered_{subset}'
+
+# make list from genotype file
+Log.print_log("Checking individuals in VCF file..")
+list1 = Processing.process_snp_file(snp_file2)
+
+# make list from phenotype and/or covariate file and remove overlap in all files
+diff1a = []
+diff1b = []
+
+if pheno_file == None:
+    Log.print_log("No phenotype file specified")
+    pheno_subset1 = pd.DataFrame()
+else:
+    Log.print_log("Checking individuals in phenotype file..")
+    pheno = Processing.load_pheno(pheno_file2)
+    list2 = Processing.pheno_index(pheno)
+    diff1a = Processing.make_diff(list1, list2)
+    diff2 = Processing.make_diff(list2, list1)
+    pheno_subset1 = Processing.make_uniform(list1, list2, diff1a, diff2, pheno, subset, snp_file2, pheno_file, "phenotpye", Log)
+    length1 = len(pheno_subset1.columns)
+    Log.print_log(f'Removed {str(len(diff2))} out of {str(len(list2))} individuals, {str((len(list2)-len(diff2)))} remaining')
+
+if covar_file == None:
+    Log.print_log("No covariate file specified")
+    pheno_subset2 = pd.DataFrame()
+else:
+    Log.print_log("Checking individuals in covariate file..")
+    covar = Processing.load_pheno(covar_file2)
+    list3 = Processing.pheno_index(covar)
+    diff1b = Processing.make_diff(list1, list3)
+    diff3 = Processing.make_diff(list3, list1)
+    if set(diff1a) == set(diff1b):
+        pheno_subset2 = Processing.rm_pheno(covar, diff3, covar_file)
+        Log.print_log(str("Not all individuals in covariate and genotype file match"))
+    else:
+        pheno_subset2 = Processing.make_uniform(list1, list3, diff1b, diff3, covar, subset, snp_file2, covar_file, "covariate", Log)
+    length2 = len(pheno_subset2.columns)
+    Log.print_log(f'Removed {str(len(diff3))} out of {str(len(list3))} individuals, {str((len(list3)-len(diff3)))} remaining')
+
+Log.print_log(f'In total, removed {str((len(diff1a)+len(diff1b)))} out of {str(len(list1))} individuals, {str((len(list1)-(len(diff1a)+len(diff1b))))} remaining')
+Log.print_log("Files successfully adjusted\n")
+
+############################## Filter, make ped and bed ##############################
+
+Log.print_log("Filtering and converting files\n")
+
+Log.print_log("Filtering SNPs..")
+Converter.filter_snps(min_af, subset, subset2)
+Log.print_log("SNPs successfully filtered")
+    
+Log.print_log("Converting to PLINK BED..")
+Converter.make_bed(subset2, chrom, memory, threads)
+Log.print_log("Successfully converted to PLINK BED\n")
+
+#remove old files
+if keep == False:
+    Converter.remove_files(subset, pheno_file, subset2, snp_file2)
+
+if pca != None:
+    Log.print_log("Performing principal component analysis..")
+    Processing.pca_analysis(subset2, pca, memory, threads, chrom)
+    Log.print_log("Principal component analysis successfully completed\n")
+
+############################## add phenotypes/covariates to .fam file ##############################
+
+Log.print_log("Adding phenotypes/covariates to .fam file\n")
+
+Log.print_log("Editing .fam file..")
+fam = Processing.prepare_fam(subset2)
+
+if pheno_file == None:
+    X = []
+    cols1 = []
+    Log.print_log("No phenotype file specified, continuing without")
+else:
+    if A == True:
+        X = list(range(length1))
+        X = [i+1 for i in X]
+        Log.print_log("All phenotypes chosen")
+        cols1 = Processing.edit_fam(fam, pheno_subset1, subset2, X, "p", "Phenotype", Log, model, model2, pc_prefix)
+        cols1 = [str(i) for i in cols1]
+    else:
+        cols1 = []
+        if X == None:
+            X = []
+            Log.print_log("No phenotypes were specified, continuing without")
+        else:
+            Processing.edit_fam(fam, pheno_subset1, subset2, X, "p", "Phenotype", Log, model, model2, pc_prefix)
+
+if covar_file == None:
+    Y = []
+    cols2 = []
+    Log.print_log("No covariate file specified, continuing without")
+else:
+    if model == "-lmm":
+        covar_file_name = Processing.make_covarfile(fam, pheno_subset2, subset2, Y)
+        Y = []
+        cols2 = []
+    elif B == True:
+        Y = list(range(length2))
+        Y = [i+1 for i in Y]
+        Log.print_log("All covariates chosen")
+        cols2 = Processing.edit_fam(fam, pheno_subset2, subset2, Y, "c", "Covariate", Log, model, model2, pc_prefix)
+        cols2 = [str(i) for i in cols2]
+    else:
+        cols2 = []
+        if Y == None:
+            Y = []
+            Log.print_log("No covariates were specified, continuing without")
+        else:
+            Processing.edit_fam(fam, pheno_subset2, subset2, Y, "c", "Covariate", Log, model, model2, pc_prefix)
+
+Log.print_log("Editing .fam file successful\n")
+
+############################## Initialising GEMMA ##############################
+
+Log.print_log("Initialising GEMMA\n")
+# set variables
+if cols1 == []:
+        cols1 = set_cols(cols1, X, pheno_subset1)
+if cols2 == []:
+        cols2 = set_cols(cols2, Y, pheno_subset2)
+
+if multi == True:
+    columns = listtostring(cols1 + cols2) 
+    columns = [columns.replace(" ", "+")]
+else:
+    columns = cols1 + cols2
+if model == "-gk" or model == "-eigen":
+    columns = ['']
+if X == [] and Y == []:
+    columns = ['']
+
+n = set_n(lm, gk, lmm, bslmm)
+filename = P.set_filename()
+filename1 = filename
+if filename != None:
+    filename = f'input/{filename}'
+filename2 = None
+if pca != None:
+    filename = f'{subset2}.eigenvec'
+    filename1 = None
+    filename2 = f'{subset2}.eigenval'
+
+x = 1
+top_ten = []
+sns.set_theme(style="white")
+pd.set_option('use_inf_as_na', True)
+pd.options.mode.chained_assignment = None
+
+############################## GEMMA ##############################
+
+prefix_list = []
+prefix2_list = []
+i_list = []
+N_list = []
+path_list = []
+
+if model == None:
+    Log.print_log("GEMMA can't be executed since no model was specified!\n")
+else:
+    Log.print_log("Running GEMMA\n")
+    Log.print_log(f'Phenotypes to analyze: {listtostring(columns).replace(" ", ", ")}\n')
+    # set lists of variables and make output directories
+    for i in columns:
+
+        prefix = subset2
+        prefix2 = f'{i}_{prefix}'
+        if i == "":
+            prefix2 = prefix
+            i = "results"
+
+        if X == [] and Y == []:
+            N = "1"
+        else:
+            N = str(x)
+            x = x + 1
+            if multi == True:
+                N = concat_lists(X, Y)
+                N = listtostring(N)
+
+        make_dir(f'output/{model2}')
+        if model not in ("-gk", "-eigen"):
+            path = f'output/{model2}/{i}'
+            make_dir(path)
+        
+        prefix_list.append(prefix)
+        prefix2_list.append(prefix2)
+        i_list.append(i)
+        N_list.append(N)
+        path_list.append(path)
+
+        if model in ("-eigen", "-lmm"):
+            if filename == None:
+                filename = Gemma.rel_matrix(prefix, Log)
+
+    # run GEMMA in parallel
+    with concurrent.futures.ProcessPoolExecutor(mp_context=mp.get_context('fork'), max_workers=threads) as executor:
+        executor.map(Gemma.run_gemma, prefix_list, prefix2_list, itertools.repeat(model), itertools.repeat(n), N_list, path_list, itertools.repeat(Log), itertools.repeat(filename), itertools.repeat(filename2), itertools.repeat(pca), itertools.repeat(covar_file_name), i_list)
+    Log.print_log("\nGEMMA completed successfully\n")
+
+    ############################## Processing and plotting ##############################
+
+    Log.print_log("Analyzing GEMMA results\n")
+    for (top_ten, Log, model, n, prefix2, path, n_top, i, sigval) in zip(itertools.repeat(top_ten), itertools.repeat(Log), itertools.repeat(model), itertools.repeat(n), prefix2_list, path_list, itertools.repeat(n_top), i_list, itertools.repeat(sigval)):
+        Post_analysis.run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval)
+    Log.print_log("Analysis of GEMMA results completed successfully\n")
+
+############################## Summary and Clean up ##############################
+
+Log.print_log("Starting clean-up\n")
+
+if model == None:
+    path = 'output'
+else:
+    path = f'output/{model2}'
+
+if model not in ("-gk", "-eigen", None):
+    make_dir(f'{path}/summary')
+    path2 = f'{path}/summary/top_SNPs'
+    make_dir(path2)
+    Post_analysis.print_top_list(top_ten, columns, path2, pc_prefix, snp_prefix)
+    Log.print_log("Top SNPs saved")
+
+make_dir(f'{path}/files')
+path3 = f'{path}/files/{folder}'
+make_dir(path3)
+
+Log.print_log("Moving files..")
+for files in os.listdir():
+    if files.startswith((f'subset{pc_prefix}', subset2)):
+        shutil.move(files, os.path.join(path3, files))
+
+finish = time.perf_counter()
+time_total = round(finish-start, 2)
+time_total = runtime_format(time_total)
+
+Log.print_log(f'Clean up successful \n\nAnalysis of {pheno_file} finished successfully\nRuntime: {time_total}\n')
+
+move_log(model, model2, pc_prefix)
