@@ -6,7 +6,7 @@ package:
   version: {{ data['version'] }}
 
 source:
-  path: ..
+  git_url: https://github.com/frankvogt/vcf2gwas.git
 
 build:
   # If the installation is complex, or different between Unix and Windows, use
