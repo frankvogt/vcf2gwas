@@ -31,6 +31,20 @@ requirements:
   host:
     - python==3.9*
     - pip
+    - numpy==1.20*
+    - matplotlib==3.4*
+    - scipy
+    - scikit-learn
+    - numba
+    #- ipykernel
+    #- jupyterlab
+    - psutil==5.8*
+    - pandas==1.2*
+    - seaborn==0.11*
+    - adjusttext==0.7*
+    - bcftools==1.12*
+    - plink==1.90*
+    - gemma==0.98.3
   run:
     - python==3.9*
     - numpy==1.20*
