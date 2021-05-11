@@ -29,13 +29,13 @@ requirements:
   # build:
   #   - {{ compilers('c') }}
   host:
-    - python==3.9
+    - python
     - pip
     - numpy==1.20*
     - matplotlib==3.4*
-    - scipy
+    #- scipy
     - scikit-learn
-    - numba
+    #- numba
     #- ipykernel
     #- jupyterlab
     - psutil==5.8*
