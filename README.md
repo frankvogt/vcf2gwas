@@ -55,33 +55,26 @@ The only requirement is an up to date version of [conda](https://conda.io/projec
 
 ### Installation
 
-First, clone the repository to your local machine.
+First, make sure to deactivate any conda environments. 
 
-```
-git clone "address"
-cd "address"
-```
-
-To get the correct versions of the necessary modules and packages and have them not interfere with your local conda installation, it is recommended to create a virtual conda environment with the help of the [environment](environment.yml) file.
-
-```
-conda env create -f environment.yml
-```
-
-This will create a virtul environment with all necessary packages called "vcf2gwas".
-
-To activate the environment, type
-
-```
-conda activate vcf2gwas
-```
-and everything is ready for analysis.
-
-To close the environment once you are done, simply type:
-
-```
+````
 conda deactivate
 ```
+
+Since vcf2gwas will create its own environment there may some conflicts when installing vcf2gwas into another conda environment.  
+Now the package can be installed by simply typing:
+
+```
+conda install -c fvogt257 vcf2gwas
+```
+
+The first time you run vcf2gwas the environment has to be installed and also the example files have to be copied to the current working directory. To do this, type
+
+```
+install_vcf2gwas
+```
+
+The environment used by the pipeline called "vcf2gwas" is now ready.
 
 ## Usage
 
