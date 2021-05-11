@@ -55,9 +55,9 @@ The only requirement is an up to date version of [conda](https://conda.io/projec
 
 ### Installation
 
-First, make sure to deactivate any conda environments. 
+First, make sure to deactivate any conda environments.  
 
-````
+```
 conda deactivate
 ```
 
