@@ -17,7 +17,7 @@ setup(
     package_data={'vcf2gwas': ['*.yml', 'input/example.*', 'README.*', 'LIC*']},
     entry_points={
         'console_scripts': [
-            'vcf2gwas=vcf2gwas.__main__:main'
+            'vcf2gwas=vcf2gwas.__main__:main',
             'install_vcf2gwas=vcf2gwas.install:main'
         ]
     },
