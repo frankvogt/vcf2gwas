@@ -5,8 +5,13 @@ import shutil
 def main():
     print("Checking for conda environment 'vcf2gwas'..")
     try:
-        subprocess.run(["pip", "install", "umap-learn"])
-        #subprocess.run(["conda", "env", "create", "-f", os.path.join(os.path.dirname(__file__), 'environment.yml')])
+        subprocess.run(["conda", "install", "psutil"])
+    except:
+        pass
+    try:
+        #subprocess.run(["pip", "install", "umap-learn"])
+        subprocess.run(["conda", "env", "create", "-f",
+            os.path.join(os.path.dirname(__file__), 'environment.yml')])
     except Exception as e:
         print(e)
     print("Environment is now available \nCopying example input files to current working directory..")
