@@ -1,10 +1,12 @@
 import argparse
+import os
+import subprocess
 import multiprocessing as mp
 try:
     from psutil import virtual_memory
 except ModuleNotFoundError:
-    exit(print("Error: Make sure to deactivate any conda environments before installing vcf2gwas!"))
-import os
+    #exit(print("Error: Make sure to deactivate any conda environments before installing vcf2gwas!"))
+    subprocess.run(["pip", "install", "psutil"])
 
 """
 Copyright (C) 2021, Frank Vogt
