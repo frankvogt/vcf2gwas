@@ -2,6 +2,7 @@ from setuptools import setup
 
 requirements = [
     # package requirements go here
+    'umap-learn'
 ]
 
 setup(
