@@ -70,7 +70,7 @@ test:
   #imports:
   #  - utils.py
   #  - parsing.py
-  #commands:
+  commands:
     - test_vcf2gwas
 
 about:
