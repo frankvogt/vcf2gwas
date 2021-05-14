@@ -7,6 +7,7 @@ try:
 except ModuleNotFoundError:
     #exit(print("Error: Make sure to deactivate any conda environments before installing vcf2gwas!"))
     subprocess.run(["pip", "install", "psutil"])
+    from psutil import virtual_memory
 
 """
 Copyright (C) 2021, Frank Vogt
