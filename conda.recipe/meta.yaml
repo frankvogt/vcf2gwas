@@ -36,10 +36,6 @@ requirements:
   host:
     - python==3.9
     - pip
-
-  run:
-    - python==3.9
-    - pip
     - numpy==1.20*
     - matplotlib==3.4*
     - scipy
@@ -54,6 +50,9 @@ requirements:
     - bcftools==1.12*
     - plink==1.90*
     - gemma==0.98.3
+
+  run:
+
     
     # dependencies are defined in setup.py
     {% for dep in data['install_requires'] %}
