@@ -70,8 +70,8 @@ test:
   #imports:
   #  - utils.py
   #  - parsing.py
-  commands:
-    - test_vcf2gwas
+  #commands:
+  #  - test_vcf2gwas
 
 about:
   home: https://github.com/frankvogt/vcf2gwas
