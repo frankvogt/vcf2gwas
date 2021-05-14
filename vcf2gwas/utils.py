@@ -27,11 +27,9 @@ import shutil
 import logging
 import numpy as np
 import subprocess
+import argparse
 import pandas as pd
-try:
-    import matplotlib.pyplot as plt
-except ModuleNotFoundError:
-    exit()
+import matplotlib.pyplot as plt
 import seaborn as sns
 import umap
 from sklearn.decomposition import PCA
@@ -56,28 +54,28 @@ def set_pc_prefix(pheno_file, covar_file, string):
         pc_prefix = ""
     return pc_prefix
 
-def check_files(snp_file, snp_file2, gene_file):
+def check_files(snp_file2, gene_file, gene_file_path):
     """Description:
     checks if input files exists (SNP file and Gene file)"""
 
     if os.path.isfile(snp_file2) == False:
         exit(print("Error: VCF file non existent"))
     if gene_file != None:
-        if os.path.isfile(f'input/{gene_file}') == False: exit(print("Error: Gene comparison file non existent"))
+        if os.path.isfile(gene_file_path) == False: exit(print("Error: Gene comparison file non existent, please check if file path was specified correctly"))
 
 def check_files2(pheno_file, pheno_file2):
     """Description:
     checks if input files exists (Pheno file)"""
 
     if pheno_file != None:
-        if os.path.isfile(pheno_file2) == False: exit(print("Error: Phenotype file non existent"))
+        if os.path.isfile(pheno_file2) == False: exit(print("Error: Phenotype file non existent, please check if file path was specified correctly"))
 
 def check_files3(covar_file, covar_file2):
     """Description:
     checks if input files exists (Covar file)"""
 
     if covar_file != None:
-        if os.path.isfile(covar_file2) == False: exit(print("Error: Covariate file non existent"))
+        if os.path.isfile(covar_file2) == False: exit(print("Error: Covariate file non existent, please check if file path was specified correctly"))
 
 def make_dir(name):
     """Description: 
@@ -156,10 +154,11 @@ def set_n(lm, gk, lmm, bslmm):
             n = str(i)
     return n
 
-def move_log(model, model2, pc_prefix):
+def move_log(model, model2, pc_prefix, out_dir):
     if model != None:
-        make_dir(f'output/{model2}/logs')
-        shutil.move(f'output/vcf2gwas{pc_prefix}.log.txt', f'output/{model2}/Logs/vcf2gwas{pc_prefix}.log.txt')
+        path = os.path.join(out_dir, model2, "logs")
+        make_dir(path)
+        shutil.move(os.path.join(out_dir, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(path, f'vcf2gwas{pc_prefix}.log.txt'))
 
 
 ############################## Classes ##############################
@@ -168,12 +167,12 @@ class Logger:
     """Description:
     contains functions regarding the log and output messages"""
 
-    def __init__(self, pc_prefix):
+    def __init__(self, pc_prefix, out_dir):
         """Description:
         initializes logger"""
 
         LOG_FORMAT = "%(message)s"
-        logging.basicConfig(filename=f'output/vcf2gwas{pc_prefix}.log.txt', level=logging.INFO, format=LOG_FORMAT, filemode='w')
+        logging.basicConfig(filename=os.path.join(out_dir, f'vcf2gwas{pc_prefix}.log.txt'), level=logging.INFO, format=LOG_FORMAT, filemode='w')
         self.logger = logging.getLogger()
 
     def print_log(self, text):
@@ -278,7 +277,7 @@ class Starter:
         for i, point in a.iterrows():
             ax.text(point['x']+.02, point['y'], str(point['val']))
 
-    def umap_calc(df, pheno_file, n, seed):
+    def umap_calc(df, pheno_file, n, seed, pheno_path):
         """Description:
         performs dimension reduction via UMAP"""
 
@@ -291,7 +290,6 @@ class Starter:
             rand = random.randint(1, 1000)
         else:
             rand = 322
-        print(rand)
         emb_list = []
         for i in range(n):
             emb_list.append(f'emb{i+1}')
@@ -307,14 +305,14 @@ class Starter:
             plt.subplots(figsize=(12,12))
             sns.scatterplot("emb1","emb2", data=embeddingDf);
             Starter.label_point(embeddingDf.emb1,embeddingDf.emb2,embeddingDf.host,plt.gca()) #custom function used
-            plt.savefig(f'input/{pheno_file.removesuffix(".csv")}.png')
+            plt.savefig(os.path.join(pheno_path, f'{pheno_file.removesuffix(".csv")}.png'))
             plt.close()
 
         embeddingDf.set_index("host", inplace=True, drop=True)
         embeddingDf.index.name = None
-        embeddingDf.to_csv(f'input/{pheno_file}')
+        embeddingDf.to_csv(os.path.join(pheno_path, pheno_file))
 
-    def pca_calc(df, pheno_file, n):
+    def pca_calc(df, pheno_file, n, pheno_path):
         """Description:
         performs principal component analysis"""
 
@@ -339,14 +337,14 @@ class Starter:
             plt.subplots(figsize=(12,12))
             sns.scatterplot("pc1","pc2", data=embeddingDf);
             Starter.label_point(embeddingDf.pc1,embeddingDf.pc2,embeddingDf.host,plt.gca()) #custom function used
-            plt.savefig(f'input/{pheno_file.removesuffix(".csv")}.png')
+            plt.savefig(os.path.join(pheno_path, f'{pheno_file.removesuffix(".csv")}.png'))
             plt.close()
 
         embeddingDf.set_index("host", inplace=True, drop=True)
         embeddingDf.index.name = None
-        embeddingDf.to_csv(f'input/{pheno_file}')
+        embeddingDf.to_csv(os.path.join(pheno_path, pheno_file))
 
-    def split_phenofile1(X, X_list, df, pheno_file, pheno_list):
+    def split_phenofile1(X, X_list, df, pheno_file, pheno_list, pheno_path):
 
         ind = 1
         for i in X:
@@ -355,10 +353,10 @@ class Starter:
             df_name = pheno_file.removesuffix(".csv")
             df_name = f'{df_name}.part{ind}.csv'
             pheno_list.append(df_name)
-            df_new.to_csv(f'input/{df_name}')
+            df_new.to_csv(os.path.join(pheno_path, df_name))
             ind += 1
 
-    def split_phenofile2(threads, threads3, rest2, col_dict, X_list, df, pheno_file, pheno_list):
+    def split_phenofile2(threads, threads3, rest2, col_dict, X_list, df, pheno_file, pheno_list, pheno_path):
 
         for i in range(threads):
             x = 0
@@ -375,7 +373,7 @@ class Starter:
             df_name = pheno_file.removesuffix(".csv")
             df_name = f'{df_name}.part{i+1}.csv'
             pheno_list.append(df_name)
-            df_new.to_csv(f'input/{df_name}')
+            df_new.to_csv(os.path.join(pheno_path, df_name))
 
     def delete_string(args, string):
 
@@ -384,7 +382,7 @@ class Starter:
         temp_list = temp_list+temp_list2
         return [j for i, j in enumerate(args) if i not in temp_list]
 
-    def edit_args1(pheno_list, args, args_list, threads_list, umap_switch, pca_switch, A):
+    def edit_args1(pheno_list, args, args_list, threads_list, umap_switch, pca_switch, A, pheno_path):
 
         for i in range(len(pheno_list)):
             args2 = list(args)
@@ -392,19 +390,22 @@ class Starter:
             args_list[i].insert(4, '--threads')
             args_list[i].insert(5, threads_list[i])
             args_list[i].insert(6, "--pfile")
-            args_list[i].insert(7, pheno_list[i])
+            if umap_switch == True and pca_switch == True:
+                args_list[i].insert(7, os.path.join(pheno_path[i//2], pheno_list[i]))
+            else:
+                args_list[i].insert(7, os.path.join(pheno_path[i], pheno_list[i]))
             if umap_switch == True or pca_switch == True:
                 if A == False:
                     args_list[i].insert(8, "--allphenotypes")
 
-    def edit_args2(pheno_list, args, args_list, threads_list, pheno_file, A, X_list):
+    def edit_args2(pheno_list, args, args_list, threads_list, pheno_file, A, X_list, pheno_path):
 
         for i in range(len(pheno_list)):
             args2 = list(args)
             args_list.append(args2)
             args_list[i].insert(4, '--threads')
             args_list[i].insert(5, threads_list[i])
-            args_list[i] = [pheno_list[i] if x==pheno_file else x for x in args_list[i]]
+            args_list[i] = [os.path.join(pheno_path[0], pheno_list[i]) if x==pheno_file else x for x in args_list[i]]
             #n = 7
             if A == False:
                 args_list[i].insert(6, "--allphenotypes")
@@ -745,14 +746,14 @@ class Post_analysis:
         """Description:
         reads GEMMA output file"""
 
-        return pd.read_csv(f'{path}/{prefix}.{case}.txt', sep='\t')
+        return pd.read_csv(os.path.join(path, f'{prefix}.{case}.txt'), sep='\t')
 
     def format_data(prefix, case, pcol, path, sep='\t', chromosome='chr'):
         """Description:
         formats dataframe for manhattan plot
         based on: https://github.com/Pudkip/Pyhattan/blob/master/Pyhattan/__init__.py"""
 
-        data = pd.read_table(f'{path}/{prefix}.{case}.txt', sep = sep)
+        data = pd.read_table(os.path.join(path, f'{prefix}.{case}.txt'), sep = sep)
         if case == "param":
             data['-log10(p_value)'] = (data[pcol])
         else:
@@ -809,8 +810,8 @@ class Post_analysis:
                             #ax.annotate(str(row[refSNP]), xy = (index, row['-log10(p_value)']))
                     adjust_text(texts, data.index.values, data['-log10(p_value)'].values, autoalign='y', ha='left', only_move={'text':'y'}, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
 
-            make_dir(f'{path}/manhattan')
-            plt.savefig(f'{path}/manhattan/{pcol}_manh_{prefix}.png')
+            make_dir(os.path.join(path, "manhattan"))
+            plt.savefig(os.path.join(path, "manhattan", f'{pcol}_manh_{prefix}.png'))
             plt.close()
             Log.print_log(f'Manhattan plot saved as "{pcol}_manh_{prefix}.png" in "manhattan/"')
 
@@ -861,8 +862,8 @@ class Post_analysis:
             plt.xlabel("Expected  "r'$-log_{10}(p)$')
             plt.ylabel("Observed  "r'$-log_{10}(p)$')
 
-            make_dir(f'{path}/QQ')
-            plt.savefig(f'{path}/QQ/{pcol}_qq_{prefix}.png')
+            make_dir(os.path.join(path, "QQ"))
+            plt.savefig(os.path.join(path, "QQ", f'{pcol}_qq_{prefix}.png'))
             plt.close()
             Log.print_log(f'QQ-plot saved as "{pcol}_qq_{prefix}.png" in "QQ/"')
 
@@ -884,7 +885,7 @@ class Post_analysis:
         iterables = [cols, ["chr", "SNP_ID", "SNP_pos"]]
         multcols = pd.MultiIndex.from_product(iterables)
         df.columns = multcols
-        df.to_csv(f'{path}/top_SNPs{pc_prefix}_{snp_prefix}.csv', sep=',')
+        df.to_csv(os.path.join(path, f'top_SNPs{pc_prefix}_{snp_prefix}.csv'), sep=',')
 
     def summarizer(path, path2, pc_prefix, snp_prefix, n, Log, prefix_list):
         """Description:
@@ -983,7 +984,7 @@ class Post_analysis:
                     plt.xlabel("SNP ID")
                     plt.yticks(np.arange(0, max(y)+2, 1))
                     plt.ylabel("Occurrence of SNP")
-                    plt.savefig(f'{path2}/summarized_top_SNPs{pc_prefix}_{snp_prefix}.png')
+                    plt.savefig(os.path.join(path2, f'summarized_top_SNPs{pc_prefix}_{snp_prefix}.png'))
                     plt.close()
                     values_list.append(values)
                 except Exception as e:
@@ -1004,18 +1005,18 @@ class Post_analysis:
                 values["phenotypes"] = names
                 #save as file
                 if len(dfnames) == 1:
-                    filename = f'{path2}/summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv'
+                    filename = os.path.join(path2, f'summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv') 
                     values.to_csv(filename, index=False, sep=',')
                     Log.print_log(f'Top SNPs summarized and saved as {filename}')
                 else:
-                    filename = f'{path2}/summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv'
+                    filename = os.path.join(path2, f'summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv')
                     values.to_csv(filename, index=False, sep=',')
                     Log.print_log(f'Top SNPs summarized and saved as {filename}')
                 c += 1
                 filenames.append(filename)
         return filenames
 
-    def gene_compare(filenames, gene_file, gene_thresh, path, pc_prefix, snp_prefix, Log):
+    def gene_compare(filenames, gene_file, gene_file_path, gene_thresh, path, pc_prefix, snp_prefix, Log):
         """Description:
         takes dataframe of summarized SNPs, calculates distances to genes in gene input file and saves results in new file.
         Columns in gene file: start, stop, chr, name (optional), ID (optional), comment (optional)"""
@@ -1033,7 +1034,7 @@ class Post_analysis:
                     if file == f'summarized_top_SNPs{pc_prefix}_{snp_prefix}.csv':
                         n += 1
                 #read gene .csv file
-                df = pd.read_csv(f'input/{gene_file}', sep=',')
+                df = pd.read_csv(gene_file_path, sep=',')
                 gene_file_name = gene_file.removesuffix(".csv")
                 #set list variables
                 gene_dist_left = []
@@ -1144,10 +1145,10 @@ class Post_analysis:
                         pass
                     #save file
                     if n > 0:
-                        values.to_csv(f'{path}/{gene_file_name}_compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv', index=False)
+                        values.to_csv(os.path.join(path, f'{gene_file_name}_compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv'), index=False)
                         Log.print_log(f'Top SNPs compared to genes and saved as {path}/compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv')
                     else:
-                        values.to_csv(f'{path}/compared_summarized_top_SNPs{addstring[c]}{snp_prefix}.csv', index=False)
+                        values.to_csv(os.path.join(path, f'compared_summarized_top_SNPs{addstring[c]}{snp_prefix}.csv'), index=False)
                         Log.print_log(f'Top SNPs compared to genes and saved as {path}/compared_summarized_top_SNPs{addstring[c]}{snp_prefix}.csv')
                 else:
                     Log.print_log(f'Could not parse contents of {gene_file}.\nPlease provide the file in the right format.')
@@ -1247,10 +1248,11 @@ class Lin_models(Post_analysis):
         # top 0.01% variants (below 0.01% quantile)
         top001 = df2[df2[pcol]<df2[pcol].quantile(0.0001)]
         #write files
-        make_dir(f'{path}/best_p-values')
-        top1.to_csv(f'{path}/best_p-values/{pcol}_{prefix}_top1.csv')
-        top01.to_csv(f'{path}/best_p-values/{pcol}_{prefix}_top01.csv')
-        top001.to_csv(f'{path}/best_p-values/{pcol}_{prefix}_top001.csv')
+        file_path = os.path.join(path, "best_p-values")
+        make_dir(file_path)
+        top1.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top1.csv'))
+        top01.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top01.csv'))
+        top001.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top001.csv'))
         if df3.empty == True:
             df2["rs"] = "NaN"
         return df2
@@ -1263,9 +1265,9 @@ class Bslmm(Post_analysis):
         """Description:
         formats column names in GEMMA output file"""
 
-        with open(f'{path}/{prefix}.hyp.txt') as f:
+        with open(os.path.join(path, f'{prefix}.hyp.txt')) as f:
             newText=f.read().replace('h ', 'h').replace(' pve', 'pve').replace(' rho', 'rho').replace(' pge', 'pge').replace(' pi', 'pi').replace(' n_gamma', 'n_gamma\t')
-        with open(f'{path}/{prefix}.hyp.txt', "w") as f:
+        with open(os.path.join(path, f'{prefix}.hyp.txt'), "w") as f:
             f.write(newText)
 
     def rm_unnamed(df):
@@ -1286,8 +1288,8 @@ class Bslmm(Post_analysis):
         df3 = pd.concat([df3_temp,c], axis=1)
         df3.columns = ["hyperparam", "mean", "median", "2.5%", "97.5"]
         # save hyperparameters as csv
-        make_dir(f'{path}/hyperparameters')
-        df3.to_csv(f'{path}/hyperparameters/{prefix}_hyperparameters.csv')
+        make_dir(os.path.join(path, "hyperparameters"))
+        df3.to_csv(os.path.join(path, "hyperparameters", f'{prefix}_hyperparameters.csv'))
         return a
 
     def diagnostics(df, a, prefix, path, Log):
@@ -1295,7 +1297,7 @@ class Bslmm(Post_analysis):
         saves diagnostic plots of hyperparameters"""
 
         Log.print_log("Plotting traces and distributions of hyperparameters..")
-        make_dir(f'{path}/diagnostics')
+        make_dir(os.path.join(path, "diagnostics"))
         for i in a:
             #create grid
             fig =plt.figure(figsize=(16,12))
@@ -1318,7 +1320,7 @@ class Bslmm(Post_analysis):
             except Exception as e:
                 pass
             #save figures  
-            plt.savefig(f'{path}/diagnostics/{prefix}_{i}_hyperparameter.png')
+            plt.savefig(os.path.join(path, "diagnostics", f'{prefix}_{i}_hyperparameter.png'))
             plt.close()
             Log.print_log(f'Plot of {i} saved in "diagnostics/"')
 
@@ -1342,11 +1344,12 @@ class Bslmm(Post_analysis):
         # top 0.01% variants (above 99.99% quantile)
         top001 = df6[df6["eff"]>df6["eff"].quantile(0.9999)]
         #write files
-        df.to_csv(path+"/"+prefix+".param.txt", sep='\t', index=False)
-        make_dir(f'{path}/highest_effects')
-        top1.to_csv(f'{path}/highest_effects/{prefix}_top1eff.csv')
-        top01.to_csv(f'{path}/highest_effects/{prefix}_top01eff.csv')
-        top001.to_csv(f'{path}/highest_effects/{prefix}_top001eff.csv')
+        df.to_csv(os.path.join(path, f'{prefix}.param.txt'), sep='\t', index=False)
+        file_path = os.path.join(path, "highest_effects")
+        make_dir(file_path)
+        top1.to_csv(os.path.join(file_path, f'{prefix}_top1eff.csv'))
+        top01.to_csv(os.path.join(file_path, f'{prefix}_top01eff.csv'))
+        top001.to_csv(os.path.join(file_path, f'{prefix}_top001eff.csv'))
         if df6.empty == True:
             df5["rs"] = "NaN"
         return df5
@@ -1369,11 +1372,12 @@ class Bslmm(Post_analysis):
         # variants with effect in 50% MCMC samples or more
         pip50 = df7[df7["gamma"]>0.5]
         #write files
-        make_dir(f'{path}/high_PIP')
-        pip01.to_csv(f'{path}/high_PIP/{prefix}_pip01.csv')
-        pip10.to_csv(f'{path}/high_PIP/{prefix}_pip10.csv')
-        pip25.to_csv(f'{path}/high_PIP/{prefix}_pip25.csv')
-        pip50.to_csv(f'{path}/high_PIP/{prefix}_pip50.csv')
+        file_path = os.path.join(path, "high_PIP")
+        make_dir(file_path)
+        pip01.to_csv(os.path.join(file_path, f'{prefix}_pip01.csv'))
+        pip10.to_csv(os.path.join(file_path, f'{prefix}_pip10.csv'))
+        pip25.to_csv(os.path.join(file_path, f'{prefix}_pip25.csv'))
+        pip50.to_csv(os.path.join(file_path, f'{prefix}_pip50.csv'))
         if df8.empty == True:
             df7["rs"] = "NaN"
         return df7

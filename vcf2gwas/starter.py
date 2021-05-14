@@ -19,6 +19,9 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+print("\nvcf2gwas v0.5 \n")
+print("Initialising..\n")
+
 from parsing import *
 from utils import *
 import time
@@ -31,21 +34,30 @@ from psutil import virtual_memory
 
 #os.chdir(os.path.dirname(os.path.abspath(__file__)))
 pd.options.mode.chained_assignment = None
-make_dir("output")
 
 #################### Setting variables ####################
 
 argvals = None
-#argvals = '-v example.vcf.gz -pf example.csv -ap -lmm'.split()
+
+P = Parser(argvals)
+out_dir = P.set_out_dir()
+out_dir2 = os.path.join(out_dir, "output")
+os.makedirs(out_dir2, exist_ok=True)
 
 timestamp = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
 start = time.perf_counter()
 
-P = Parser(argvals)
-
-snp_file = P.set_geno()
+snp_file2 = P.set_geno()
+snp_file = os.path.split(snp_file2)[1]
 
 pheno_files = P.set_pheno()
+pheno_files_path = []
+if pheno_files != None:
+    plist = []
+    for p in pheno_files:
+        pheno_files_path.append(os.path.split(p)[0])
+        plist.append(os.path.split(p)[1])
+    pheno_files = plist
 pheno = listtostring(pheno_files)
 if pheno_files != None and len(pheno_files) > 1:
     switch = True
@@ -54,20 +66,28 @@ if pheno_files != None and len(pheno_files) > 1:
 else:
     switch = False
 
-covar_files = P.set_covar()
-covar = listtostring(covar_files)
+#covar_files = P.set_covar()
+#covar = listtostring(covar_files)
+covar = P.set_covar()
+if covar != None:
+    covar_file = covar
+    covar = os.path.split(covar)[1]
 
 pc_prefix = set_pc_prefix(pheno, covar, ".")
 
 # configure logger
-Log = Logger(pc_prefix)
+Log = Logger(pc_prefix, out_dir2)
 Log.just_log("\nvcf2gwas v0.5 \n")
 Log.just_log("Initialising..\n")
 Log.print_log(f'Start time: {timestamp}\n')
 Log.print_log("Parsing arguments..")
 
-snp_file2 = f'input/{snp_file}'
+#snp_file2 = f'input/{snp_file}'
 gene_file = P.set_gene_file()
+gene_file_path = None
+if gene_file != None:
+    gene_file_path = gene_file
+    gene_file = os.path.split(gene_file)[1]
 gene_thresh = P.set_gene_thresh()
 
 X = P.get_phenotypes()
@@ -96,8 +116,8 @@ n_top = P.set_n_top()
 Log.print_log(f'Genotype file: {snp_file}')
 if pheno_files != None:
     Log.print_log(f'Phenotype file(s): {listtostring(pheno_files).replace(" ", ", ")}')
-if covar_files != None:
-    Log.print_log(f'Covariate file(s): {covar_files}')
+if covar != None:
+    Log.print_log(f'Covariate file: {covar}')
 if gene_file != None:
     Log.print_log(f'Gene comparison file: {gene_file}')
 Log.print_log("Arguments parsed successfully\n")
@@ -110,14 +130,16 @@ if A == False and B == False:
 
 pheno2 = None
 covar2 = None
-check_files(snp_file, snp_file2, gene_file)
+check_files(snp_file2, gene_file, gene_file_path)
 if pheno_files != None:
+    x = 0
     for pheno_file in pheno_files:
-        pheno2 = f'input/{pheno_file}'
+        pheno2 = os.path.join(pheno_files_path[x], pheno_file)
         check_files2(pheno_file, pheno2)
-if covar_files != None:
-    covar2 = f'input/{covar_files}'
-check_files3(covar_files, covar2)
+        x += 1
+if covar != None:
+    covar2 = covar_file
+check_files3(covar, covar2)
 
 # file preparation
 Log.print_log("Preparing files\n")
@@ -154,6 +176,8 @@ if cpu < threads:
 
 n = set_n(lm, gk, lmm, bslmm)
 filename = P.set_filename()
+if filename != None:
+    filename = os.path.split(filename)[1]
 min_af = P.set_q()
 pca = P.set_pca()
 keep = P.set_keep()
@@ -208,9 +232,11 @@ if pheno_files != None:
         else:
             exit(Log.print_log("Error: Too many phenotype input files for available ressources"))
 
+    x = 0
     for pheno_file in pheno_files:
 
-        pheno_file2 = f'input/{pheno_file}'
+        pheno_path = pheno_files_path[x]
+        pheno_file2 = os.path.join(pheno_path, pheno_file)
         df = Processing.load_pheno(pheno_file2)
         l = len(df.columns)
 
@@ -223,7 +249,7 @@ if pheno_files != None:
                 pheno_file3 = pheno_file3.removesuffix(".csv")
                 pheno_file3 = f'{pheno_file3}_umap.csv'
                 pheno_files2.append(pheno_file3)
-                Starter.umap_calc(df, pheno_file3, umap_n, seed)
+                Starter.umap_calc(df, pheno_file3, umap_n, seed, pheno_path)
                 Log.print_log(f"Saved as {pheno_file3} in 'input/'\nUMAP calculated successful\n")
         
         if pca_switch == True:
@@ -235,12 +261,19 @@ if pheno_files != None:
                 pheno_file4 = pheno_file4.removesuffix(".csv")
                 pheno_file4 = f'{pheno_file4}_pca.csv'
                 pheno_files2.append(pheno_file4)
-                Starter.pca_calc(df, pheno_file4, pca_n)
+                Starter.pca_calc(df, pheno_file4, pca_n, pheno_path)
                 Log.print_log(f"Saved as {pheno_file4} in 'input/'\nPCA calculated successful\n")
 
+        x += 1
+
+    x = 0
     for pheno_file in pheno_files2:
         Log.print_log(f"Checking {pheno_file}..")
-        pheno_file2 = f'input/{pheno_file}'
+        if umap_switch == True and pca_switch == True:
+            pheno_path = pheno_files_path[x//2]
+        else:
+            pheno_path = pheno_files_path[x]
+        pheno_file2 = os.path.join(pheno_path, pheno_file)
         df = Processing.load_pheno(pheno_file2)
 
         if A == False and len(X) > len(df.columns):
@@ -271,7 +304,7 @@ if pheno_files != None:
             rest = threads%l
             threads2 = threads//l
             memory2 = memory//l
-            Starter.split_phenofile1(X, X_list, df, pheno_file, pheno_list)
+            Starter.split_phenofile1(X, X_list, df, pheno_file, pheno_list, pheno_path)
             Log.print_log("Phenotype file split up successful")
 
         else:
@@ -281,8 +314,10 @@ if pheno_files != None:
             col_dict = {}
             rest2 = l%threads
             threads3 = l//threads
-            Starter.split_phenofile2(threads, threads3, rest2, col_dict, X_list, df, pheno_file, pheno_list)
+            Starter.split_phenofile2(threads, threads3, rest2, col_dict, X_list, df, pheno_file, pheno_list, pheno_path)
             Log.print_log("Phenotype file split up successful")
+        
+        x += 1
 
 if memory2 < 1000:
     Log.print_log("Warning: Memory might not be sufficient to carry out analysis!")
@@ -297,7 +332,7 @@ args = sys.argv[1:]
 if args == []:
     args = argvals
 args.insert(0, 'python')
-args.insert(1, os.path.join(os.path.dirname(__file__), 'analysis.py'))
+args.insert(1, os.path.join(os.path.dirname(__file__), 'main.py'))
 args.insert(2, '--memory')
 args.insert(3, str(memory2))
 
@@ -311,13 +346,13 @@ elif switch == True:
     if umap_switch == True or pca_switch == True:
         args = Starter.delete_string(args, '-p')
         args = Starter.delete_string(args, '--pheno')
-    Starter.edit_args1(pheno_list, args, args_list, threads_list, umap_switch, pca_switch, A)
+    Starter.edit_args1(pheno_list, args, args_list, threads_list, umap_switch, pca_switch, A, pheno_files_path)
 
 elif l != 1:
     Starter.adjust_threads(pheno_list, threads2, rest, threads_list)
     args = Starter.delete_string(args, '-p')
     args = Starter.delete_string(args, '--pheno')
-    Starter.edit_args2(pheno_list, args, args_list, threads_list, pheno, A, X_list)
+    Starter.edit_args2(pheno_list, args, args_list, threads_list, pheno, A, X_list, pheno_files_path)
     if umap_switch == True:
         Log.print_log(f'Info:\nAfter reducing dimensions of {pheno} via UMAP, it has been split up in {len(pheno_list)} parts in order to ensure maximum efficiency')
     else:
@@ -340,41 +375,44 @@ Log.print_log("Analysis successfully completed\n")
 os.remove(f'{snp_file2}.csi')
 
 if model == None:
-    path = 'output'
+    path = out_dir2
 else:
-    path = str('output/'+model2)
+    path = os.path.join(out_dir2, model2)
 
 if model not in ("-gk", "-eigen", None):
-    path2 = f'{path}/summary'
-    path3 = f'{path2}/top_SNPs'
+    path2 = os.path.join(path, "summary")
+    path3 = os.path.join(path2, "top_SNPs")
     make_dir(path2)
     prefix_list = []
-    for p in pheno_list:
-        pc_prefix2 = set_pc_prefix(p, covar, "_")
+    for pheno in pheno_list:
+        pc_prefix2 = set_pc_prefix(pheno, covar, "_")
         prefix_list.append(pc_prefix2)
     filenames = Post_analysis.summarizer(path3, path2, pc_prefix, snp_prefix, n_top, Log, prefix_list)
     if gene_file != None:
-        Post_analysis.gene_compare(filenames, gene_file, gene_thresh, path2, pc_prefix, snp_prefix, Log)
+        Post_analysis.gene_compare(filenames, gene_file, gene_file_path, gene_thresh, path2, pc_prefix, snp_prefix, Log)
 
 if switch == False and len(pheno_list) > 1:
     for file in pheno_list:
-        os.remove(f'input/{file}')
+        os.remove(os.path.join(pheno_files_path[0], file))
 
 if umap_switch == True:
-    path4 = f'{path}/UMAP'
+    path4 = os.path.join(path, "UMAP")
     make_dir(path4)
+    x = 0
     for pheno_file in pheno_files:
-        for files in os.listdir("input/"):
+        pheno_path = pheno_files_path[x]
+        for files in os.listdir(pheno_path):
             if files.startswith(f'{pheno_file.removesuffix(".csv")}_umap'):
-                shutil.move(f'input/{files}', os.path.join(path4, files))
+                shutil.move(os.path.join(pheno_path, files), os.path.join(path4, files))
 
 if pca_switch == True:
-    path4 = f'{path}/PCA'
+    path4 = os.path.join(path, "PCA")
     make_dir(path4)
     for pheno_file in pheno_files:
-        for files in os.listdir("input/"):
+        pheno_path = pheno_files_path[x]
+        for files in os.listdir(pheno_path):
             if files.startswith(f'{pheno_file.removesuffix(".csv")}_pca'):
-                shutil.move(f'input/{files}', os.path.join(path4, files))   
+                shutil.move(os.path.join(pheno_path, files), os.path.join(path4, files))   
 
 finish = time.perf_counter()
 time_total = round(finish-start, 2)
@@ -385,4 +423,4 @@ Log.print_log(f'Clean up successful \n\nvcf2gwas has been successfully completed
 Log.summary(snp_file, listtostring(pheno_files).replace(" ", ", "), covar, listtostring(X), listtostring(Y), model2, n, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n)
 
 if model != None:
-    shutil.move(f'output/vcf2gwas{pc_prefix}.log.txt', f'output/{model2}/vcf2gwas{pc_prefix}.log.txt')
+    shutil.move(os.path.join(out_dir2, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(out_dir2, model2, f'vcf2gwas{pc_prefix}.log.txt'))

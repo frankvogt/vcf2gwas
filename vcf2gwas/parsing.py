@@ -4,6 +4,27 @@ try:
     from psutil import virtual_memory
 except ModuleNotFoundError:
     exit(print("Error: Make sure to deactivate any conda environments before installing vcf2gwas!"))
+import os
+
+"""
+Copyright (C) 2021, Frank Vogt
+
+This file is part of vcf2gwas.
+
+vcf2gwas is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+vcf2gwas is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
 def getArgs(argv=None):
     """Description:
     Sets up Argument Parser and returns input arguments"""
@@ -27,6 +48,7 @@ def getArgs(argv=None):
     parser.add_argument("-U", "--UMAP", metavar="<int>", type=int, nargs="?", const=2, help="perform UMAP on phenotypes and use resulting embeddings as phenotypes for GEMMA analysis \noptional: set amount of embeddings to be calculated (default: %(const)s) \nrecommended amount of embeddings: 1 - 5")
     parser.add_argument("-KC", "--kcpca", metavar="<float>", nargs='?', const=0.5, type=float, help="Kinship calculation via principal component analysis instead of GEMMA's internal method \noptional: r-squared threshold for LD pruning (default: %(const)s)")    
     parser.add_argument("-sv", "--sigval", metavar="<int>", type=int, default=6, help="set value where to draw significant line in manhattan plot \n<int> represents -log10(1e-<int>) (default: %(default)s) \nwhen using '-bslmm', value is adjusted to fit in the range of 0 to 1 \nset <int> to '0' to disable line")
+    parser.add_argument("-o", "--output", metavar="<path>", type=str, default=os.getcwd(), help="change the output directory \ndefault: %(default)s\ndirectory will be created if non-existent")
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-lm", type=int, choices=[1,2,3,4], nargs="?", const=1, help="Association Tests with a Linear Model \noptional: specify which frequentist test to use (default: %(const)s) \n 1: performs Wald test \n 2: performs likelihood ratio test \n 3: performs score test \n 4: performs all three tests")
@@ -129,3 +151,6 @@ class Parser:
 
     def set_multi(self):
         return self.args.multi
+
+    def set_out_dir(self):
+        return self.args.output

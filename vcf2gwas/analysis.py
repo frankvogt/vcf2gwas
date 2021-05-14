@@ -40,19 +40,36 @@ timestamp = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
 start = time.perf_counter()
 # set argument parser
 P = Parser(argvals)
+out_dir = P.set_out_dir()
+out_dir2 = os.path.join(out_dir, "output")
+
 # set variables
 pheno_file = P.set_pheno()
+pheno_file_path = []
+if pheno_file != None:
+    plist = []
+    for p in pheno_file:
+        pheno_file_path.append(os.path.split(p)[0])
+        pheno_file_path = listtostring(pheno_file_path)
+        plist.append(os.path.split(p)[1])
+    pheno_file = plist
 pheno_file = listtostring(pheno_file)
+
 covar_file = P.set_covar()
-covar_file = listtostring(covar_file)
+#covar_file = listtostring(covar_file)
+if covar_file != None:
+    covar_file_path = covar_file
+    covar_file = os.path.split(covar_file)[1]
+
 pc_prefix = set_pc_prefix(pheno_file, covar_file, "_")
 # configure logger
-Log = Logger(pc_prefix)
+Log = Logger(pc_prefix, out_dir2)
 
 Log.print_log(f'\nBeginning with analysis of {pheno_file}\n')
 
 # set variables
-snp_file = P.set_geno()
+snp_file2 = P.set_geno()
+snp_file = os.path.split(snp_file2)[1]
 X = P.get_phenotypes()
 Y = P.get_covariates()
 min_af = P.set_q()
@@ -73,19 +90,19 @@ model = set_model(lm, gk, eigen, lmm, bslmm)
 model2 = model.removeprefix("-")
 
 n_top = P.set_n_top()
-gene_file = P.set_gene_file()
+#gene_file = P.set_gene_file()
 gene_thresh = P.set_gene_thresh()
 multi = P.set_multi()
 sigval = P.set_sigval()
 
-snp_file2 = f'input/{snp_file}'
+#snp_file2 = f'input/{snp_file}'
 pheno_file2 = None
 covar_file2 = None
 
 if pheno_file != None:
-    pheno_file2 = f'input/{pheno_file}'
+    pheno_file2 = os.path.join(pheno_file_path, pheno_file)
 if covar_file != None:
-    covar_file2 = f'input/{covar_file}'
+    covar_file2 = covar_file_path
 
 covar_file_name = None
 
@@ -242,13 +259,11 @@ if X == [] and Y == []:
 
 n = set_n(lm, gk, lmm, bslmm)
 filename = P.set_filename()
-filename1 = filename
-if filename != None:
-    filename = f'input/{filename}'
+#if filename != None:
+#    filename = f'input/{filename}'
 filename2 = None
 if pca != None:
     filename = f'{subset2}.eigenvec'
-    filename1 = None
     filename2 = f'{subset2}.eigenval'
 
 x = 1
@@ -288,9 +303,9 @@ else:
                 N = concat_lists(X, Y)
                 N = listtostring(N)
 
-        make_dir(f'output/{model2}')
+        make_dir(os.path.join(out_dir2, model2))
         if model not in ("-gk", "-eigen"):
-            path = f'output/{model2}/{i}'
+            path = os.path.join(out_dir2, model2, i)
             make_dir(path)
         
         prefix_list.append(prefix)
@@ -320,19 +335,19 @@ else:
 Log.print_log("Starting clean-up\n")
 
 if model == None:
-    path = 'output'
+    path = out_dir2
 else:
-    path = f'output/{model2}'
+    path = os.path.join(out_dir2, model2)
 
 if model not in ("-gk", "-eigen", None):
-    make_dir(f'{path}/summary')
-    path2 = f'{path}/summary/top_SNPs'
+    make_dir(os.path.join(path, "summary"))
+    path2 = os.path.join(path, "summary", "top_SNPs")
     make_dir(path2)
     Post_analysis.print_top_list(top_ten, columns, path2, pc_prefix, snp_prefix)
     Log.print_log("Top SNPs saved")
 
-make_dir(f'{path}/files')
-path3 = f'{path}/files/{folder}'
+make_dir(os.path.join(path, "files"))
+path3 = os.path.join(path, "files", folder)
 make_dir(path3)
 
 Log.print_log("Moving files..")
@@ -346,4 +361,4 @@ time_total = runtime_format(time_total)
 
 Log.print_log(f'Clean up successful \n\nAnalysis of {pheno_file} finished successfully\nRuntime: {time_total}\n')
 
-move_log(model, model2, pc_prefix)
+move_log(model, model2, pc_prefix, out_dir2)
