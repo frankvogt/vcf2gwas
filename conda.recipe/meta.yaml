@@ -1,20 +1,25 @@
 
+{% set name = "vcf2gwas" %}
+{% set version = "0.5" %}
 {% set data = load_setup_py_data() %}
 
 package:
-  name: vcf2gwas
-  version: {{ data['version'] }}
+  name: {{ name|lower }}
+  version: {{ version }}
 
 source:
   git_url: https://github.com/frankvogt/vcf2gwas.git
+  # url: https://github.com/frankvogt/vcf2gwas/releases/download/{{ version }}/vcf2gwas-{{ version }}.tar.gz
 
 build:
   # If the installation is complex, or different between Unix and Windows, use
   # separate bld.bat and build.sh files instead of this key.  Add the line
   # "skip: True  # [py<35]" (for example) to limit to Python 3.5 and newer, or
   # "skip: True  # [not win]" to limit to Windows.
-  script: {{ PYTHON }} -m pip install --no-deps --ignore-installed -vv .
-  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+  #script: {{ PYTHON }} -m pip install --no-deps --ignore-installed -vv .
+  # noarch: python
   
   entry_points:
     #- vcf2gwas = vcf2gwas.__main__.main
@@ -31,8 +36,23 @@ requirements:
   host:
     - python
     - pip
+    - numpy==1.20*
+    - matplotlib==3.4*
+    - scipy
+    - scikit-learn
+    - numba
+    #- ipykernel
+    #- jupyterlab
+    - psutil==5.8*
+    - pandas==1.2*
+    - seaborn==0.11*
+    - adjusttext==0.7*
+    - bcftools==1.12*
+    - plink==1.90*
+    - gemma==0.98.3
   run:
-    - python
+    #- python
+    
     # dependencies are defined in setup.py
     {% for dep in data['install_requires'] %}
     - {{ dep.lower() }}
@@ -45,11 +65,15 @@ test:
   #requires:
     #- pytest
     #- pytest-cov
-  #commands:
-    #- pytest tests
+  imports:
+    - utils.py
+    - parsing.py
+  commands:
+    - test_vcf2gwas -h
 
 about:
   home: https://github.com/frankvogt/vcf2gwas
   summary: Python API for comprehensive GWAS analysis using GEMMA
   license: {{ data.get('license') }}
   license_file: LICENSE
+  dev_url: https://github.com/simplejson/simplejson
