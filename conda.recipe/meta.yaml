@@ -37,20 +37,6 @@ requirements:
   host:
     - python==3.9
     - pip
-    - numpy==1.20*
-    - matplotlib==3.4*
-    - scipy
-    - scikit-learn
-    - numba
-    #- ipykernel
-    #- jupyterlab
-    - psutil==5.8*
-    - pandas==1.2*
-    - seaborn==0.11*
-    - adjusttext==0.7*
-    - bcftools==1.12*
-    - plink==1.90*
-    - gemma==0.98.3
 
   run:
     - python==3.9
@@ -92,7 +78,7 @@ test:
 about:
   home: https://github.com/frankvogt/vcf2gwas
   summary: Python API for comprehensive GWAS analysis using GEMMA
-  license: "GNUv3"
+  license: GNUv3
   #license: {{ data.get('license') }}
   license_file: LICENSE
   dev_url: https://github.com/frankvogt/vcf2gwas
