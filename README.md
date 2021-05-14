@@ -61,7 +61,7 @@ First, make sure to deactivate any conda environments.
 conda deactivate
 ```
 
-Since vcf2gwas will create its own environment there may some conflicts when installing vcf2gwas into another conda environment.  
+Since vcf2gwas will create its own environment there may be some conflicts when installing vcf2gwas into another conda environment.  
 Now the package can be installed by simply typing:
 
 ```
@@ -135,10 +135,10 @@ In the notebook, detailed instructions on how to run vcf2gwas and its available 
 ### Available Options:
 #### File affiliated options: 
 * `-v` / `--vcf` <filename>  
-Specify genotype `.vcf` or `.vcf.gz` filename (required).
+Specify genotype `.vcf` or `.vcf.gz` file (required).
 
 * `-pf` / `--pfile` <filename>  
-Specify phenotype filename.
+Specify phenotype file.
 
 * `-p` / `--pheno` <int>  
 Specify phenotypes used for analysis:  
@@ -148,7 +148,7 @@ Specify phenotypes used for analysis:
 All phenotypes in the phenotype file will be used.
 
 * `-cf` / `--cfile` <filename>  
-Specify covariate filename.
+Specify covariate file.
 
 * `-c` / `--covar` <int>  
 Specify covariates used for analysis:  
@@ -158,14 +158,18 @@ Specify covariates used for analysis:
 All covariates in the covariate file will be used.
 
 * `-gf` / `--genefile` <filename>  
-Specify gene file name.
+Specify gene file.
 
 * `-gt` / `--genethresh` <int>  
 Set a gene distance threshold (in bp) when comparing genes to SNPs from GEMMA results.  
 Only SNPs with distances below threshold will be considered for comparison of each gene.
 
 * `-k` / `--relmatrix`  
-Specify relatedness matrix file name.
+Specify relatedness matrix file.
+
+* `-o`/ `--output`  
+Change the output directory.  
+Default is the current working directory.
 
 #### GEMMA affiliated options:
 
@@ -273,7 +277,7 @@ output/
     │   └── manhattan
     │       └── manhattan plot figure (.png)
     ├── files
-    │   └── files_example_example
+    │   └── files_'file'
     │       ├── PLINK BED files (.bed, .bim, .fam, .nosex)
     │       ├── PLINK log file (.log)
     │       ├── GEMMA relatedness matrix (.txt)
@@ -305,4 +309,8 @@ The GEMMA software was developed by:
 Dept. of Biostatistics  
 University of Michigan
 
-Peter Carbonetto, Tim Flutre, Matthew Stephens, [Pjotr Prins](https://thebird.nl/) and [others](https://github.com/genetics-statistics/GEMMA/graphs/contributors) have also contributed to the development of this software.
+Peter Carbonetto, Tim Flutre, Matthew Stephens, [Pjotr Prins](https://thebird.nl/) and [others](https://github.com/genetics-statistics/GEMMA/graphs/contributors) have also contributed to the development of the GEMMA software.  
+
+* [Genome-wide efficient mixed-model analysis for association studies](https://doi.org/10.1038/ng.2310)  
+* [Efficient multivariate linear mixed model algorithms for genome-wide association studies](https://doi.org/10.1038/nmeth.2848)  
+* [Polygenic Modeling with Bayesian Sparse Linear Mixed Models](https://doi.org/10.1371/journal.pgen.1003264)
