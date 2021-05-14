@@ -67,9 +67,9 @@ test:
   #requires:
     #- pytest
     #- pytest-cov
-  imports:
-    - utils.py
-    - parsing.py
+  #imports:
+  #  - utils.py
+  #  - parsing.py
   commands:
     - test_vcf2gwas -h
 
