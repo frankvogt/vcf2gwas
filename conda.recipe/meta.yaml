@@ -18,7 +18,7 @@ build:
   # "skip: True  # [not win]" to limit to Windows.
   number: 0
   script: "{{ PYTHON }} -m pip install . -vv"
-  #script: {{ PYTHON }} -m pip install --no-deps --ignore-installed -vv .
+  # script: {{ PYTHON }} -m pip install --no-deps --ignore-installed -vv .
   # noarch: python
   
   entry_points:
@@ -71,7 +71,7 @@ test:
   #  - utils.py
   #  - parsing.py
   #commands:
-  #  - test_vcf2gwas -h
+    - test_vcf2gwas
 
 about:
   home: https://github.com/frankvogt/vcf2gwas
