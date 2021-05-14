@@ -1,7 +1,9 @@
 from utils import *
 from parsing import *
 
-argvals = None
+argvals = "-h"
 
 def main():
     Parser(argvals)
+
+main()
