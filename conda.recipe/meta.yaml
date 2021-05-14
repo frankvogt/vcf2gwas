@@ -22,7 +22,7 @@ build:
   # noarch: python
   
   entry_points:
-    - vcf2gwas = vcf2gwas.__main__.main
+    - vcf2gwas = vcf2gwas.__main__:main
     - install_vcf2gwas = vcf2gwas.install:main
     #{% for entry in data['entry_points']['console_scripts'] %}
     #  - {{ entry.split('=')[0].strip() }} = {{ entry.split('=')[1].strip() }}
