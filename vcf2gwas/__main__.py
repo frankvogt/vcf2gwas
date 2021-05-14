@@ -9,6 +9,10 @@ argvals = None
 def main(argvals=argvals):
     print("\nvcf2gwas v0.5 \n")
     print("Initialising..\n")
+    try:
+        import umap
+    else:
+        subprocess.run(["pip", "install", "umap-learn"])
     #if "umap-learn" not in str(subprocess.run(["conda", "list"], capture_output=True)):
     #    installer()
     Parser(argvals)
