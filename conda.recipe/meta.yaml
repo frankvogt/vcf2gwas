@@ -1,7 +1,7 @@
 
 {% set name = "vcf2gwas" %}
 {% set version = "0.5" %}
-{% set data = load_setup_py_data() %}
+#{% set data = load_setup_py_data() %}
 
 package:
   name: {{ name|lower }}
@@ -22,10 +22,11 @@ build:
   # noarch: python
   
   entry_points:
-    #- vcf2gwas = vcf2gwas.__main__.main
-    {% for entry in data['entry_points']['console_scripts'] %}
-      - {{ entry.split('=')[0].strip() }} = {{ entry.split('=')[1].strip() }}
-    {% endfor %}
+    - vcf2gwas = vcf2gwas.__main__.main
+    - install_vcf2gwas = vcf2gwas.install:main
+    #{% for entry in data['entry_points']['console_scripts'] %}
+    #  - {{ entry.split('=')[0].strip() }} = {{ entry.split('=')[1].strip() }}
+    #{% endfor %}
   
 
 requirements:
@@ -71,10 +72,10 @@ requirements:
 
     
     # dependencies are defined in setup.py
-    {% for dep in data['install_requires'] %}
-    - {{ dep.lower() }}
-    {% endfor %}
-    {# raw is for ignoring templating with cookiecutter, leaving it for use with conda-build #}
+    #{% for dep in data['install_requires'] %}
+    #- {{ dep.lower() }}
+    #{% endfor %}
+    #{# raw is for ignoring templating with cookiecutter, leaving it for use with conda-build #}
 
 test:
   #source_files:
@@ -91,6 +92,7 @@ test:
 about:
   home: https://github.com/frankvogt/vcf2gwas
   summary: Python API for comprehensive GWAS analysis using GEMMA
-  license: {{ data.get('license') }}
+  license: "GNUv3"
+  #license: {{ data.get('license') }}
   license_file: LICENSE
-  dev_url: https://github.com/simplejson/simplejson
+  dev_url: https://github.com/frankvogt/vcf2gwas
