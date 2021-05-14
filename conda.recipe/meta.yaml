@@ -35,26 +35,12 @@ requirements:
   # build:
   #   - {{ compilers('c') }}
   host:
-    - python>=3.9
+    - python==3.9*
     - pip
 
   run:
-    - python>=3.9
+    - python==3.9*
     - pip
-    - numpy>=1.20
-    - matplotlib>=3.4
-    - scipy
-    - scikit-learn
-    - numba
-    #- ipykernel
-    #- jupyterlab
-    - psutil
-    - pandas
-    - seaborn
-    - adjusttext
-    - bcftools>=1.12
-    - plink
-    - gemma>=0.98
 
     
     # dependencies are defined in setup.py
