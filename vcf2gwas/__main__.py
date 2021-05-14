@@ -11,7 +11,7 @@ def main(argvals=argvals):
     print("Initialising..\n")
     try:
         import umap
-    else:
+    except:
         subprocess.run(["pip", "install", "umap-learn"])
     #if "umap-learn" not in str(subprocess.run(["conda", "list"], capture_output=True)):
     #    installer()
