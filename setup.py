@@ -2,6 +2,8 @@ from setuptools import setup
 
 requirements = [
     'psutil',
+    'bcftools==1.12*',
+    'plink==1.90*',
     'gemma==0.98.3'
     # package requirements go here
 ]
