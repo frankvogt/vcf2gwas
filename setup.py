@@ -1,7 +1,13 @@
 from setuptools import setup
 
 requirements = [
+    'numpy==1.20*',
+    'pandas==1.2*',
+    'matplotlib==3.4*',
+    'seaborn==0.11*',
+    'scikit-learn==0.24*',
     'psutil',
+    'adjusttext'
     'bcftools==1.12*',
     'plink==1.90*',
     'gemma==0.98.3'
