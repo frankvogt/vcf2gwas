@@ -55,26 +55,36 @@ The only requirement is an up to date version of [conda](https://conda.io/projec
 
 ### Installation
 
-First, make sure to deactivate any conda environments.  
+It is good practice to install the package in a clean environment.  
+
+```
+conda create -n myenv
+```
+
+Once the environment is set up, activate it by typing:
+
+```
+conda activate myenv
+```
+
+Now the package can be installed by typing:
+
+```
+conda install vcf2gwas -c fvogt257 -c bioconda -c conda-forge
+```
+
+Now everything is ready for analysis.  
+Optionally, to test the installation and copy the example files to your current working directory, run:
+
+```
+vcf2gwas -v test
+```
+
+Once the analysis is completed, the environment can be deactivated:
 
 ```
 conda deactivate
 ```
-
-Since vcf2gwas will create its own environment there may be some conflicts when installing vcf2gwas into another conda environment.  
-Now the package can be installed by simply typing:
-
-```
-conda install -c fvogt257 vcf2gwas
-```
-
-The first time you run vcf2gwas the environment has to be installed and also the example files have to be copied to the current working directory. To do this, type
-
-```
-install_vcf2gwas
-```
-
-The environment used by the pipeline called "vcf2gwas" is now ready.
 
 ## Usage
 
