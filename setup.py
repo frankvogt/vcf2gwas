@@ -6,8 +6,8 @@ requirements = [
     'matplotlib==3.4*',
     'seaborn==0.11*',
     'scikit-learn==0.24*',
-    'psutil',
-    'adjusttext',
+    'psutil==5.8*',
+    'adjusttext==0.7*',
     'bcftools==1.12*',
     'plink==1.90*',
     'gemma==0.98.3'
