@@ -7,7 +7,7 @@ requirements = [
     'seaborn==0.11*',
     'scikit-learn==0.24*',
     'psutil',
-    'adjusttext'
+    'adjusttext',
     'bcftools==1.12*',
     'plink==1.90*',
     'gemma==0.98.3'
