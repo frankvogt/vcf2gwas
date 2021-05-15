@@ -24,13 +24,17 @@ print("Initialising..\n")
 
 from parsing import *
 from utils import *
+
+import subprocess
 import time
 import os
 import sys
 import concurrent.futures
 import multiprocessing as mp
-import pandas as pd
+
 from psutil import virtual_memory
+import pandas as pd
+
 
 #os.chdir(os.path.dirname(os.path.abspath(__file__)))
 pd.options.mode.chained_assignment = None
@@ -108,7 +112,8 @@ lmm = P.set_lmm()
 bslmm = P.set_bslmm()
 
 model = set_model(lm, gk, eigen, lmm, bslmm)
-model2 = model.removeprefix("-")
+if model != None:
+    model2 = model.removeprefix("-")
 
 n_top = P.set_n_top()
 

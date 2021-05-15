@@ -22,21 +22,50 @@ along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import os
+import subprocess
 from sys import exit
 import shutil
 import logging
-import numpy as np
-import subprocess
 import argparse
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import umap
-from sklearn.decomposition import PCA
 import multiprocessing as mp
-from psutil import virtual_memory
 import random
-from adjustText import adjust_text
+
+from psutil import virtual_memory
+try:
+    import numpy as np
+except ModuleNotFoundError:
+    subprocess.run(["conda", "install", "-c", "anaconda", "numpy==1.20*"])
+    import numpy as np
+try:
+    import pandas as pd
+except ModuleNotFoundError:
+    subprocess.run(["conda", "install", "-c", "anaconda", "pandas==1.2*"])
+    import pandas as pd
+try:
+    import matplotlib.pyplot as plt
+except ModuleNotFoundError:
+    subprocess.run(["conda", "install", "-c", "conda-forge", "matplotlib==3.4*"])
+    import matplotlib.pyplot as plt
+try:
+    import seaborn as sns
+except ModuleNotFoundError:
+    subprocess.run(["conda", "install", "-c", "anaconda", "seaborn==0.11*"])
+    import seaborn as sns
+try:
+    from sklearn.decomposition import PCA
+except ModuleNotFoundError:
+    subprocess.run(["conda", "install", "-c", "anaconda", "scikit-learn==0.24*"])
+    from sklearn.decomposition import PCA
+try:
+    from adjustText import adjust_text
+except ModuleNotFoundError:
+    subprocess.run(["conda", "install", "-c", "conda-forge", "adjusttext==0.7*"])
+    from adjustText import adjust_text
+try:
+    import umap
+except ModuleNotFoundError:
+    subprocess.run(["pip", "install", "umap-learn"])
+    import umap
 
 #os.chdir(os.path.dirname(os.path.abspath(__file__)))
 

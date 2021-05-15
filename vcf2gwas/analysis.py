@@ -21,12 +21,14 @@ along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 
 from parsing import *
 from utils import *
+
 import time
 import concurrent.futures
 import multiprocessing as mp
 import itertools
 import os
 import shutil
+
 import pandas as pd
 import seaborn as sns
 
@@ -87,7 +89,8 @@ lmm = P.set_lmm()
 bslmm = P.set_bslmm()
 
 model = set_model(lm, gk, eigen, lmm, bslmm)
-model2 = model.removeprefix("-")
+if model != None:
+    model2 = model.removeprefix("-")
 
 n_top = P.set_n_top()
 #gene_file = P.set_gene_file()
