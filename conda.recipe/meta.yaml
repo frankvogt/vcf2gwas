@@ -1,7 +1,7 @@
 
 {% set name = "vcf2gwas" %}
 {% set version = "0.5" %}
-#{% set data = load_setup_py_data() %}
+{% set data = load_setup_py_data() %}
 
 package:
   name: {{ name|lower }}
@@ -43,9 +43,9 @@ requirements:
 
     
     # dependencies are defined in setup.py
-    #{% for dep in data['install_requires'] %}
-    #- {{ dep.lower() }}
-    #{% endfor %}
+    {% for dep in data['install_requires'] %}
+    - {{ dep.lower() }}
+    {% endfor %}
     #{# raw is for ignoring templating with cookiecutter, leaving it for use with conda-build #}
 
 test:
