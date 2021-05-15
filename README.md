@@ -55,19 +55,19 @@ The only requirement is an up to date version of [conda](https://conda.io/projec
 
 ### Installation
 
-It is good practice to install the package in a clean environment.  
+It is good practice to install the package in a clean environment:  
 
 ```
 conda create -n myenv
 ```
 
-Once the environment is set up, activate it by typing:
+Next, activate the environment by typing:
 
 ```
 conda activate myenv
 ```
 
-Now the package can be installed by typing:
+Now the vcf2gwas package can be installed:
 
 ```
 conda install vcf2gwas -c fvogt257 -c bioconda -c conda-forge
