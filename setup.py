@@ -1,7 +1,8 @@
 from setuptools import setup
 
 requirements = [
-    'psutil'
+    'psutil',
+    'gemma==0.98.3'
     # package requirements go here
 ]
 
