@@ -19,8 +19,8 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-print("\nvcf2gwas v0.5 \n")
-print("Initialising..\n")
+#print("\nvcf2gwas v0.5 \n")
+#print("Initialising..\n")
 
 from parsing import *
 from utils import *
@@ -337,7 +337,7 @@ args = sys.argv[1:]
 if args == []:
     args = argvals
 args.insert(0, 'python')
-args.insert(1, os.path.join(os.path.dirname(__file__), 'main.py'))
+args.insert(1, os.path.join(os.path.dirname(__file__), 'analysis.py'))
 args.insert(2, '--memory')
 args.insert(3, str(memory2))
 

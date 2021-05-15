@@ -10,8 +10,6 @@ from vcf2gwas.install import main as installer
 argvals = None
 
 def main(argvals=argvals):
-    print("\nvcf2gwas v0.5 \n")
-    print("Initialising..\n")
     #try:
     #    import umap
     #except:
@@ -25,6 +23,8 @@ def main(argvals=argvals):
         #subprocess.run(["conda", "install", "-c", "bioconda", "bcftools==1.12*"])
         #subprocess.run(["conda", "install", "-c", "bioconda", "plink==1.90*"])
         #subprocess.run(["conda", "install", "-c", "bioconda", "gemma==0.98.3"])
+    print("\nvcf2gwas v0.5 \n")
+    print("Initialising..\n")
     Parser(argvals)
     args = sys.argv[1:]
     #args.insert(0, 'conda')
