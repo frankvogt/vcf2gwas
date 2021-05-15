@@ -1,6 +1,7 @@
 from setuptools import setup
 
 requirements = [
+    'psutil'
     # package requirements go here
 ]
 
