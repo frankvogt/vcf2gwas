@@ -8,7 +8,7 @@ import multiprocessing as mp
 try:
     from psutil import virtual_memory
 except ModuleNotFoundError:
-    subprocess.run(["conda", "install", "-c", "anaconda", "psutil==5.8"])
+    subprocess.run(["pip", "install", "psutil"])
     from psutil import virtual_memory
 
 """
