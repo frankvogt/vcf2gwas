@@ -34,8 +34,9 @@ def main(argvals=argvals):
     
     geno = P.set_geno()
     if geno == "test":
+        source = os.path.join(os.path.dirname(__file__), 'starter.py')
         installer()
-        args = f'python {os.path.join(os.path.dirname(__file__), 'starter.py')} -v input/example.vcf.gz -pf input/example.csv -p 1 -lmm'.split()
+        args = f'python {source} -v input/example.vcf.gz -pf input/example.csv -p 1 -lmm'.split()
     
     subprocess.run(args)
 
