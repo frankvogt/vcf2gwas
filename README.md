@@ -47,7 +47,8 @@ The exact versions of [Python](https://www.python.org/), [bcftools](http://samto
 
 ## Getting Started
 
-These instructions will provide an easy way to get vcf2gwas running on your local machine. 
+These instructions will provide an easy way to get vcf2gwas running on your local machine.  
+vcf2gwas works on macOS and Linux systems.
 
 ### Prerequisites
 
@@ -55,7 +56,8 @@ The only requirement is an up to date version of [conda](https://conda.io/projec
 
 ### Installation
 
-It is good practice to install the package in a clean environment:  
+It is good practice to install the package in a clean environment.  
+So first, we create a new environment, here with the exemplary name 'myenv':
 
 ```
 conda create -n myenv
@@ -93,7 +95,6 @@ The items below will explain the required format of the input files, the basic u
 ### Input Files
 
 There are multiple files that can be provided as input for vcf2gwas, below you can find an overview over these files.
-All input files need to be placed inside the "input" folder.
 
 #### VCF file:
 A VCF file containing the SNP data of the individuals to be examined is required to run vcf2gwas. This file does not need to be altered in any way and can be in either `.vcf` or `.vcf.gz` format.
