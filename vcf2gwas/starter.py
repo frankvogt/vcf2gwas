@@ -336,7 +336,7 @@ args = sys.argv[1:]
 # for testing
 if args == []:
     args = argvals
-args.insert(0, 'python')
+args.insert(0, 'python3.9')
 args.insert(1, os.path.join(os.path.dirname(__file__), 'analysis.py'))
 args.insert(2, '--memory')
 args.insert(3, str(memory2))

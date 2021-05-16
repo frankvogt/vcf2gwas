@@ -29,14 +29,14 @@ def main(argvals=argvals):
     #args.insert(4, 'vcf2gwas')
     #args.insert(5, 'python')
     #args.insert(6, os.path.join(os.path.dirname(__file__), 'starter.py'))
-    args.insert(0, 'python')
+    args.insert(0, 'python3.9')
     args.insert(1, os.path.join(os.path.dirname(__file__), 'starter.py'))
     
     geno = P.set_geno()
     if geno == "test":
         source = os.path.join(os.path.dirname(__file__), 'starter.py')
         installer()
-        args = f'python {source} -v input/example.vcf.gz -pf input/example.csv -p 1 -lmm'.split()
+        args = f'python3.9 {source} -v input/example.vcf.gz -pf input/example.csv -p 1 -lmm'.split()
     
     subprocess.run(args)
 
