@@ -57,7 +57,7 @@ The only requirement is an up to date version of [conda](https://conda.io/projec
 ### Installation
 
 It is good practice to install the package in a clean environment.  
-So first, we create a new environment, here with the exemplary name 'myenv':
+So first create a new environment, here with the exemplary name 'myenv':
 
 ```
 conda create -n myenv
@@ -141,7 +141,7 @@ vcf2gwas -v example.vcf.gz -pf example.csv -ap -lmm
 ```
 
 The available options will be elucidated in the next section.  
-In the notebook, detailed instructions on how to run vcf2gwas and its available options can be viewed.
+In the [manual](MANUAL.md), detailed instructions on how to run vcf2gwas and its available options can be viewed.
 
 ### Available Options:
 #### File affiliated options: 
