@@ -120,7 +120,7 @@ vcf2gwas will summarize the `n` best SNPs (specified with `-t/--topsnp`) of ever
 
 ### Add relatedness matrix
 
-Although vcf2gwas will by default calculate a relatedness matrix depending on the chosen model, one may want to add a different one to the analysis. This is possible by employing the `-k/--relmatrix` option:
+Although vcf2gwas will by default calculate a relatedness matrix depending on the chosen model, one may want to add a different one instead to the analysis. This is possible by employing the `-k/--relmatrix` option:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -k [filename]
