@@ -425,7 +425,7 @@ time_total = runtime_format(time_total)
 
 Log.print_log(f'Clean up successful \n\nvcf2gwas has been successfully completed! \nRuntime: {time_total}\n')
 
-Log.summary(snp_file, listtostring(pheno_files).replace(" ", ", "), covar, listtostring(X), listtostring(Y), model2, n, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n)
+Log.summary(snp_file, listtostring(pheno_files).replace(" ", ", "), covar, listtostring(X), listtostring(Y), model2, n, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir2)
 
 if model != None:
     shutil.move(os.path.join(out_dir2, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(out_dir2, model2, f'vcf2gwas{pc_prefix}.log.txt'))

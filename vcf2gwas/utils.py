@@ -217,13 +217,14 @@ class Logger:
 
         self.logger.info(text)
 
-    def summary(self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n):
+    def summary(self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir):
         """Description:
         prints summary of input variables and methods"""
 
-        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = ""
+        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = ""
 
-        a = '\n- VCF file: "'+snp_file+'"'
+        v = f'\n{out_dir}'
+        a = f'\n- VCF file: "{snp_file}"'
         if pheno_file != None:
             b = f'\n- Phenotype file(s): "{pheno_file}"'
             if X == "":
@@ -275,7 +276,7 @@ class Logger:
             if pca_n != 2:
                 u = f'\n  --PCA {pca_n}'
 
-        self.logger.info(f'Input:\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{j}{k}{l}{m}{n}{o}{p}')
+        self.logger.info(f'Input:\n\nOutput directory:{v}\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{j}{k}{l}{m}{n}{o}{p}')
 
 
 class Starter:
