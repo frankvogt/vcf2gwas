@@ -276,7 +276,7 @@ class Logger:
             if pca_n != 2:
                 u = f'\n  --PCA {pca_n}'
 
-        self.logger.info(f'Input:\n\nOutput directory:{v}\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{j}{k}{l}{m}{n}{o}{p}')
+        self.logger.info(f'Input:\n\nOutput directory:{v}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{j}{k}{l}{m}{n}{o}{p}')
 
 
 class Starter:
