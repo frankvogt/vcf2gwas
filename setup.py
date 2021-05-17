@@ -24,7 +24,7 @@ setup(
     url='https://github.com/frankvogt/vcf2gwas',
     packages=['vcf2gwas'],
     package_dir={'vcf2gwas': 'vcf2gwas'},
-    package_data={'vcf2gwas': ['*.yml', 'input/example.*', 'README.*', 'LIC*', 'MAN*']},
+    package_data={'vcf2gwas': ['*.yml', 'input/example.*', 'README.*', 'LIC*', 'MANUAL.*']},
     entry_points={
         'console_scripts': [
             'vcf2gwas=vcf2gwas.__main__:main'
