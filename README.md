@@ -69,13 +69,13 @@ Next, activate the environment by typing:
 conda activate myenv
 ```
 
-Now the vcf2gwas package can be installed:
+Now, the vcf2gwas package can be installed:
 
 ```
 conda install vcf2gwas -c fvogt257 -c bioconda -c conda-forge
 ```
 
-Now everything is ready for analysis.  
+Everything is ready for analysis now.  
 Optionally, to test the installation and copy the example files to your current working directory, run:
 
 ```

@@ -119,7 +119,7 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -gf [filename]
 
 vcf2gwas will summarize the `n` best SNPs (specified with `-t/--topsnp`) of every analyzed phenotype and compare them to the genes in the file by calculating the distance between each SNP and gene. These results can be filtered by saving only those SNPs with a distance to a gene lower than a specific threshold (set with `-gt/--genethresh`).
 
-### Add relatedness matrix
+### Adding a relatedness matrix
 
 Although vcf2gwas will by default calculate a relatedness matrix depending on the chosen model, one may want to add a different one instead to the analysis. This is possible by employing the `-k/--relmatrix` option:
 
@@ -127,7 +127,7 @@ Although vcf2gwas will by default calculate a relatedness matrix depending on th
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -k [filename]
 ```
 
-To use vcf2gwas just to calculate a relatedness matrix from the VCF file, run the `-gk` option:
+To use vcf2gwas to just calculate a relatedness matrix from the VCF file, run the `-gk` option:
 
 ```
 vcf2gwas -v [filename] -gk 
@@ -141,7 +141,7 @@ vcf2gwas -v [filename] -eigen
 
 Of course the `-eigen` option can also be used when supplying your own relatedness matrix with the `-k/--relmatrix` option.
 
-### Change the output directory
+### Changing the output directory
 
 By default, vcf2gwas will save the output in the current working directory. To change to a unique output directory, use the `-o/--output` option to specify a path:
 
@@ -168,7 +168,7 @@ It is recommended to not set the memory to less than 1 GB.
 ### Using dimensionality reduction of phenotypes for analysis
 
 When analyzing many phenotypes it can be escpecially beneficial to reduce the phenotypic dimensions. This allows the user to analyze any underlying structure in their phenotypic data by using the output of the dimensionality reduction as phenotypes for GEMMA.  
-vcf2gwas offers to often-used methods to reduce the dimensions: principal component analysis ([PCA](https://en.wikipedia.org/wiki/PCA)) and Uniform Manifold Approximation and Projection ([UMAP](https://arxiv.org/abs/1802.03426)).  
+vcf2gwas offers to often-used methods to reduce the dimensions: principal component analysis ([PCA](https://en.wikipedia.org/wiki/Principal_component_analysis)) and Uniform Manifold Approximation and Projection ([UMAP](https://arxiv.org/abs/1802.03426)).  
 Both can be used either separately or simultaneously in the analysis.
 
 #### PCA
