@@ -133,7 +133,7 @@ To perform GWAS, GEMMA needs a relatedness matrix, which vcf2gwas will calculate
 
 ### Running vcf2gwas
 
-Once the virtual environment is activated, vcf2gwas can be run on the command-line by specifying the input files and the statistical model chosen for GEMMA. Below is an exemplary command for running a linear mixed model analysis on all phenotypes in `example.csv` using genotype information from `example.vcf.gz`, both in the [input](input) directory.  
+Once the virtual environment is activated, vcf2gwas can be run on the command-line by specifying the input files and the statistical model chosen for GEMMA. Below is an exemplary command for running a linear mixed model analysis on all phenotypes in `example.csv` using genotype information from `example.vcf.gz`, both in the [input](https://github.com/frankvogt/vcf2gwas/tree/main/vcf2gwas/input) directory.  
 This command can also be run to confirm the installation.
 
 ```
@@ -141,7 +141,7 @@ vcf2gwas -v example.vcf.gz -pf example.csv -ap -lmm
 ```
 
 The available options will be elucidated in the next section.  
-In the [manual](MANUAL.md), detailed instructions on how to run vcf2gwas and its available options can be viewed.
+In the [manual](https://github.com/frankvogt/vcf2gwas/blob/main/MANUAL.md), detailed instructions on how to run vcf2gwas and its available options can be viewed.
 
 ### Available Options:
 #### File affiliated options: 
@@ -308,7 +308,7 @@ The names of the folders in quotes as well as the file names will vary based on 
 
 ## License
 
-Distributed under the terms of the GNU General Public License. See [LICENSE](LICENSE) for more information.
+Distributed under the terms of the GNU General Public License. See [LICENSE](https://github.com/frankvogt/vcf2gwas/blob/main/LICENSE) for more information.
 
 ## Contact
 
