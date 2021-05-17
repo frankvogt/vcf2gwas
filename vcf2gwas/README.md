@@ -43,7 +43,7 @@ vcf2gwas was built using [Python](https://www.python.org/), [bcftools](http://sa
 
 [GEMMA](https://github.com/genetics-statistics/GEMMA) is the software implementing the Genome-wide Efficient Mixed Model Association algorithm for a standard linear mixed model and some of its close relatives for GWAS. It fits either a [univariate linear mixed model](https://doi.org/10.1038/ng.2310), a [multivariate linear mixed model](https://doi.org/10.1038/nmeth.2848) or a [Bayesian sparse linear mixed model](https://doi.org/10.1371/journal.pgen.1003264).
 
-The exact versions of [Python](https://www.python.org/), [bcftools](http://samtools.github.io/bcftools/bcftools.html), [PLINK](https://www.cog-genomics.org/plink/) and [GEMMA](https://github.com/genetics-statistics/GEMMA) used to build the pipeline are available in the [environment](environment.yml) file.
+The exact versions of [Python](https://www.python.org/), [bcftools](http://samtools.github.io/bcftools/bcftools.html), [PLINK](https://www.cog-genomics.org/plink/) and [GEMMA](https://github.com/genetics-statistics/GEMMA) used to build the pipeline are available in the [environment](https://github.com/frankvogt/vcf2gwas/blob/main/vcf2gwas/environment.yml) file.
 
 ## Getting Started
 
@@ -311,6 +311,8 @@ The names of the folders in quotes as well as the file names will vary based on 
 Distributed under the terms of the GNU General Public License. See [LICENSE](LICENSE) for more information.
 
 ## Contact
+
+If you run into any troubles, please raise an issue on the github page.
 
 ## Acknowledgements
 
