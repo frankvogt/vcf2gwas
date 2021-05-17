@@ -94,7 +94,8 @@ The items below will explain the required format of the input files, the basic u
 
 ### Input Files
 
-There are multiple files that can be provided as input for vcf2gwas, below you can find an overview over these files.
+There are multiple files that can be provided as input for vcf2gwas, below you can find an overview over these files.  
+For more information about the example files provided with vcf2gwas, please refer to the [manual](https://github.com/frankvogt/vcf2gwas/blob/main/MANUAL.md).
 
 #### VCF file:
 A VCF file containing the SNP data of the individuals to be examined is required to run vcf2gwas. This file does not need to be altered in any way and can be in either `.vcf` or `.vcf.gz` format.
@@ -232,7 +233,7 @@ set core usage
 if not specified, all available logical cores minus 1 will be used
 
 * `-q` / `--minaf` <float>  
-minimum allele frequency of sites to be printed (default: 0.01)  
+minimum allele frequency of sites to be used (default: 0.01)  
 input value needs to be a value between 0.0 and 1.0
   
 * `-t` / `--topsnp` <int>  
@@ -292,7 +293,7 @@ output/
     │       ├── PLINK BED files (.bed, .bim, .fam, .nosex)
     │       ├── PLINK log file (.log)
     │       ├── GEMMA relatedness matrix (.txt)
-    │       └── GEMMA log file .log.txt
+    │       └── GEMMA log file (.log.txt)
     ├── logs
     │   └── analysis log file (.txt)
     ├── vcf2gwas log file (.txt)

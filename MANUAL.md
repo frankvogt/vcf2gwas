@@ -9,8 +9,9 @@ To obtain example files for running vcf2gwas, run:
 vcf2gwas -v test
 ```
 
-Besides testing the installation, this will copy the example `VCF` file `example.vcf.gz` and phenotype file `example.csv` to your current working directory.
-
+Besides testing the installation, this will copy the example `VCF` file `example.vcf.gz` and phenotype file `example.csv` to your current working directory.  
+The VCF file `example.vcf.gz` contains pre-filtered SNP information of about 60 accessions of *A. thaliana* from the [1001 Genomes](https://1001genomes.org/accessions.html) project.  
+The phenotype file `example.csv` is made up of the `avrRpm1` phenotype from the [AraPheno](https://arapheno.1001genomes.org/phenotype/17/) database for the same accessions.
 
 ## GEMMA models
 
@@ -126,6 +127,20 @@ Although vcf2gwas will by default calculate a relatedness matrix depending on th
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -k [filename]
 ```
 
+To use vcf2gwas just to calculate a relatedness matrix from the VCF file, run the `-gk` option:
+
+```
+vcf2gwas -v [filename] -gk 
+```
+
+To calculate the relatedness matrix and perform its eigen-decomposition in the same run, use the `-eigen` option:
+
+```
+vcf2gwas -v [filename] -eigen
+```
+
+Of course the `-eigen` option can also be used when supplying your own relatedness matrix with the `-k/--relmatrix` option.
+
 ### Change the output directory
 
 By default, vcf2gwas will save the output in the current working directory. To change to a unique output directory, use the `-o/--output` option to specify a path:
@@ -135,3 +150,92 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -o dir/example/
 ```
 
 ## Miscellaneous options
+
+In this section other useful options of vcf2gwas will be elucidated.
+
+### Limiting memory and core usage
+
+By default vcf2gwas will use half of the available memory and all logical cores minus one. It can be important to limit usage of these resources especially when running the analysis on a machine shared with others.  
+To set the memory (in MB) and core usage employ the `-M/--memory` and `-T/--threads` option, respectively:
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -M 8000 -T 6
+```
+
+Now, vcf2gwas uses 8 GB of memory and 6 cores to carry out the analysis.  
+It is recommended to not set the memory to less than 1 GB.
+
+### Using dimensionality reduction of phenotypes for analysis
+
+When analyzing many phenotypes it can be escpecially beneficial to reduce the phenotypic dimensions. This allows the user to analyze any underlying structure in their phenotypic data by using the output of the dimensionality reduction as phenotypes for GEMMA.  
+vcf2gwas offers to often-used methods to reduce the dimensions: principal component analysis ([PCA](https://en.wikipedia.org/wiki/PCA)) and Uniform Manifold Approximation and Projection ([UMAP](https://arxiv.org/abs/1802.03426)).  
+Both can be used either separately or simultaneously in the analysis.
+
+#### PCA
+
+To perform PCA on the phenotype data and use the principal components as phenotypes for the analysis, use the `-P/--PCA` option.  
+By default, vcf2gwas will reduce the phenotype dimensionality to 2 PCs. To change this value to any value between 2 and 10, append the value to the option:
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -P 3
+```
+
+Now, vcf2gwas will reduce the phenotype dimensionality to 3 instead of 2.
+
+#### UMAP
+
+To perform UMAP reduction on the phenotype data and use the embeddings as phenotypes for the analysis, use the `-U/--UMAP` option.  
+By default, vcf2gwas will reduce the phenotype dimensionality to 2 embeddings. To change this value to any value between 1 and 5, append the value to the option:
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -U 3
+```
+
+Now, vcf2gwas will reduce the phenotype dimensionality to 3 instead of 2.
+
+### Using PCA of genotypes instead of standard relatedness matrix
+
+vcf2gwas uses GEMMAs standard method of kinship calculation for the linear mixed model, which produces a relatedness matrix. Instead of using this standard method, the relatedness matrix can optionally be calculated via PCA by utilizing the `-KC/--kcpca` option.  
+The SNP data from the VCF file will be pruned by linkage disequilibrium with a default r-squared threshold of 0.5. To change the threshold, append the value to the option:
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -KC 0.8
+```
+
+### Filter out SNPs
+
+By default, vcf2gwas will filter out SNPs with a minimum allele frequency of 0.01. To change this threshold use the `-q/--minaf` option:
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -q 0.02
+```
+
+### Change manhattan plot
+
+The manhattan plot which will be produced from the GEMMA output, has by default a significant value line drawn at -log10(1e-6). All SNPs above that line will be labeled.  
+To change this threshold line, use the `-sv/--sigval` option.
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -sv 7
+```
+
+The line will now be drawn at -log10(1e-7).  
+To disable the line and not label any SNPs, change the value to 0.
+
+### Keep temporary files
+
+During the analysis, various temporary files like subsetted and filtered VCF and `.csv` files are produced. By default they are removed once they are no longer needed but if one wants to retain these files, employ the `-r/--retain` option:
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -r
+```
+
+## Output
+
+The following part shows some of the output plots and summaries produced by the analysis of the example files using the linear mixed model and standard options.
+
+### Plots
+
+
+
+### Summaries
