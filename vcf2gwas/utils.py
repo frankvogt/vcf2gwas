@@ -80,7 +80,7 @@ def set_pc_prefix(pheno_file, covar_file, string):
     elif pheno_file != None:
         pc_prefix = f'{string}{pheno_file.removesuffix(".csv")}'
     else:
-        pc_prefix = ""
+        pc_prefix = string
     return pc_prefix
 
 def check_files(snp_file2, gene_file, gene_file_path):
@@ -652,11 +652,23 @@ class Converter:
         """Description:
         removes no longer needed files"""
 
-        os.remove(f'subset_{File}')
-        os.remove(f'{subset}.txt')
-        os.remove(f'{subset}.vcf.gz')
-        os.remove(f'{subset2}.vcf.gz')
-    
+        try:
+            os.remove(f'subset_{File}')
+        except:
+            pass
+        try:
+            os.remove(f'{subset}.txt')
+        except:
+            pass
+        try:
+            os.remove(f'{subset}.vcf.gz')
+        except:
+            pass
+        try:
+            os.remove(f'{subset2}.vcf.gz')
+        except:
+            pass
+
 
 class Gemma:
     """Description:

@@ -22,6 +22,7 @@ along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 #print("\nvcf2gwas v0.5 \n")
 #print("Initialising..\n")
 
+from GEMMA.test import listtostring
 from parsing import *
 from utils import *
 
@@ -425,7 +426,15 @@ time_total = runtime_format(time_total)
 
 Log.print_log(f'Clean up successful \n\nvcf2gwas has been successfully completed! \nRuntime: {time_total}\n')
 
-Log.summary(snp_file, listtostring(pheno_files).replace(" ", ", "), covar, listtostring(X), listtostring(Y), model2, n, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir2)
+if pheno_files != None:
+    pheno_files = listtostring(pheno_files).replace(" ", ", ")
+if X != None:
+    X = listtostring(X)
+if Y != None:
+    Y = listtostring(Y)
+
+Log.summary(snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir2)
 
 if model != None:
     shutil.move(os.path.join(out_dir2, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(out_dir2, model2, f'vcf2gwas{pc_prefix}.log.txt'))
+

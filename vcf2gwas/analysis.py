@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+from vcf2gwas.utils import make_dir
 from parsing import *
 from utils import *
 
@@ -166,6 +167,10 @@ else:
     length2 = len(pheno_subset2.columns)
     Log.print_log(f'Removed {str(len(diff3))} out of {str(len(list3))} individuals, {str((len(list3)-len(diff3)))} remaining')
 
+if model in ("-gk", "-eigen"):
+    if pheno_file == None and covar_file == None:
+        shutil.copy(snp_file2, f'{subset}.vcf.gz')
+
 Log.print_log(f'In total, removed {str((len(diff1a)+len(diff1b)))} out of {str(len(list1))} individuals, {str((len(list1)-(len(diff1a)+len(diff1b))))} remaining')
 Log.print_log("Files successfully adjusted\n")
 
@@ -239,6 +244,11 @@ else:
         else:
             Processing.edit_fam(fam, pheno_subset2, subset2, Y, "c", "Covariate", Log, model, model2, pc_prefix)
 
+if model in ("-gk", "-eigen"):
+    if pheno_file == None and covar_file == None:
+        fam['results'] = 1
+        fam.to_csv(f'{subset2}.fam', sep=' ', header=False)
+
 Log.print_log("Editing .fam file successful\n")
 
 ############################## Initialising GEMMA ##############################
@@ -307,6 +317,7 @@ else:
                 N = listtostring(N)
 
         make_dir(os.path.join(out_dir2, model2))
+        path = None
         if model not in ("-gk", "-eigen"):
             path = os.path.join(out_dir2, model2, i)
             make_dir(path)
@@ -357,6 +368,18 @@ Log.print_log("Moving files..")
 for files in os.listdir():
     if files.startswith((f'subset{pc_prefix}', subset2)):
         shutil.move(files, os.path.join(path3, files))
+if model == "-gk":
+    path2 = os.path.join(path, "rel_matrix")
+    make_dir(path2)
+    for files in os.listdir(path3):
+        if files.endswith("XX.txt"):
+            shutil.move(os.path.join(path3, files), os.path.join(path2, files))
+if model == "-eigen":
+    path2 = os.path.join(path, "eigen_v")
+    make_dir(path2)
+    for files in os.listdir(path3):
+        if files.endswith(("eigenD.txt", "eigenU.txt")):
+            shutil.move(os.path.join(path3, files), os.path.join(path2, files))
 
 finish = time.perf_counter()
 time_total = round(finish-start, 2)
