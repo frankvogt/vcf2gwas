@@ -22,6 +22,6 @@ def main():
     for file in os.listdir(path):
         shutil.copy(os.path.join(path, file), os.path.join('input', file))
     print("Copying README and LICENSE files..")
-    shutil.copy(os.path.join(os.path.dirname(__file__), 'README.md'), 'README.md')
+    shutil.copy(os.path.join(os.path.dirname(__file__), 'README.pdf'), 'README.pdf')
     shutil.copy(os.path.join(os.path.dirname(__file__), 'LICENSE'), 'LICENSE')
     #print("Installation complete\n")
