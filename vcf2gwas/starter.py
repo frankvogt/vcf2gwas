@@ -22,7 +22,6 @@ along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 #print("\nvcf2gwas v0.5 \n")
 #print("Initialising..\n")
 
-from GEMMA.test import listtostring
 from parsing import *
 from utils import *
 
