@@ -183,7 +183,7 @@ Converter.filter_snps(min_af, subset, subset2)
 Log.print_log("SNPs successfully filtered")
     
 Log.print_log("Converting to PLINK BED..")
-Converter.make_bed(subset2, chrom, memory, threads)
+Converter.make_bed(subset2, chrom, memory, threads, list1)
 Log.print_log("Successfully converted to PLINK BED\n")
 
 #remove old files

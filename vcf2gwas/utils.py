@@ -549,6 +549,10 @@ class Processing:
                 move_log(model, model2, pc_prefix)
                 exit(Log.print_log(f'Warning: selected {string}(s) not in {string} file'))
         fam.fillna("NA", inplace=True)
+        fam2 = fam
+        fam2.dropna(axis=1, how="all", inplace=True)
+        if len(fam2.columns) <= 4:
+            exit(Log.print_log("Error: Please make sure that the individual names don't contain any special characters/delimiters/spaces"))
         fam.to_csv(f'{subset2}.fam', sep=' ', header=False)
         Log.print_log(f'{string}(s) added to .fam file')
         return pheno_subset_new.columns.tolist()
@@ -640,13 +644,20 @@ class Converter:
         filtered = subprocess.run(['bcftools', 'view', '-m2', '-M2', '-v', 'snps', '-q', str(min_af), f'{subset}.vcf.gz', '-Oz', '-o', f'{subset2}.vcf.gz'], stdout=subprocess.PIPE, text=True) 
         filtered.stdout
 
-    def make_bed(subset2, chrom, memory, threads):
+    def make_bed(subset2, chrom, memory, threads, list):
         """Description:
         converts VCF file to PLINK BED files via plink"""
 
-        #make_bed = subprocess.run(['plink', '--dummy', '15000', '2000000', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
-        make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
-        make_bed.stdout
+        string = "_"
+        list2 = [l for l in list if string in l]
+        if list2 != None:
+            print("yes")
+            make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
+            make_bed.stdout
+        else:
+            #make_bed = subprocess.run(['plink', '--dummy', '15000', '2000000', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
+            make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
+            make_bed.stdout
 
     def remove_files(subset, File, subset2, snp_file):
         """Description:
