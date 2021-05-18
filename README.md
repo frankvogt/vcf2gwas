@@ -272,7 +272,8 @@ e.g. subsetted and filtered VCF and .csv files
 ### Output
 
 vcf2gwas will create an output folder with a hierarchical structure consisting of multiple folders containing plots, summaries, GEMMA output files, log files and so on, depending on the selected options.  
-Below are the QQ-plot and manhattan-plot produced when running the test command mentioned in [Installation](#installation):
+Below are the QQ-plot and manhattan-plot that are produced when running the test command mentioned in [Installation](#installation):  
+<!--[Manhattan-plot](https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_manh.png), [QQ-plot](https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_qq.png)  -->
 <img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_manh.png" alt="Manhattan-plot" width="50%"/><img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_qq.png" alt="QQ-plot" width="50%"/>  
 The exemplary directory and file structure of the output folder after running a linear mixed model analysis on a single phenotype is shown below:
 
