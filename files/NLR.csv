@@ -1,198 +1,198 @@
-ID,name,chr,start,stop,Strand,Eurasian cM/Mb,Eurasian theta,Eurasian pi,Swedish cM/Mb,Swedish theta,Swedish pi,TIR domain,NBS domain,LRR domain,comment,R locus structure,R loci members
-AT1G10920.1,LOV1,1,3644420,3647768,REVERSE,"1,37","0,004","0,016","1,04","0,002","0,008",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,singleton,1
-AT1G12210.1,,1,4140948,4143605,FORWARD,"1,54","0,012","0,042","0,00","0,007","0,025",FALSCH,WAHR,WAHR,RPS5-like 1,tandem,2
-AT1G12220.1,RPS5,1,4144935,4147817,FORWARD,"0,00","0,000","0,000","0,00","0,000","0,001",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,tandem,2
-AT1G12280.1,SUMM2,1,4174875,4177559,REVERSE,"0,24","0,005","0,016","0,71","0,002","0,009",FALSCH,WAHR,WAHR,LRR and NB-ARC domains-containing disease resistance protein,tandem,2
-AT1G12290.1,,1,4178359,4181247,REVERSE,"1,30","0,004","0,014","0,80","0,002","0,009",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,tandem,2
-AT1G15890.1,,1,5461317,5464223,FORWARD,"0,00","0,001","0,004","0,42","0,000","0,000",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,singleton,1
-AT1G17600.1,soc3,1,6052936,6056664,REVERSE,"0,74","0,003","0,011","0,80","0,002","0,008",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem inverted,3
-AT1G17610.1,Chs1,1,6056895,6058357,FORWARD,"1,52","0,004","0,015","1,10","0,002","0,009",WAHR,WAHR,FALSCH,Disease resistance protein (TIR-NBS class),tandem inverted,3
-AT1G17615.1,,1,6059441,6060667,FORWARD,"2,36","0,002","0,008","1,45","0,002","0,006",WAHR,WAHR,FALSCH,Disease resistance protein (TIR-NBS class),tandem inverted,3
-AT1G27170.1,,1,9434559,9439417,FORWARD,"1,89","0,003","0,012","0,00","0,002","0,010",WAHR,WAHR,WAHR,transmembrane receptors;ATP binding,tandem,2
-AT1G27180.1,,1,9439859,9446106,FORWARD,"0,12","0,002","0,006","0,32","0,001","0,003",WAHR,WAHR,WAHR,"disease resistance protein (TIR-NBS-LRR class), putative",tandem,2
-AT1G31540.2,RAC1,1,11288452,11293753,REVERSE,"118,30","0,012","0,043","58,04","0,013","0,054",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT1G33560.1,ADR1,1,12168768,12172005,FORWARD,"8,37","0,004","0,016","6,02","0,003","0,011",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,singleton,1
-AT1G47370.1,,1,17365898,17368703,REVERSE,"24,47","0,008","0,029","14,43","0,009","0,037",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,singleton,1
-AT1G50180.1,,1,18584235,18587136,FORWARD,"1,90","0,007","0,024","1,56","0,005","0,021",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,singleton,1
-AT1G51270.3,,1,19007510,19011272,FORWARD,"0,00","0,001","0,002","0,00","0,004","0,016",WAHR,FALSCH,FALSCH,structural molecules;transmembrane receptors;structural molecules,singleton,1
-AT1G51480.1,,1,19090847,19094306,REVERSE,"18,75","0,010","0,037","19,72","0,007","0,030",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,singleton,1
-AT1G52660.1,,1,19613475,19614796,FORWARD,"0,15","0,006","0,021","3,06","0,002","0,010",FALSCH,WAHR,FALSCH,P-loop containing nucleoside triphosphate hydrolases superfamily protein,singleton,1
-AT1G52900.1,,1,19702211,19702916,REVERSE,"0,58","0,008","0,028","0,34","0,004","0,019",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,singleton,1
-AT1G53350.1,,1,19903899,19907515,FORWARD,"1,23","0,008","0,032","4,01","0,005","0,019",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,singleton,1
-AT1G56510.1,WRR4,1,21167589,21173632,FORWARD,"1,72","0,000","0,001","1,15","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class),tandem inverted,3
-AT1G56520.2,,1,21174664,21178974,REVERSE,"2,00","0,000","0,000","1,01","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem inverted,3
-AT1G56540.1,,1,21181664,21185306,FORWARD,"15,22","0,002","0,008","2,16","0,000","0,001",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem inverted,3
-AT1G57650.1,,1,21351291,21354311,FORWARD,"1,26","0,006","0,021","17,50","0,009","0,036",FALSCH,WAHR,WAHR,ATP binding,inverted,2
-AT1G57670.1,,1,21357169,21359872,REVERSE,"21,15","0,004","0,016","19,36","0,007","0,029",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,inverted,2
-AT1G57830.1,,1,21420309,21420803,FORWARD,"0,34","0,000","0,000","0,36","0,000","0,000",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,tandem,2
-AT1G57850.1,,1,21426690,21427349,FORWARD,"0,34","0,000","0,000","0,36","0,000","0,000",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,tandem,2
-AT1G58390.1,,1,21690962,21694447,REVERSE,"8,39","0,006","0,022","14,64","0,010","0,043",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,tandem,3
-AT1G58400.1,,1,21696165,21699118,REVERSE,"1,63","0,000","0,000","1,01","0,000","0,000",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,tandem,3
-AT1G58410.1,,1,21701185,21704255,REVERSE,"1,63","0,000","0,000","1,01","0,000","0,000",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,tandem,3
-AT1G58602.1,RPP7,1,21746373,21764969,FORWARD,"9,45","0,000","0,001","6,65","0,001","0,004",FALSCH,WAHR,WAHR,LRR and NB-ARC domains-containing disease resistance protein,complex,5
-AT1G58807.1,,1,21780185,21784296,FORWARD,"0,00","0,000","0,000","0,00","0,000","0,000",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,complex,5
-AT1G58848.1,,1,21791783,21797050,FORWARD,"0,00","0,000","0,000","0,00","0,000","0,000",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,complex,5
-AT1G59124.1,,1,21816443,21820572,FORWARD,"0,00","0,000","0,000","0,00","0,000","0,000",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,complex,5
-AT1G59218.1,,1,21828033,21832708,FORWARD,"0,00","0,000","0,000","0,00","0,000","0,000",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,complex,5
-AT1G59620.1,CW9,1,21902284,21905685,FORWARD,"35,32","0,005","0,019","39,67","0,008","0,034",FALSCH,WAHR,FALSCH,Disease resistance protein (CC-NBS-LRR class) family,singleton,1
-AT1G59780.1,,1,21993581,21997691,REVERSE,"23,17","0,005","0,018","9,39","0,006","0,024",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,singleton,1
-AT1G60320.1,,1,22235091,22235606,FORWARD,"0,66","0,000","0,000","1,17","0,001","0,004",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,singleton,1
-AT1G61105.1,,1,22513585,22514492,REVERSE,"11,05","0,004","0,014","4,17","0,004","0,018",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,singleton,1
-AT1G61180.2,,1,22551345,22554649,FORWARD,"87,42","0,002","0,008","47,93","0,007","0,025",FALSCH,WAHR,WAHR,LRR and NB-ARC domains-containing disease resistance protein,tandem,2
-AT1G61190.1,RPP39,1,22557602,22560687,FORWARD,"87,42","0,003","0,012","179,88","0,011","0,047",FALSCH,WAHR,WAHR,LRR and NB-ARC domains-containing disease resistance protein,tandem,2
-AT1G61300.1,,1,22607466,22610273,REVERSE,"44,45","0,004","0,012","99,28","0,009","0,038",FALSCH,WAHR,WAHR,LRR and NB-ARC domains-containing disease resistance protein,tandem,2
-AT1G61310.1,,1,22613063,22615943,REVERSE,"44,46","0,001","0,004","62,75","0,007","0,027",FALSCH,WAHR,WAHR,LRR and NB-ARC domains-containing disease resistance protein,tandem,2
-AT1G62630.1,,1,23185912,23188593,FORWARD,"36,17","0,009","0,029","15,06","0,004","0,015",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,singleton,1
-AT1G63350.1,HRG4,1,23494935,23497631,REVERSE,"54,12","0,000","0,000","2,57","0,000","0,000",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,tandem,2
-AT1G63360.1,HRG5,1,23499515,23502169,REVERSE,"54,75","0,002","0,006","15,42","0,002","0,008",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,tandem,2
-AT1G63730.1,,1,23641770,23645132,FORWARD,"3,56","0,004","0,014","3,22","0,005","0,019",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,3
-AT1G63740.1,,1,23645429,23648973,FORWARD,"1,07","0,003","0,012","2,57","0,005","0,024",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,3
-AT1G63750.3,HRG6,1,23650848,23655359,FORWARD,"12,83","0,002","0,007","13,49","0,005","0,022",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,3
-AT1G63860.1,,1,23701484,23706005,REVERSE,"0,24","0,000","0,000","0,83","0,002","0,007",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,3
-AT1G63870.1,,1,23707131,23711901,REVERSE,"0,88","0,000","0,000","1,32","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,3
-AT1G63880.1,,1,23712276,23716124,REVERSE,"8,47","0,007","0,023","6,30","0,005","0,021",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,3
-AT1G64070.1,RLM1,1,23779949,23783449,FORWARD,"1,27","0,010","0,033","0,77","0,002","0,009",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT1G65390.1,,1,24292478,24294631,FORWARD,"14,85","0,007","0,024","10,08","0,006","0,025",WAHR,FALSCH,FALSCH,phloem protein 2 A5,singleton,1
-AT1G65850.2,HRG1,1,24494678,24498542,FORWARD,"14,75","0,006","0,021","18,41","0,006","0,026",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT1G66090.1,,1,24602146,24604763,FORWARD,"4,49","0,003","0,013","10,09","0,004","0,015",WAHR,WAHR,FALSCH,Disease resistance protein (TIR-NBS class),singleton,1
-AT1G69550.1,,1,26148021,26153555,REVERSE,"9,82","0,009","0,031","18,05","0,008","0,033",WAHR,WAHR,WAHR,disease resistance protein (TIR-NBS-LRR class),singleton,1
-AT1G72840.2,,1,27409237,27413851,REVERSE,"0,25","0,000","0,000","0,14","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class),complex,11
-AT1G72850.1,,1,27413971,27415335,FORWARD,"0,25","0,000","0,000","0,14","0,000","0,000",WAHR,WAHR,FALSCH,Disease resistance protein (TIR-NBS class),complex,11
-AT1G72860.1,,1,27416228,27420778,REVERSE,"0,25","0,000","0,000","0,14","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,11
-AT1G72870.1,,1,27421023,27423184,FORWARD,"0,25","0,000","0,000","0,14","0,000","0,000",WAHR,WAHR,FALSCH,Disease resistance protein (TIR-NBS class),complex,11
-AT1G72890.2,,1,27429916,27431960,FORWARD,"6,48","0,006","0,023","8,38","0,006","0,024",WAHR,WAHR,FALSCH,Disease resistance protein (TIR-NBS class),complex,11
-AT1G72900.1,,1,27432195,27433782,FORWARD,"6,20","0,007","0,026","5,99","0,005","0,022",WAHR,WAHR,FALSCH,Toll-Interleukin-Resistance (TIR) domain-containing protein,complex,11
-AT1G72910.1,,1,27435614,27437144,FORWARD,"2,92","0,000","0,000","1,63","0,002","0,006",WAHR,WAHR,FALSCH,Toll-Interleukin-Resistance (TIR) domain-containing protein,complex,11
-AT1G72920.1,,1,27437928,27439091,FORWARD,"2,92","0,000","0,000","4,06","0,003","0,010",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,complex,11
-AT1G72930.1,,1,27439452,27440464,FORWARD,"2,92","0,000","0,000","9,54","0,005","0,019",WAHR,FALSCH,FALSCH,toll/interleukin-1 receptor-like,complex,11
-AT1G72940.1,,1,27442238,27443856,FORWARD,"3,68","0,003","0,010","5,46","0,004","0,015",WAHR,WAHR,FALSCH,Toll-Interleukin-Resistance (TIR) domain-containing protein,complex,11
-AT1G72950.1,,1,27444585,27445980,FORWARD,"3,98","0,006","0,020","4,34","0,004","0,018",WAHR,WAHR,FALSCH,Disease resistance protein (TIR-NBS class),complex,11
-AT2G03030.1,,2,889764,890520,FORWARD,"15,33","0,002","0,002","7,86","0,002","0,006",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,singleton,1
-AT2G03300.1,,2,1003468,1004222,REVERSE,"45,81","0,001","0,000","20,33","0,003","0,013",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,singleton,1
-AT2G14080.1,,2,5925186,5929600,FORWARD,"24,70","0,018","0,064","28,42","0,012","0,044",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT2G16870.1,,2,7308077,7311686,REVERSE,"1,02","0,008","0,029","0,85","0,005","0,021",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT2G17050.1,,2,7410835,7415610,REVERSE,"6,12","0,004","0,017","10,28","0,004","0,018",WAHR,WAHR,WAHR,"disease resistance protein (TIR-NBS-LRR class), putative",inverted,2
-AT2G17060.1,,2,7422411,7426877,FORWARD,"13,12","0,006","0,023","10,16","0,005","0,022",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,inverted,2
-AT2G20142.1,,2,8695374,8696643,FORWARD,"0,90","0,004","0,014","1,32","0,003","0,013",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,singleton,1
-AT2G32140.1,,2,13655627,13657175,REVERSE,"2,74","0,003","0,010","2,74","0,003","0,015",WAHR,FALSCH,FALSCH,transmembrane receptors,singleton,1
-AT3G04210.1,,3,1105963,1108069,REVERSE,"2,46","0,003","0,012","3,47","0,003","0,011",WAHR,WAHR,FALSCH,Disease resistance protein (TIR-NBS class),tandem,2
-AT3G04220.1,,3,1109118,1112188,REVERSE,"3,94","0,003","0,010","1,87","0,002","0,008",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT3G07040.1,RPM1,3,2225952,2229024,REVERSE,"0,01","0,000","0,000","0,01","0,000","0,000",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,singleton,1
-AT3G14460.1,,3,4851990,4856264,REVERSE,"1,06","0,009","0,034","0,48","0,004","0,017",FALSCH,WAHR,WAHR,LRR and NB-ARC domains-containing disease resistance protein,inverted,2
-AT3G14470.1,,3,4857940,4861247,FORWARD,"1,58","0,008","0,031","0,04","0,006","0,023",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,inverted,2
-AT3G15700.1,,3,5321136,5322376,REVERSE,"0,02","0,003","0,011","0,07","0,002","0,005",FALSCH,WAHR,FALSCH,P-loop containing nucleoside triphosphate hydrolases superfamily protein,singleton,1
-AT3G25510.1,,3,9260838,9268797,REVERSE,"7,25","0,006","0,023","7,67","0,006","0,024",WAHR,WAHR,WAHR,"disease resistance protein (TIR-NBS-LRR class), putative",singleton,1
-AT3G44400.1,,3,16045954,16049668,REVERSE,"21,37","0,001","0,004","104,01","0,010","0,038",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT3G44480.1,RPP1,3,16090564,16096359,REVERSE,"43,94","0,003","0,010","97,27","0,006","0,024",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT3G44630.3,DM2,3,16195984,16200595,FORWARD,"117,11","0,003","0,009","98,37","0,006","0,024",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT3G44670.1,,3,16216950,16221617,FORWARD,"69,37","0,004","0,012","89,30","0,005","0,021",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT3G46530.1,RPP13,3,17130367,17133338,REVERSE,"10,56","0,013","0,045","10,57","0,011","0,044",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,singleton,1
-AT3G46710.1,,3,17206489,17209032,REVERSE,"6,52","0,008","0,029","8,10","0,006","0,027",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,tandem,2
-AT3G46730.1,,3,17213069,17215612,REVERSE,"0,64","0,005","0,017","1,35","0,002","0,008",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,tandem,2
-AT3G50950.2,ZAR1,3,18935714,18938685,FORWARD,"5,38","0,005","0,017","2,97","0,004","0,017",FALSCH,WAHR,WAHR,HOPZ-ACTIVATED RESISTANCE 1,singleton,1
-AT3G51560.1,,3,19121808,19125913,REVERSE,"0,00","0,000","0,000","1,38","0,003","0,012",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,inverted,2
-AT3G51570.1,,3,19126358,19130456,FORWARD,"0,00","0,000","0,000","3,48","0,002","0,008",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,inverted,2
-AT4G04110.1,,4,1972591,1974014,FORWARD,"1,89","0,010","0,037","0,01","0,008","0,034",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,singleton,1
-AT4G08450.1,,4,5365610,5371101,FORWARD,"29,15","0,005","0,017","19,86","0,004","0,016",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT4G09360.1,,4,5940186,5943280,FORWARD,"0,01","0,000","0,000","0,06","0,000","0,000",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,tandem inverted,3
-AT4G09420.1,,4,5962181,5963791,REVERSE,"0,01","0,000","0,000","0,06","0,000","0,000",WAHR,WAHR,FALSCH,Disease resistance protein (TIR-NBS class),tandem inverted,3
-AT4G09430.1,,4,5970932,5975375,FORWARD,"0,01","0,000","0,000","0,06","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem inverted,3
-AT4G10780.1,,4,6634779,6637457,REVERSE,"0,01","0,000","0,000","0,01","0,000","0,000",FALSCH,WAHR,WAHR,LRR and NB-ARC domains-containing disease resistance protein,singleton,1
-AT4G11170.1,RMG1,4,6811127,6817130,FORWARD,"0,73","0,005","0,017","2,78","0,007","0,028",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,inverted,2
-AT4G11340.1,,4,6894208,6899130,REVERSE,"4,97","0,005","0,020","1,64","0,003","0,011",WAHR,FALSCH,FALSCH,Disease resistance protein (TIR-NBS-LRR class) family,inverted,2
-AT4G12010.1,,4,7197211,7201393,REVERSE,"5,84","0,011","0,041","6,01","0,010","0,044",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,inverted,2
-AT4G12020.2,,4,7201656,7209648,FORWARD,"0,55","0,005","0,019","0,63","0,002","0,009",FALSCH,WAHR,WAHR,protein kinase family protein,inverted,2
-AT4G14370.1,,4,8279641,8283263,REVERSE,"10,81","0,014","0,052","12,38","0,010","0,044",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT4G16860.1,RPP4,4,9488466,9495816,REVERSE,"50,39","0,000","0,001","38,13","0,003","0,013",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,8
-AT4G16890.1,SNC1,4,9500506,9505455,REVERSE,"50,39","0,000","0,000","73,83","0,004","0,018",WAHR,WAHR,WAHR,"disease resistance protein (TIR-NBS-LRR class), putative",complex,8
-AT4G16900.1,,4,9511859,9516541,REVERSE,"50,39","0,000","0,000","0,24","0,000","0,001",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,8
-AT4G16920.1,,4,9519173,9525691,REVERSE,"50,39","0,000","0,001","46,90","0,004","0,016",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,8
-AT4G16940.1,,4,9533149,9537604,REVERSE,"50,39","0,000","0,000","65,90","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,8
-AT4G16950.1,RPP5,4,9538798,9544467,REVERSE,"50,39","0,000","0,000","45,12","0,002","0,007",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,8
-AT4G16960.1,,4,9546343,9551007,REVERSE,"50,39","0,000","0,001","64,24","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,8
-AT4G16990.2,RLM3,4,9560135,9565454,FORWARD,"0,96","0,000","0,000","0,21","0,000","0,000",WAHR,WAHR,FALSCH,"disease resistance protein (TIR-NBS class), putative",complex,8
-AT4G19050.1,,4,10439984,10444121,REVERSE,"6,69","0,013","0,047","4,20","0,009","0,036",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,tandem,2
-AT4G19060.1,,4,10444916,10446300,REVERSE,"5,06","0,014","0,049","4,12","0,007","0,031",FALSCH,WAHR,FALSCH,P-loop containing nucleoside triphosphate hydrolases superfamily protein,tandem,2
-AT4G19500.1,,4,10625659,10630395,FORWARD,"0,21","0,002","0,008","0,14","0,000","0,000",WAHR,WAHR,WAHR,nucleoside-triphosphatases;transmembrane receptors;nucleotide binding;ATP binding,tandem inverted,4
-AT4G19510.1,,4,10633685,10639001,FORWARD,"0,21","0,004","0,012","0,13","0,002","0,008",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class),tandem inverted,4
-AT4G19520.1,,4,10639269,10647079,REVERSE,"0,06","0,000","0,000","0,12","0,000","0,000",WAHR,WAHR,WAHR,disease resistance protein (TIR-NBS-LRR class) family,tandem inverted,4
-AT4G19530.1,,4,10651744,10657282,FORWARD,"5,43","0,002","0,008","6,37","0,002","0,007",WAHR,WAHR,WAHR,disease resistance protein (TIR-NBS-LRR class) family,tandem inverted,4
-AT4G19920.1,,4,10797217,10798388,REVERSE,"9,61","0,006","0,016","6,33","0,005","0,021",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,singleton,1
-AT4G23440.1,,4,12237765,12240826,FORWARD,"0,21","0,006","0,023","1,23","0,002","0,008",WAHR,FALSCH,FALSCH,Disease resistance protein (TIR-NBS class),inverted,2
-AT4G23510.1,,4,12267516,12270543,REVERSE,"0,10","0,001","0,005","1,96","0,004","0,015",WAHR,FALSCH,FALSCH,Disease resistance protein (TIR-NBS-LRR class) family,inverted,2
-AT4G26090.1,RPS2,4,13224338,13227872,FORWARD,"3,80","0,007","0,025","1,76","0,003","0,013",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,singleton,1
-AT4G27190.1,,4,13620977,13623934,REVERSE,"0,03","0,000","0,000","0,11","0,000","0,000",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,tandem,2
-AT4G27220.1,,4,13633953,13636712,REVERSE,"0,03","0,000","0,000","0,11","0,000","0,000",FALSCH,WAHR,WAHR,NB-ARC domain-containing disease resistance protein,tandem,2
-AT4G33300.1,ADR1L1,4,16051051,16056526,REVERSE,"1,26","0,003","0,010","2,38","0,003","0,013",FALSCH,WAHR,WAHR,ADR1-like 1,singleton,1
-AT4G36140.1,,4,17098956,17104479,REVERSE,"0,00","0,004","0,014","2,32","0,002","0,008",WAHR,WAHR,WAHR,"disease resistance protein (TIR-NBS-LRR class), putative",inverted,2
-AT4G36150.1,,4,17104719,17108711,FORWARD,"1,30","0,012","0,041","3,97","0,009","0,039",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,inverted,2
-AT5G04720.1,ADR1L2,5,1360712,1363884,FORWARD,"1,35","0,002","0,008","1,70","0,002","0,010",FALSCH,WAHR,WAHR,ADR1-like 2,singleton,1
-AT5G05400.1,,5,1597745,1600369,REVERSE,"0,20","0,000","0,000","0,00","0,000","0,000",FALSCH,WAHR,WAHR,LRR and NB-ARC domains-containing disease resistance protein,singleton,1
-AT5G11250.1,,5,3587978,3591960,REVERSE,"1,62","0,009","0,034","0,51","0,002","0,010",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class),singleton,1
-AT5G17680.1,,5,5822999,5827153,FORWARD,"8,76","0,006","0,021","0,00","0,004","0,018",WAHR,WAHR,WAHR,"disease resistance protein (TIR-NBS-LRR class), putative",singleton,1
-AT5G17880.1,Csa1,5,5908874,5913099,REVERSE,"0,15","0,000","0,001","0,01","0,000","0,000",WAHR,WAHR,WAHR,disease resistance protein (TIR-NBS-LRR class),tandem inverted,3
-AT5G17890.1,Chs3,5,5916970,5923355,FORWARD,"0,02","0,000","0,001","0,01","0,000","0,000",WAHR,WAHR,WAHR,DA1-related protein 4,tandem inverted,3
-AT5G17970.1,,5,5948999,5951619,REVERSE,"0,35","0,000","0,000","0,09","0,002","0,007",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem inverted,3
-AT5G18350.1,,5,6074069,6078569,REVERSE,"0,04","0,000","0,000","0,00","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,3
-AT5G18360.1,,5,6080049,6083027,REVERSE,"1,68","0,006","0,023","1,95","0,004","0,018",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,3
-AT5G18370.1,,5,6085036,6088926,REVERSE,"2,33","0,005","0,018","3,19","0,002","0,010",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,3
-AT5G22690.1,,5,7541271,7545182,FORWARD,"1,11","0,004","0,014","0,26","0,002","0,006",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT5G35450.1,,5,13667686,13671184,FORWARD,"0,20","0,000","0,001","0,00","0,000","0,000",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,singleton,1
-AT5G36930.2,,5,14567622,14572630,REVERSE,"0,09","0,001","0,004","0,13","0,001","0,002",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT5G38340.1,,5,15320507,15324061,FORWARD,"25,38","0,012","0,043","21,10","0,008","0,032",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT5G38350.1,,5,15328659,15331528,FORWARD,"20,34","0,017","0,062","25,48","0,015","0,064",FALSCH,WAHR,WAHR,Disease resistance protein (NBS-LRR class) family,tandem,2
-AT5G38850.1,,5,15555156,15558732,FORWARD,"2,00","0,008","0,028","3,31","0,006","0,027",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class),singleton,1
-AT5G40060.1,,5,16034576,16039096,FORWARD,"12,79","0,009","0,032","10,61","0,006","0,027",FALSCH,WAHR,WAHR,Disease resistance protein (NBS-LRR class) family,tandem inverted,3
-AT5G40090.1,,5,16041919,16043494,REVERSE,"5,15","0,009","0,031","7,60","0,005","0,020",WAHR,WAHR,FALSCH,Disease resistance protein (TIR-NBS class),tandem inverted,3
-AT5G40100.1,,5,16043929,16047355,FORWARD,"3,10","0,008","0,028","2,15","0,005","0,022",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem inverted,3
-AT5G40910.1,,5,16395507,16399129,FORWARD,"0,48","0,000","0,000","1,66","0,003","0,012",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT5G41540.1,,5,16612659,16616063,REVERSE,"25,56","0,002","0,006","13,97","0,004","0,015",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT5G41550.1,DM1,5,16617232,16620785,REVERSE,"27,36","0,008","0,029","17,39","0,008","0,034",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT5G41740.2,DM1,5,16688626,16693119,FORWARD,"8,11","0,000","0,001","26,53","0,005","0,019",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT5G41750.1,,5,16693909,16698943,FORWARD,"18,87","0,002","0,008","35,97","0,004","0,017",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT5G43470.1,RPP8,5,17462611,17467448,REVERSE,"148,58","0,007","0,022","122,69","0,008","0,031",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,singleton,1
-AT5G43730.1,,5,17560179,17562929,FORWARD,"1,54","0,006","0,020","13,24","0,009","0,036",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,tandem,2
-AT5G43740.1,,5,17564738,17568802,FORWARD,"1,03","0,002","0,007","3,31","0,000","0,001",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,tandem,2
-AT5G44510.1,TAO1,5,17929673,17934188,REVERSE,"0,22","0,010","0,035","0,60","0,008","0,031",WAHR,WAHR,WAHR,target of AVRB operation1,singleton,1
-AT5G44870.1,TTR1,5,18114666,18118608,FORWARD,"0,97","0,007","0,023","3,23","0,003","0,010",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,10
-AT5G44900.1,,5,18135446,18136438,FORWARD,"9,15","0,010","0,038","14,71","0,009","0,038",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,complex,10
-AT5G44910.1,,5,18137354,18138235,FORWARD,"6,55","0,008","0,031","7,20","0,006","0,027",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,complex,10
-AT5G44920.1,,5,18138775,18140190,FORWARD,"8,64","0,010","0,038","3,73","0,006","0,025",WAHR,FALSCH,FALSCH,Toll-Interleukin-Resistance (TIR) domain family protein,complex,10
-AT5G45000.1,,5,18165383,18167193,FORWARD,"13,70","0,007","0,024","11,61","0,004","0,015",WAHR,FALSCH,FALSCH,Disease resistance protein (TIR-NBS-LRR class) family,complex,10
-AT5G45050.1,RRS1B,5,18176914,18181805,REVERSE,"0,21","0,007","0,027","0,81","0,005","0,023",FALSCH,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class),complex,10
-AT5G45060.1,RPS4B,5,18182038,18186495,FORWARD,"0,75","0,011","0,042","1,41","0,008","0,035",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,10
-AT5G45070.1,,5,18187630,18189431,REVERSE,"0,05","0,000","0,000","0,10","0,000","0,000",WAHR,FALSCH,FALSCH,phloem protein 2-A8,complex,10
-AT5G45080.1,,5,18191575,18193207,REVERSE,"0,05","0,000","0,000","0,10","0,000","0,000",WAHR,FALSCH,FALSCH,phloem protein 2-A6,complex,10
-AT5G45090.1,,5,18202753,18205000,REVERSE,"0,05","0,000","0,000","0,10","0,000","0,000",WAHR,FALSCH,FALSCH,phloem protein 2-A7,complex,10
-AT5G45200.1,HRG7,5,18283967,18290332,REVERSE,"5,24","0,006","0,021","6,96","0,006","0,024",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,7
-AT5G45210.1,HRG8,5,18295521,18298434,FORWARD,"12,50","0,010","0,035","15,43","0,009","0,036",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,7
-AT5G45220.1,,5,18298926,18301069,REVERSE,"3,32","0,003","0,011","1,52","0,001","0,002",WAHR,FALSCH,FALSCH,Disease resistance protein (TIR-NBS-LRR class) family,complex,7
-AT5G45230.1,,5,18302147,18308303,REVERSE,"2,12","0,000","0,000","0,11","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,7
-AT5G45240.1,,5,18313706,18319089,FORWARD,"2,12","0,000","0,000","0,11","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class),complex,7
-AT5G45250.1,RPS4,5,18321914,18326022,REVERSE,"0,76","0,003","0,012","1,39","0,003","0,012",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,7
-AT5G45260.1,RRS1,5,18326203,18332609,FORWARD,"5,56","0,005","0,016","6,10","0,004","0,018",FALSCH,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class),complex,7
-AT5G45440.1,,5,18412308,18413555,REVERSE,"7,07","0,012","0,044","4,98","0,008","0,031",FALSCH,WAHR,FALSCH,P-loop containing nucleoside triphosphate hydrolases superfamily protein,tandem inverted,3
-AT5G45490.1,,5,18431003,18432397,FORWARD,"0,69","0,002","0,005","0,98","0,002","0,007",FALSCH,WAHR,FALSCH,P-loop containing nucleoside triphosphate hydrolases superfamily protein,tandem inverted,3
-AT5G45510.1,,5,18444657,18449446,FORWARD,"4,54","0,010","0,036","3,65","0,006","0,023",FALSCH,FALSCH,WAHR,Leucine-rich repeat (LRR) family protein,tandem inverted,3
-AT5G46260.1,HRG2,5,18759102,18763358,REVERSE,"20,22","0,006","0,023","14,15","0,005","0,023",WAHR,WAHR,WAHR,disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT5G46270.1,HRG3,5,18764349,18769090,REVERSE,"38,08","0,007","0,026","21,58","0,006","0,026",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,tandem,2
-AT5G46450.1,,5,18835618,18839546,FORWARD,"1,27","0,006","0,022","2,09","0,004","0,018",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,6
-AT5G46470.1,RPS6,5,18842701,18849741,FORWARD,"0,47","0,005","0,019","0,35","0,003","0,015",WAHR,WAHR,WAHR,disease resistance protein (TIR-NBS-LRR class) family,complex,6
-AT5G46490.2,,5,18850776,18853843,FORWARD,"0,78","0,000","0,000","1,66","0,001","0,002",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,6
-AT5G46500.1,,5,18856454,18857787,FORWARD,"0,75","0,001","0,003","0,50","0,001","0,004",FALSCH,FALSCH,FALSCH,,complex,6
-AT5G46510.1,,5,18860451,18867013,FORWARD,"0,70","0,000","0,000","0,49","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,6
-AT5G46520.1,,5,18867767,18872415,FORWARD,"2,51","0,000","0,001","4,08","0,001","0,005",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,complex,6
-AT5G47250.1,,5,19185794,19188745,REVERSE,"5,67","0,005","0,018","6,03","0,006","0,026",FALSCH,WAHR,WAHR,LRR and NB-ARC domains-containing disease resistance protein,tandem inverted,3
-AT5G47260.1,,5,19189411,19192516,FORWARD,"1,86","0,008","0,028","2,75","0,006","0,025",FALSCH,WAHR,WAHR,ATP binding;GTP binding;nucleotide binding;nucleoside-triphosphatases,tandem inverted,3
-AT5G47280.1,ADR1L3,5,19193157,19195559,FORWARD,"0,21","0,000","0,000","0,35","0,000","0,000",FALSCH,WAHR,WAHR,ADR1-like 3,tandem inverted,3
-AT5G48620.1,,5,19716476,19721452,FORWARD,"48,06","0,003","0,011","91,13","0,008","0,033",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,singleton,1
-AT5G48770.1,,5,19773277,19777242,REVERSE,"0,12","0,000","0,000","0,02","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,inverted,2
-AT5G48780.1,,5,19777468,19779604,FORWARD,"0,12","0,000","0,000","0,02","0,000","0,000",WAHR,WAHR,FALSCH,disease resistance protein (TIR-NBS class),inverted,2
-AT5G49140.1,HRG9,5,19919085,19923415,REVERSE,"0,01","0,000","0,000","0,00","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT5G51630.1,,5,20970030,20974916,FORWARD,"0,09","0,000","0,000","0,01","0,000","0,000",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT5G56220.1,,5,22754818,22757920,FORWARD,"0,33","0,005","0,019","0,00","0,004","0,015",WAHR,WAHR,FALSCH,P-loop containing nucleoside triphosphate hydrolases superfamily protein,singleton,1
-AT5G58120.1,,5,23517492,23521067,FORWARD,"2,29","0,011","0,040","4,17","0,009","0,038",WAHR,WAHR,WAHR,Disease resistance protein (TIR-NBS-LRR class) family,singleton,1
-AT5G63020.1,,5,25283063,25286002,REVERSE,"0,35","0,009","0,033","0,68","0,005","0,020",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,singleton,1
-AT5G66630.1,DAR5,5,26592648,26595922,FORWARD,"0,00","0,001","0,005","0,00","0,001","0,002",FALSCH,WAHR,FALSCH,DA1-related protein 5,singleton,1
-AT5G66900.1,,5,26714764,26717788,REVERSE,"0,62","0,005","0,018","1,06","0,002","0,008",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,tandem,2
-AT5G66910.1,,5,26718232,26721256,REVERSE,"0,00","0,006","0,022","0,84","0,003","0,011",FALSCH,WAHR,WAHR,Disease resistance protein (CC-NBS-LRR class) family,tandem,2
+ID,name,chr,start,stop,comment
+AT1G10920.1,LOV1,1,3644420,3647768,NB-ARC domain-containing disease resistance protein
+AT1G12210.1,,1,4140948,4143605,RPS5-like 1
+AT1G12220.1,RPS5,1,4144935,4147817,Disease resistance protein (CC-NBS-LRR class) family
+AT1G12280.1,SUMM2,1,4174875,4177559,LRR and NB-ARC domains-containing disease resistance protein
+AT1G12290.1,,1,4178359,4181247,Disease resistance protein (CC-NBS-LRR class) family
+AT1G15890.1,,1,5461317,5464223,Disease resistance protein (CC-NBS-LRR class) family
+AT1G17600.1,soc3,1,6052936,6056664,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G17610.1,Chs1,1,6056895,6058357,Disease resistance protein (TIR-NBS class)
+AT1G17615.1,,1,6059441,6060667,Disease resistance protein (TIR-NBS class)
+AT1G27170.1,,1,9434559,9439417,transmembrane receptors;ATP binding
+AT1G27180.1,,1,9439859,9446106,"disease resistance protein (TIR-NBS-LRR class), putative"
+AT1G31540.2,RAC1,1,11288452,11293753,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G33560.1,ADR1,1,12168768,12172005,Disease resistance protein (CC-NBS-LRR class) family
+AT1G47370.1,,1,17365898,17368703,Toll-Interleukin-Resistance (TIR) domain family protein
+AT1G50180.1,,1,18584235,18587136,NB-ARC domain-containing disease resistance protein
+AT1G51270.3,,1,19007510,19011272,structural molecules;transmembrane receptors;structural molecules
+AT1G51480.1,,1,19090847,19094306,Disease resistance protein (CC-NBS-LRR class) family
+AT1G52660.1,,1,19613475,19614796,P-loop containing nucleoside triphosphate hydrolases superfamily protein
+AT1G52900.1,,1,19702211,19702916,Toll-Interleukin-Resistance (TIR) domain family protein
+AT1G53350.1,,1,19903899,19907515,Disease resistance protein (CC-NBS-LRR class) family
+AT1G56510.1,WRR4,1,21167589,21173632,Disease resistance protein (TIR-NBS-LRR class)
+AT1G56520.2,,1,21174664,21178974,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G56540.1,,1,21181664,21185306,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G57650.1,,1,21351291,21354311,ATP binding
+AT1G57670.1,,1,21357169,21359872,Toll-Interleukin-Resistance (TIR) domain family protein
+AT1G57830.1,,1,21420309,21420803,Toll-Interleukin-Resistance (TIR) domain family protein
+AT1G57850.1,,1,21426690,21427349,Toll-Interleukin-Resistance (TIR) domain family protein
+AT1G58390.1,,1,21690962,21694447,Disease resistance protein (CC-NBS-LRR class) family
+AT1G58400.1,,1,21696165,21699118,Disease resistance protein (CC-NBS-LRR class) family
+AT1G58410.1,,1,21701185,21704255,Disease resistance protein (CC-NBS-LRR class) family
+AT1G58602.1,RPP7,1,21746373,21764969,LRR and NB-ARC domains-containing disease resistance protein
+AT1G58807.1,,1,21780185,21784296,Disease resistance protein (CC-NBS-LRR class) family
+AT1G58848.1,,1,21791783,21797050,Disease resistance protein (CC-NBS-LRR class) family
+AT1G59124.1,,1,21816443,21820572,Disease resistance protein (CC-NBS-LRR class) family
+AT1G59218.1,,1,21828033,21832708,Disease resistance protein (CC-NBS-LRR class) family
+AT1G59620.1,CW9,1,21902284,21905685,Disease resistance protein (CC-NBS-LRR class) family
+AT1G59780.1,,1,21993581,21997691,NB-ARC domain-containing disease resistance protein
+AT1G60320.1,,1,22235091,22235606,Toll-Interleukin-Resistance (TIR) domain family protein
+AT1G61105.1,,1,22513585,22514492,Toll-Interleukin-Resistance (TIR) domain family protein
+AT1G61180.2,,1,22551345,22554649,LRR and NB-ARC domains-containing disease resistance protein
+AT1G61190.1,RPP39,1,22557602,22560687,LRR and NB-ARC domains-containing disease resistance protein
+AT1G61300.1,,1,22607466,22610273,LRR and NB-ARC domains-containing disease resistance protein
+AT1G61310.1,,1,22613063,22615943,LRR and NB-ARC domains-containing disease resistance protein
+AT1G62630.1,,1,23185912,23188593,Disease resistance protein (CC-NBS-LRR class) family
+AT1G63350.1,HRG4,1,23494935,23497631,Disease resistance protein (CC-NBS-LRR class) family
+AT1G63360.1,HRG5,1,23499515,23502169,Disease resistance protein (CC-NBS-LRR class) family
+AT1G63730.1,,1,23641770,23645132,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G63740.1,,1,23645429,23648973,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G63750.3,HRG6,1,23650848,23655359,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G63860.1,,1,23701484,23706005,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G63870.1,,1,23707131,23711901,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G63880.1,,1,23712276,23716124,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G64070.1,RLM1,1,23779949,23783449,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G65390.1,,1,24292478,24294631,phloem protein 2 A5
+AT1G65850.2,HRG1,1,24494678,24498542,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G66090.1,,1,24602146,24604763,Disease resistance protein (TIR-NBS class)
+AT1G69550.1,,1,26148021,26153555,disease resistance protein (TIR-NBS-LRR class)
+AT1G72840.2,,1,27409237,27413851,Disease resistance protein (TIR-NBS-LRR class)
+AT1G72850.1,,1,27413971,27415335,Disease resistance protein (TIR-NBS class)
+AT1G72860.1,,1,27416228,27420778,Disease resistance protein (TIR-NBS-LRR class) family
+AT1G72870.1,,1,27421023,27423184,Disease resistance protein (TIR-NBS class)
+AT1G72890.2,,1,27429916,27431960,Disease resistance protein (TIR-NBS class)
+AT1G72900.1,,1,27432195,27433782,Toll-Interleukin-Resistance (TIR) domain-containing protein
+AT1G72910.1,,1,27435614,27437144,Toll-Interleukin-Resistance (TIR) domain-containing protein
+AT1G72920.1,,1,27437928,27439091,Toll-Interleukin-Resistance (TIR) domain family protein
+AT1G72930.1,,1,27439452,27440464,toll/interleukin-1 receptor-like
+AT1G72940.1,,1,27442238,27443856,Toll-Interleukin-Resistance (TIR) domain-containing protein
+AT1G72950.1,,1,27444585,27445980,Disease resistance protein (TIR-NBS class)
+AT2G03030.1,,2,889764,890520,Toll-Interleukin-Resistance (TIR) domain family protein
+AT2G03300.1,,2,1003468,1004222,Toll-Interleukin-Resistance (TIR) domain family protein
+AT2G14080.1,,2,5925186,5929600,Disease resistance protein (TIR-NBS-LRR class) family
+AT2G16870.1,,2,7308077,7311686,Disease resistance protein (TIR-NBS-LRR class) family
+AT2G17050.1,,2,7410835,7415610,"disease resistance protein (TIR-NBS-LRR class), putative"
+AT2G17060.1,,2,7422411,7426877,Disease resistance protein (TIR-NBS-LRR class) family
+AT2G20142.1,,2,8695374,8696643,Toll-Interleukin-Resistance (TIR) domain family protein
+AT2G32140.1,,2,13655627,13657175,transmembrane receptors
+AT3G04210.1,,3,1105963,1108069,Disease resistance protein (TIR-NBS class)
+AT3G04220.1,,3,1109118,1112188,Disease resistance protein (TIR-NBS-LRR class) family
+AT3G07040.1,RPM1,3,2225952,2229024,NB-ARC domain-containing disease resistance protein
+AT3G14460.1,,3,4851990,4856264,LRR and NB-ARC domains-containing disease resistance protein
+AT3G14470.1,,3,4857940,4861247,NB-ARC domain-containing disease resistance protein
+AT3G15700.1,,3,5321136,5322376,P-loop containing nucleoside triphosphate hydrolases superfamily protein
+AT3G25510.1,,3,9260838,9268797,"disease resistance protein (TIR-NBS-LRR class), putative"
+AT3G44400.1,,3,16045954,16049668,Disease resistance protein (TIR-NBS-LRR class) family
+AT3G44480.1,RPP1,3,16090564,16096359,Disease resistance protein (TIR-NBS-LRR class) family
+AT3G44630.3,DM2,3,16195984,16200595,Disease resistance protein (TIR-NBS-LRR class) family
+AT3G44670.1,,3,16216950,16221617,Disease resistance protein (TIR-NBS-LRR class) family
+AT3G46530.1,RPP13,3,17130367,17133338,NB-ARC domain-containing disease resistance protein
+AT3G46710.1,,3,17206489,17209032,NB-ARC domain-containing disease resistance protein
+AT3G46730.1,,3,17213069,17215612,NB-ARC domain-containing disease resistance protein
+AT3G50950.2,ZAR1,3,18935714,18938685,HOPZ-ACTIVATED RESISTANCE 1
+AT3G51560.1,,3,19121808,19125913,Disease resistance protein (TIR-NBS-LRR class) family
+AT3G51570.1,,3,19126358,19130456,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G04110.1,,4,1972591,1974014,Toll-Interleukin-Resistance (TIR) domain family protein
+AT4G08450.1,,4,5365610,5371101,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G09360.1,,4,5940186,5943280,NB-ARC domain-containing disease resistance protein
+AT4G09420.1,,4,5962181,5963791,Disease resistance protein (TIR-NBS class)
+AT4G09430.1,,4,5970932,5975375,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G10780.1,,4,6634779,6637457,LRR and NB-ARC domains-containing disease resistance protein
+AT4G11170.1,RMG1,4,6811127,6817130,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G11340.1,,4,6894208,6899130,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G12010.1,,4,7197211,7201393,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G12020.2,,4,7201656,7209648,protein kinase family protein
+AT4G14370.1,,4,8279641,8283263,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G16860.1,RPP4,4,9488466,9495816,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G16890.1,SNC1,4,9500506,9505455,"disease resistance protein (TIR-NBS-LRR class), putative"
+AT4G16900.1,,4,9511859,9516541,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G16920.1,,4,9519173,9525691,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G16940.1,,4,9533149,9537604,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G16950.1,RPP5,4,9538798,9544467,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G16960.1,,4,9546343,9551007,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G16990.2,RLM3,4,9560135,9565454,"disease resistance protein (TIR-NBS class), putative"
+AT4G19050.1,,4,10439984,10444121,NB-ARC domain-containing disease resistance protein
+AT4G19060.1,,4,10444916,10446300,P-loop containing nucleoside triphosphate hydrolases superfamily protein
+AT4G19500.1,,4,10625659,10630395,nucleoside-triphosphatases;transmembrane receptors;nucleotide binding;ATP binding
+AT4G19510.1,,4,10633685,10639001,Disease resistance protein (TIR-NBS-LRR class)
+AT4G19520.1,,4,10639269,10647079,disease resistance protein (TIR-NBS-LRR class) family
+AT4G19530.1,,4,10651744,10657282,disease resistance protein (TIR-NBS-LRR class) family
+AT4G19920.1,,4,10797217,10798388,Toll-Interleukin-Resistance (TIR) domain family protein
+AT4G23440.1,,4,12237765,12240826,Disease resistance protein (TIR-NBS class)
+AT4G23510.1,,4,12267516,12270543,Disease resistance protein (TIR-NBS-LRR class) family
+AT4G26090.1,RPS2,4,13224338,13227872,NB-ARC domain-containing disease resistance protein
+AT4G27190.1,,4,13620977,13623934,NB-ARC domain-containing disease resistance protein
+AT4G27220.1,,4,13633953,13636712,NB-ARC domain-containing disease resistance protein
+AT4G33300.1,ADR1L1,4,16051051,16056526,ADR1-like 1
+AT4G36140.1,,4,17098956,17104479,"disease resistance protein (TIR-NBS-LRR class), putative"
+AT4G36150.1,,4,17104719,17108711,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G04720.1,ADR1L2,5,1360712,1363884,ADR1-like 2
+AT5G05400.1,,5,1597745,1600369,LRR and NB-ARC domains-containing disease resistance protein
+AT5G11250.1,,5,3587978,3591960,Disease resistance protein (TIR-NBS-LRR class)
+AT5G17680.1,,5,5822999,5827153,"disease resistance protein (TIR-NBS-LRR class), putative"
+AT5G17880.1,Csa1,5,5908874,5913099,disease resistance protein (TIR-NBS-LRR class)
+AT5G17890.1,Chs3,5,5916970,5923355,DA1-related protein 4
+AT5G17970.1,,5,5948999,5951619,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G18350.1,,5,6074069,6078569,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G18360.1,,5,6080049,6083027,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G18370.1,,5,6085036,6088926,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G22690.1,,5,7541271,7545182,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G35450.1,,5,13667686,13671184,Disease resistance protein (CC-NBS-LRR class) family
+AT5G36930.2,,5,14567622,14572630,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G38340.1,,5,15320507,15324061,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G38350.1,,5,15328659,15331528,Disease resistance protein (NBS-LRR class) family
+AT5G38850.1,,5,15555156,15558732,Disease resistance protein (TIR-NBS-LRR class)
+AT5G40060.1,,5,16034576,16039096,Disease resistance protein (NBS-LRR class) family
+AT5G40090.1,,5,16041919,16043494,Disease resistance protein (TIR-NBS class)
+AT5G40100.1,,5,16043929,16047355,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G40910.1,,5,16395507,16399129,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G41540.1,,5,16612659,16616063,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G41550.1,DM1,5,16617232,16620785,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G41740.2,DM1,5,16688626,16693119,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G41750.1,,5,16693909,16698943,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G43470.1,RPP8,5,17462611,17467448,Disease resistance protein (CC-NBS-LRR class) family
+AT5G43730.1,,5,17560179,17562929,Disease resistance protein (CC-NBS-LRR class) family
+AT5G43740.1,,5,17564738,17568802,Disease resistance protein (CC-NBS-LRR class) family
+AT5G44510.1,TAO1,5,17929673,17934188,target of AVRB operation1
+AT5G44870.1,TTR1,5,18114666,18118608,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G44900.1,,5,18135446,18136438,Toll-Interleukin-Resistance (TIR) domain family protein
+AT5G44910.1,,5,18137354,18138235,Toll-Interleukin-Resistance (TIR) domain family protein
+AT5G44920.1,,5,18138775,18140190,Toll-Interleukin-Resistance (TIR) domain family protein
+AT5G45000.1,,5,18165383,18167193,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G45050.1,RRS1B,5,18176914,18181805,Disease resistance protein (TIR-NBS-LRR class)
+AT5G45060.1,RPS4B,5,18182038,18186495,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G45070.1,,5,18187630,18189431,phloem protein 2-A8
+AT5G45080.1,,5,18191575,18193207,phloem protein 2-A6
+AT5G45090.1,,5,18202753,18205000,phloem protein 2-A7
+AT5G45200.1,HRG7,5,18283967,18290332,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G45210.1,HRG8,5,18295521,18298434,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G45220.1,,5,18298926,18301069,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G45230.1,,5,18302147,18308303,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G45240.1,,5,18313706,18319089,Disease resistance protein (TIR-NBS-LRR class)
+AT5G45250.1,RPS4,5,18321914,18326022,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G45260.1,RRS1,5,18326203,18332609,Disease resistance protein (TIR-NBS-LRR class)
+AT5G45440.1,,5,18412308,18413555,P-loop containing nucleoside triphosphate hydrolases superfamily protein
+AT5G45490.1,,5,18431003,18432397,P-loop containing nucleoside triphosphate hydrolases superfamily protein
+AT5G45510.1,,5,18444657,18449446,Leucine-rich repeat (LRR) family protein
+AT5G46260.1,HRG2,5,18759102,18763358,disease resistance protein (TIR-NBS-LRR class) family
+AT5G46270.1,HRG3,5,18764349,18769090,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G46450.1,,5,18835618,18839546,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G46470.1,RPS6,5,18842701,18849741,disease resistance protein (TIR-NBS-LRR class) family
+AT5G46490.2,,5,18850776,18853843,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G46500.1,,5,18856454,18857787,
+AT5G46510.1,,5,18860451,18867013,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G46520.1,,5,18867767,18872415,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G47250.1,,5,19185794,19188745,LRR and NB-ARC domains-containing disease resistance protein
+AT5G47260.1,,5,19189411,19192516,ATP binding;GTP binding;nucleotide binding;nucleoside-triphosphatases
+AT5G47280.1,ADR1L3,5,19193157,19195559,ADR1-like 3
+AT5G48620.1,,5,19716476,19721452,Disease resistance protein (CC-NBS-LRR class) family
+AT5G48770.1,,5,19773277,19777242,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G48780.1,,5,19777468,19779604,disease resistance protein (TIR-NBS class)
+AT5G49140.1,HRG9,5,19919085,19923415,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G51630.1,,5,20970030,20974916,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G56220.1,,5,22754818,22757920,P-loop containing nucleoside triphosphate hydrolases superfamily protein
+AT5G58120.1,,5,23517492,23521067,Disease resistance protein (TIR-NBS-LRR class) family
+AT5G63020.1,,5,25283063,25286002,Disease resistance protein (CC-NBS-LRR class) family
+AT5G66630.1,DAR5,5,26592648,26595922,DA1-related protein 5
+AT5G66900.1,,5,26714764,26717788,Disease resistance protein (CC-NBS-LRR class) family
+AT5G66910.1,,5,26718232,26721256,Disease resistance protein (CC-NBS-LRR class) family
