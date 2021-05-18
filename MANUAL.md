@@ -9,7 +9,7 @@ To obtain example files for running vcf2gwas, run:
 vcf2gwas -v test
 ```
 
-Besides testing the installation, this will copy the example `VCF` file `example.vcf.gz` and phenotype file `example.csv` to your current working directory.  
+Besides testing the installation, this will copy the example VCF file `example.vcf.gz` and phenotype file `example.csv` to your current working directory.  
 The VCF file `example.vcf.gz` contains pre-filtered SNP information of about 60 accessions of *A. thaliana* from the [1001 Genomes](https://1001genomes.org/accessions.html) project.  
 The phenotype file `example.csv` is made up of the `avrRpm1` phenotype from the [AraPheno](https://arapheno.1001genomes.org/phenotype/17/) database for the same accessions.
 
