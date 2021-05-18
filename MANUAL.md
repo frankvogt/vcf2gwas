@@ -117,7 +117,7 @@ Comparing the GWAS results to specific genes of interest can be a tedious task. 
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -gf [filename]
 ```
 
-vcf2gwas will summarize the `n` best SNPs (specified with `-t/--topsnp`) of every analyzed phenotype and compare them to the genes in the file by calculating the distance between each SNP and gene. These results can be filtered by saving only those SNPs with a distance to a gene lower than a specific threshold (set with `-gt/--genethresh`).
+vcf2gwas will summarize the `n` best SNPs (specified with `-t/--topsnp`) of every analyzed phenotype and compare them to the genes in the file by calculating the distance between each SNP and gene upstream as well as downstream. These results can be filtered by saving only those SNPs with a distance to a gene lower than a specific threshold (set with `-gt/--genethresh`).
 
 ### Adding a relatedness matrix
 
@@ -243,3 +243,23 @@ QQ-plot comparing the expected and observed probability distributions:
 <img src="https://github.com/frankvogt/vcf2gwas/blob/main/images/lmm_qq.png" alt="QQ-plot" width="75%"/>
 
 ### Summaries
+
+Amongst other things, vcf2gwas will sort the SNPs of every analyzed phenotype, save the specified amount of top SNPs for each phenotype, summarize these SNPs of all phenotypes to check if certain SNPs occur more than once and optionally compare these SNPs to the genes supplied by the gene file. Below is the output of such a gene comparison when supplying a gene file containing information about NLR genes in *A. thaliana*:
+
+|SNP_ID|chr|phenotypes|gene_ID(up)|gene_comment(up)|gene_name(up)|gene_distance(up)|SNP_pos|gene_distance(down)|gene_name(down)|gene_comment(down)|gene_ID(down)|
+|---|---|---|---|---|---|---|---|---|---|---|---|
+|3:2237364|3|avrRpm|AT3G07040.1|NB-ARC domain-containing disease resistance protein|RPM1|8340|2237364|||||
+|3:2237394|3|avrRpm|AT3G07040.1|NB-ARC domain-containing disease resistance protein|RPM1|8370|2237394|||||
+|3:2237446|3|avrRpm|AT3G07040.1|NB-ARC domain-containing disease resistance protein|RPM1|8422|2237446|||||
+|3:2237452|3|avrRpm|AT3G07040.1|NB-ARC domain-containing disease resistance protein|RPM1|8428|2237452|||||
+|3:2289171|3|avrRpm|AT3G07040.1|NB-ARC domain-containing disease resistance protein|RPM1|60147|2289171|||||
+|2:975138|2|avrRpm|AT2G03030.1|Toll-Interleukin-Resistance (TIR) domain family protein||84618|975138|28330||Toll-Interleukin-Resistance (TIR) domain family protein|AT2G03300.1|
+|2:975234|2|avrRpm|AT2G03030.1|Toll-Interleukin-Resistance (TIR) domain family protein||84714|975234|28234||Toll-Interleukin-Resistance (TIR) domain family protein|AT2G03300.1|
+|2:975320|2|avrRpm|AT2G03030.1|Toll-Interleukin-Resistance (TIR) domain family protein||84800|975320|28148||Toll-Interleukin-Resistance (TIR) domain family protein|AT2G03300.1|
+|2:975405|2|avrRpm|AT2G03030.1|Toll-Interleukin-Resistance (TIR) domain family protein||84885|975405|28063||Toll-Interleukin-Resistance (TIR) domain family protein|AT2G03300.1|
+|2:975411|2|avrRpm|AT2G03030.1|Toll-Interleukin-Resistance (TIR) domain family protein||84891|975411|28057||Toll-Interleukin-Resistance (TIR) domain family protein|AT2G03300.1|
+|2:975490|2|avrRpm|AT2G03030.1|Toll-Interleukin-Resistance (TIR) domain family protein||84970|975490|27978||Toll-Interleukin-Resistance (TIR) domain family protein|AT2G03300.1|
+|2:975590|2|avrRpm|AT2G03030.1|Toll-Interleukin-Resistance (TIR) domain family protein||85070|975590|27878||Toll-Interleukin-Resistance (TIR) domain family protein|AT2G03300.1|
+|1:11273854|1|avrRpm|||||11273854|14598|RAC1|Disease resistance protein (TIR-NBS-LRR class) family|AT1G31540.2|
+|1:11273813|1|avrRpm|||||11273813|14639|RAC1|Disease resistance protein (TIR-NBS-LRR class) family|AT1G31540.2|
+|3:2165688|3|avrRpm|||||2165688|60264|RPM1|NB-ARC domain-containing disease resistance protein|AT3G07040.1|
