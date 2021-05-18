@@ -22,6 +22,7 @@ along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 #print("\nvcf2gwas v0.5 \n")
 #print("Initialising..\n")
 
+from vcf2gwas.utils import Starter
 from parsing import *
 from utils import *
 
@@ -336,6 +337,10 @@ args = sys.argv[1:]
 # for testing
 if args == []:
     args = argvals
+args = Starter.delete_string(args, '-v')
+args = Starter.delete_string(args, '--vcf')
+args.insert(0, snp_file2)
+args.insert(0, "--vcf")
 args.insert(0, 'python3.9')
 args.insert(1, os.path.join(os.path.dirname(__file__), 'analysis.py'))
 args.insert(2, '--memory')
@@ -346,7 +351,7 @@ if l == None:
 
 elif switch == True:
     Starter.adjust_threads(pheno_list, threads2, rest, threads_list)
-    args = Starter.delete_string(args, "-pf")
+    args = Starter.delete_string(args, '-pf')
     args = Starter.delete_string(args, '--pfile')
     if umap_switch == True or pca_switch == True:
         args = Starter.delete_string(args, '-p')
