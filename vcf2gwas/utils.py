@@ -1163,15 +1163,15 @@ class Post_analysis:
                     # add lists to dataframe
                     pos_col = values["SNP_pos"].to_list()
                     values = values.drop("SNP_pos", axis=1)
-                    values["gene_ID(left)"] = gene_ID_left
-                    values["gene_comment(left)"] = gene_comment_left
-                    values["gene_name(left)"] = gene_annot_left
-                    values["gene_distance(left)"] = gene_dist_left
+                    values["gene_ID(up)"] = gene_ID_left
+                    values["gene_comment(up)"] = gene_comment_left
+                    values["gene_name(up)"] = gene_annot_left
+                    values["gene_distance(up)"] = gene_dist_left
                     values["SNP_pos"] = pos_col
-                    values["gene_distance(right)"] = gene_dist_right
-                    values["gene_name(right)"] = gene_annot_right
-                    values["gene_comment(right)"] = gene_comment_right
-                    values["gene_ID(right)"] = gene_ID_right
+                    values["gene_distance(down)"] = gene_dist_right
+                    values["gene_name(down)"] = gene_annot_right
+                    values["gene_comment(down)"] = gene_comment_right
+                    values["gene_ID(down)"] = gene_ID_right
                     # sort and remove empty columns
                     values = values.sort_values(by=["gene_distance(left)","gene_distance(right)"])
                     values.dropna(subset=["gene_distance(left)", "gene_distance(right)"], how="all", inplace=True)
