@@ -236,7 +236,7 @@ The following part shows some of the output plots and summaries produced by the 
 
 ### Plots
 
-<img src="https://github.com/frankvogt/vcf2gwas/blob/main/images/p_wald_manh_avrRpm_filtered_subset_example_example.png" alt="Manhattan-plot" width="200"/>
+<img src="https://github.com/frankvogt/vcf2gwas/blob/main/images/p_wald_manh_avrRpm_filtered_subset_example_example.png" alt="Manhattan-plot" width="75%"/>
 
 
 ![QQ plot](https://github.com/frankvogt/vcf2gwas/blob/main/images/p_wald_qq_avrRpm_filtered_subset_example_example.png "QQ plot")
