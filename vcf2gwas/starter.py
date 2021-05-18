@@ -255,7 +255,7 @@ if pheno_files != None:
                 pheno_file3 = f'{pheno_file3}_umap.csv'
                 pheno_files2.append(pheno_file3)
                 Starter.umap_calc(df, pheno_file3, umap_n, seed, pheno_path)
-                Log.print_log(f"Saved as {pheno_file3} in 'input/'\nUMAP calculated successful\n")
+                Log.print_log(f"Saved as {pheno_file3} in {pheno_path}\nUMAP calculated successful\n")
         
         if pca_switch == True:
             if l < pca_n:
@@ -267,7 +267,7 @@ if pheno_files != None:
                 pheno_file4 = f'{pheno_file4}_pca.csv'
                 pheno_files2.append(pheno_file4)
                 Starter.pca_calc(df, pheno_file4, pca_n, pheno_path)
-                Log.print_log(f"Saved as {pheno_file4} in 'input/'\nPCA calculated successful\n")
+                Log.print_log(f"Saved as {pheno_file4} in {pheno_path}\nPCA calculated successful\n")
 
         x += 1
 

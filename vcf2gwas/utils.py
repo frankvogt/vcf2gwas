@@ -276,7 +276,7 @@ class Logger:
             if pca_n != 2:
                 u = f'\n  --PCA {pca_n}'
 
-        self.logger.info(f'Input:\n\nOutput directory:{v}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{j}{k}{l}{m}{n}{o}{p}')
+        self.logger.info(f'Output directory:{v}\n\nInput:\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{j}{k}{l}{m}{n}{o}{p}')
 
 
 class Starter:
@@ -842,6 +842,7 @@ class Post_analysis:
             plt.axhline(y=sigval, color='gray', linestyle='-', linewidth = 0.5)
             plt.xticks(fontsize=8, rotation=90)
             plt.yticks(fontsize=8)
+            plt.title("Manhattan-plot")
             np.random.seed(0)
 
             if sigval > 0:
@@ -852,10 +853,11 @@ class Post_analysis:
                             #ax.annotate(str(row[refSNP]), xy = (index, row['-log10(p_value)']))
                     adjust_text(texts, data.index.values, data['-log10(p_value)'].values, autoalign='y', ha='left', only_move={'text':'y'}, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
 
-            make_dir(os.path.join(path, "manhattan"))
-            plt.savefig(os.path.join(path, "manhattan", f'{pcol}_manh_{prefix}.png'))
+            file_path = os.path.join(path, "manhattan")
+            make_dir(file_path)
+            plt.savefig(os.path.join(file_path, f'{pcol}_manh_{prefix}.png'))
             plt.close()
-            Log.print_log(f'Manhattan plot saved as "{pcol}_manh_{prefix}.png" in "manhattan/"')
+            Log.print_log(f'Manhattan plot saved as "{pcol}_manh_{prefix}.png" in {file_path}')
 
     def ppoints(n):
         """Description:
@@ -904,10 +906,11 @@ class Post_analysis:
             plt.xlabel("Expected  "r'$-log_{10}(p)$')
             plt.ylabel("Observed  "r'$-log_{10}(p)$')
 
-            make_dir(os.path.join(path, "QQ"))
-            plt.savefig(os.path.join(path, "QQ", f'{pcol}_qq_{prefix}.png'))
+            file_path = os.path.join(path, "QQ")
+            make_dir(file_path)
+            plt.savefig(os.path.join(file_path, f'{pcol}_qq_{prefix}.png'))
             plt.close()
-            Log.print_log(f'QQ-plot saved as "{pcol}_qq_{prefix}.png" in "QQ/"')
+            Log.print_log(f'QQ-plot saved as "{pcol}_qq_{prefix}.png" in {file_path}')
 
     def make_top_list(df, top_list, n):
         """Description:
@@ -1047,15 +1050,15 @@ class Post_analysis:
                 values["phenotypes"] = names
                 #save as file
                 if len(dfnames) == 1:
-                    filename = os.path.join(path2, f'summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv') 
-                    values.to_csv(filename, index=False, sep=',')
-                    Log.print_log(f'Top SNPs summarized and saved as {filename}')
+                    filename = f'summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv'
+                    values.to_csv(os.path.join(path2, filename) , index=False, sep=',')
+                    Log.print_log(f'Top SNPs summarized and saved as "{filename}" in {path2}')
                 else:
-                    filename = os.path.join(path2, f'summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv')
-                    values.to_csv(filename, index=False, sep=',')
-                    Log.print_log(f'Top SNPs summarized and saved as {filename}')
+                    filename = f'summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv'
+                    values.to_csv(os.path.join(path2, filename), index=False, sep=',')
+                    Log.print_log(f'Top SNPs summarized and saved as "{filename}" in {path2}')
                 c += 1
-                filenames.append(filename)
+                filenames.append(os.path.join(path2, filename))
         return filenames
 
     def gene_compare(filenames, gene_file, gene_file_path, gene_thresh, path, pc_prefix, snp_prefix, Log):
@@ -1188,10 +1191,10 @@ class Post_analysis:
                     #save file
                     if n > 0:
                         values.to_csv(os.path.join(path, f'{gene_file_name}_compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv'), index=False)
-                        Log.print_log(f'Top SNPs compared to genes and saved as {path}/compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv')
+                        Log.print_log(f'Top SNPs compared to genes and saved as "{gene_file_name}_compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv" in {path}')
                     else:
-                        values.to_csv(os.path.join(path, f'compared_summarized_top_SNPs{addstring[c]}{snp_prefix}.csv'), index=False)
-                        Log.print_log(f'Top SNPs compared to genes and saved as {path}/compared_summarized_top_SNPs{addstring[c]}{snp_prefix}.csv')
+                        values.to_csv(os.path.join(path, f'compared_summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv'), index=False)
+                        Log.print_log(f'Top SNPs compared to genes and saved as "compared_summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv" in {path}')
                 else:
                     Log.print_log(f'Could not parse contents of {gene_file}.\nPlease provide the file in the right format.')
             c += 1
@@ -1209,7 +1212,7 @@ class Post_analysis:
             for p in pcol:
                 df = Lin_models.load_df(prefix2, "assoc", path)
                 df2 = Lin_models.get_p_values(df, p, prefix2, path)
-                Log.print_log(f'Variants with the best {p} score saved in "best_p-values/"')
+                Log.print_log(f'Variants with the best {p} score saved in {os.path.join(path, "best_p-values")}')
 
                 df3 = Lin_models.format_data(prefix2, "assoc", p, path)
                 Lin_models.manh_plot(df3, "assoc", Log, prefix2, p, path, sigval, refSNP="rs")
@@ -1232,7 +1235,7 @@ class Post_analysis:
             df = Bslmm.rm_unnamed(df)
             # Get mean, median, and 95% ETPI of hyperparameters
             a = Bslmm.get_hyper(df, prefix2, path)
-            Log.print_log(f'Mean, median, and 95% ETPI of hyperparameters saved as "hyperparameters.csv" in "hyperparameters/"')
+            Log.print_log(f'Mean, median, and 95% ETPI of hyperparameters saved as "hyperparameters.csv" in {os.path.join(path, "hyperparameters")}')
             # plot traces and distributions of hyperparameters
             Bslmm.diagnostics(df, a, prefix2, path, Log)
 
@@ -1243,11 +1246,11 @@ class Post_analysis:
             # Get variants with sparse effect size on phenotypes
             Bslmm.get_eff(df2, prefix2, path)
             #df3 = Bslmm.get_eff(df2, prefix2, path)
-            Log.print_log('Variants with the highest sparse effects saved in "highest_effects/"')
+            Log.print_log(f'Variants with the highest sparse effects saved in {os.path.join(path, "highest_effects")}')
             # Get variants with high Posterior Inclusion Probability (PIP) == gamma
             #Bslmm.get_pip(df2, prefix2, path)
             df3 = Bslmm.get_pip(df2, prefix2, path)
-            Log.print_log('Variants with high Posterior Inclusion Probability (PIP) (== gamma) saved in "highest_PIP/"')
+            Log.print_log(f'Variants with high Posterior Inclusion Probability (PIP) (== gamma) saved in {os.path.join(path, "high_PIP")}')
 
             # plot variants PIPs across linkage groups/chromosomes
             df4 = Bslmm.format_data(prefix2, "param", "gamma", path)
@@ -1364,7 +1367,7 @@ class Bslmm(Post_analysis):
             #save figures  
             plt.savefig(os.path.join(path, "diagnostics", f'{prefix}_{i}_hyperparameter.png'))
             plt.close()
-            Log.print_log(f'Plot of {i} saved in "diagnostics/"')
+            Log.print_log(f'Plot of {i} saved in {os.path.join(path, "diagnostics")}')
 
     def get_eff(df, prefix, path):
         """Description:
