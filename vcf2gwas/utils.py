@@ -1184,15 +1184,15 @@ class Post_analysis:
                     values["gene_comment(down)"] = gene_comment_right
                     values["gene_ID(down)"] = gene_ID_right
                     # sort and remove empty columns
-                    values = values.sort_values(by=["gene_distance(left)","gene_distance(right)"])
-                    values.dropna(subset=["gene_distance(left)", "gene_distance(right)"], how="all", inplace=True)
+                    values = values.sort_values(by=["gene_distance(up)","gene_distance(down)"])
+                    values.dropna(subset=["gene_distance(up)", "gene_distance(down)"], how="all", inplace=True)
                     values.dropna(axis=1, how="all", inplace=True)
                     try:
-                        values["gene_distance(left)"] = values["gene_distance(left)"].astype("Int32")
+                        values["gene_distance(up)"] = values["gene_distance(up)"].astype("Int32")
                     except Exception:
                         pass
                     try:
-                        values["gene_distance(right)"] = values["gene_distance(right)"].astype("Int32")
+                        values["gene_distance(down)"] = values["gene_distance(down)"].astype("Int32")
                     except Exception:
                         pass
                     try:
