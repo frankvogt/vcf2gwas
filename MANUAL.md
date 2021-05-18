@@ -237,10 +237,10 @@ The following part shows some of the output plots and summaries produced by the 
 ### Plots
 
 Manhattan-plot labeling significant SNPs with a standard significant value threshold of *-log10(1e-6)*:
-<img src="https://github.com/frankvogt/vcf2gwas/blob/main/images/p_wald_manh_avrRpm_filtered_subset_example_example.png" alt="Manhattan-plot" width="75%"/>
+<img src="https://github.com/frankvogt/vcf2gwas/blob/main/images/lmm_manh.png" alt="Manhattan-plot" width="75%"/>
 
 
 QQ-plot comparing the expected and observed probability distributions:
-<img src="https://github.com/frankvogt/vcf2gwas/blob/main/images/p_wald_qq_avrRpm_filtered_subset_example_example.png" alt="QQ-plot" width="75%"/>
+<img src="https://github.com/frankvogt/vcf2gwas/blob/main/images/lmm_qq.png" alt="QQ-plot" width="75%"/>
 
 ### Summaries
