@@ -1,16 +1,5 @@
 #!/usr/bin/env python
 
-import argparse
-import os
-import subprocess
-import multiprocessing as mp
-
-try:
-    from psutil import virtual_memory
-except ModuleNotFoundError:
-    subprocess.run(["conda", "install", "-c", "anaconda", "psutil==5.8*"])
-    from psutil import virtual_memory
-
 """
 Copyright (C) 2021, Frank Vogt
 
@@ -29,6 +18,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
+
+import argparse
+import os
+import subprocess
+import multiprocessing as mp
+
+try:
+    from psutil import virtual_memory
+except ModuleNotFoundError:
+    subprocess.run(["conda", "install", "-c", "anaconda", "psutil==5.8*"])
+    from psutil import virtual_memory
+
 
 def getArgs(argv=None):
     """Description:
