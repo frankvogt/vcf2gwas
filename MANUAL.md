@@ -13,6 +13,30 @@ Besides testing the installation, this will copy the example `VCF` file `example
 The VCF file `example.vcf.gz` contains pre-filtered SNP information of about 60 accessions of *A. thaliana* from the [1001 Genomes](https://1001genomes.org/accessions.html) project.  
 The phenotype file `example.csv` is made up of the `avrRpm1` phenotype from the [AraPheno](https://arapheno.1001genomes.org/phenotype/17/) database for the same accessions.
 
+## Contents
+
+* [GEMMA models](#gemma-models)
+    * [Running a linear model analysis](#running-a-linear-model-analysis)
+    * [Running a linear mixed model analysis](#running-a-linear-mixed-model-analysis)
+    * [Running a bayesian sparse linear mixed model analysis](#running-a-bayesian-sparse-linear-mixed-model-analysis)
+* [File related options](#file-related-options)
+    * [Selecting multiple phenotype files](#selecting-multiple-phenotype-files)
+    * [Analyzing multiple phenotypes](#analyzing-multiple-phenotypes)
+    * [Adding covariates](#adding-covariates)
+    * [Comparing results to specific genes](#comparing-results-to-specific-genes)
+    * [Adding a relatedness matrix](#adding-a-relatedness-matrix)
+    * [Changing the output directory](#changing-the-output-directory)
+* [Miscellaneous options](#miscellaneous-options)
+    * [Limiting memory and core usage](#limiting-memory-and-core-usage)
+    * [Using dimensionality reduction of phenotypes for analysis](#using-dimensionality-reduction-of-phenotypes-for-analysis)
+    * [Using PCA of genotypes instead of standard relatedness matrix](#using-pca-of-genotypes-instead-of-standard-relatedness-matrix)
+    * [Filter out SNPs](#filter-out-snps)
+    * [Change manhattan plot](#change-manhattan-plot)
+    * [Keep temporary files](#keep-temporary-files)
+* [Output](#output)
+    * [Plots](#plots)
+    * [Summaries](#summaries)
+
 ## GEMMA models
 
 This sections demonstrates the usage of vcf2gwas when running the different analysis models of GEMMA.  
