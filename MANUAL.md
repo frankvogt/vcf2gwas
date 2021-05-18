@@ -212,14 +212,14 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -q 0.02
 
 ### Change manhattan plot
 
-The manhattan plot which will be produced from the GEMMA output, has by default a significant value line drawn at -log10(1e-6). All SNPs above that line will be labeled.  
+The manhattan plot which will be produced from the GEMMA output, has by default a significant value line drawn at *-log10(1e-6)*. All SNPs above that line will be labeled.  
 To change this threshold line, use the `-sv/--sigval` option.
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -sv 7
 ```
 
-The line will now be drawn at -log10(1e-7).  
+The line will now be drawn at *-log10(1e-7)*.  
 To disable the line and not label any SNPs, change the value to 0.
 
 ### Keep temporary files
@@ -236,7 +236,7 @@ The following part shows some of the output plots and summaries produced by the 
 
 ### Plots
 
-Manhattan-plot labeling significant SNPs with a standard significant value threshold of -log10(1e-6):
+Manhattan-plot labeling significant SNPs with a standard significant value threshold of *-log10(1e-6)*:
 <img src="https://github.com/frankvogt/vcf2gwas/blob/main/images/p_wald_manh_avrRpm_filtered_subset_example_example.png" alt="Manhattan-plot" width="75%"/>
 
 
