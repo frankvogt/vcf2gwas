@@ -237,14 +237,14 @@ The following part shows some of the output plots and summaries produced by the 
 ### Plots
 
 Manhattan-plot labeling significant SNPs with a standard significant value threshold of *-log10(1e-6)*:
-<img src="https://github.com/frankvogt/vcf2gwas/blob/main/images/lmm_manh.png" alt="Manhattan-plot" width="75%"/>
+<img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lmm_manh.png" alt="Manhattan-plot" width="75%"/>
 
 QQ-plot comparing the expected and observed probability distributions:
-<img src="https://github.com/frankvogt/vcf2gwas/blob/main/images/lmm_qq.png" alt="QQ-plot" width="75%"/>
+<img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lmm_qq.png" alt="QQ-plot" width="75%"/>
 
 ### Summaries
 
-Amongst other things, vcf2gwas will sort the SNPs of every analyzed phenotype, save the specified amount of top SNPs for each phenotype, summarize these SNPs of all phenotypes to check if certain SNPs occur more than once and optionally compare these SNPs to the genes supplied by the gene file. Below is the output of such a gene comparison when supplying a gene file containing information about NLR genes in *A. thaliana*:
+Amongst other things, vcf2gwas will sort the SNPs of every analyzed phenotype, save the specified amount of top SNPs for each phenotype, summarize these SNPs of all phenotypes to check if certain SNPs occur more than once and optionally compare these SNPs to the genes supplied by the gene file. Below is the [output](https://github.com/frankvogt/vcf2gwas/blob/main/files/compared_summarized_top_SNPs_complete_example.csv) shown of such a gene comparison when supplying a [gene file](https://github.com/frankvogt/vcf2gwas/blob/main/files/NLR.csv) containing information about NLR genes in *A. thaliana*:
 
 |SNP_ID|chr|phenotypes|gene_ID(up)|gene_comment(up)|gene_name(up)|gene_distance(up)|SNP_pos|gene_distance(down)|gene_name(down)|gene_comment(down)|gene_ID(down)|
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -263,3 +263,4 @@ Amongst other things, vcf2gwas will sort the SNPs of every analyzed phenotype, s
 |1:11273854|1|avrRpm|||||11273854|14598|RAC1|Disease resistance protein (TIR-NBS-LRR class) family|AT1G31540.2|
 |1:11273813|1|avrRpm|||||11273813|14639|RAC1|Disease resistance protein (TIR-NBS-LRR class) family|AT1G31540.2|
 |3:2165688|3|avrRpm|||||2165688|60264|RPM1|NB-ARC domain-containing disease resistance protein|AT3G07040.1|
+
