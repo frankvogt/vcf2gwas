@@ -56,8 +56,8 @@ The only requirement is an up to date version of [conda](https://conda.io/projec
 
 ### Installation
 
-It is good practice to install the package in a clean environment.  
-So first create a new environment, here with the exemplary name 'myenv':
+It is a good practice to install the package in a clean environment.  
+So first create a new environment (you can name it as you like) , here with the exemplary name 'myenv':
 
 ```
 conda create -n myenv
