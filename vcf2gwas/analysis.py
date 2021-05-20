@@ -124,10 +124,10 @@ snp_prefix = snp_file.removesuffix(".vcf.gz")
 
 chrom = Converter.set_chrom(snp_file2)
 
-subset = f'subset{pc_prefix}_{snp_prefix}'
+subset = f'sub{pc_prefix}_{snp_prefix}'
 folder = f'files{pc_prefix}_{snp_prefix}'
 
-subset2 = f'filtered_{subset}'
+subset2 = f'mod_{subset}'
 
 # make list from genotype file
 Log.print_log("Checking individuals in VCF file..")
@@ -148,7 +148,7 @@ else:
     diff2 = Processing.make_diff(list2, list1)
     pheno_subset1 = Processing.make_uniform(list1, list2, diff1a, diff2, pheno, subset, snp_file2, pheno_file, "phenotpye", Log)
     length1 = len(pheno_subset1.columns)
-    Log.print_log(f'Removed {str(len(diff2))} out of {str(len(list2))} individuals, {str((len(list2)-len(diff2)))} remaining')
+    Log.print_log(f'Removed {len(diff2)} out of {len(list2)} individuals, {(len(list2)-len(diff2))} remaining')
 
 if covar_file == None:
     Log.print_log("No covariate file specified")
@@ -165,23 +165,29 @@ else:
     else:
         pheno_subset2 = Processing.make_uniform(list1, list3, diff1b, diff3, covar, subset, snp_file2, covar_file, "covariate", Log)
     length2 = len(pheno_subset2.columns)
-    Log.print_log(f'Removed {str(len(diff3))} out of {str(len(list3))} individuals, {str((len(list3)-len(diff3)))} remaining')
+    Log.print_log(f'Removed {len(diff3)} out of {len(list3)} individuals, {(len(list3)-len(diff3))} remaining')
 
 if model in ("-gk", "-eigen"):
     if pheno_file == None and covar_file == None:
         shutil.copy(snp_file2, f'{subset}.vcf.gz')
 
-Log.print_log(f'In total, removed {str((len(diff1a)+len(diff1b)))} out of {str(len(list1))} individuals, {str((len(list1)-(len(diff1a)+len(diff1b))))} remaining')
+Log.print_log(f'In total, removed {(len(diff1a)+len(diff1b))} out of {len(list1)} individuals, {(len(list1)-(len(diff1a)+len(diff1b)))} remaining')
 Log.print_log("Files successfully adjusted\n")
+
+if (len(list1)-(len(diff1a)+len(diff1b))) == 0:
+    if keep == False:
+        Converter.remove_files(subset, pheno_file, subset2, snp_file2)
+    exit(Log.print_log("Error: No individuals left! Check if IDs in VCF and phenotype file are of the same format"))
 
 ############################## Filter, make ped and bed ##############################
 
 Log.print_log("Filtering and converting files\n")
 
-Log.print_log("Filtering SNPs..")
-Converter.filter_snps(min_af, subset, subset2)
-Log.print_log("SNPs successfully filtered")
-    
+#Log.print_log("Filtering SNPs..")
+#Converter.filter_snps(min_af, subset, subset2)
+#Log.print_log("SNPs successfully filtered")
+os.rename(f'{subset}.vcf.gz', f'{subset2}.vcf.gz')
+
 Log.print_log("Converting to PLINK BED..")
 Converter.make_bed(subset2, chrom, memory, threads, list1)
 Log.print_log("Successfully converted to PLINK BED\n")
@@ -366,7 +372,7 @@ make_dir(path3)
 
 Log.print_log("Moving files..")
 for files in os.listdir():
-    if files.startswith((f'subset{pc_prefix}', subset2)):
+    if files.startswith((f'sub{pc_prefix}', subset2)):
         shutil.move(files, os.path.join(path3, files))
 if model == "-gk":
     path2 = os.path.join(path, "rel_matrix")

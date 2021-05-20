@@ -22,7 +22,7 @@ along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 #print("\nvcf2gwas v0.5 \n")
 #print("Initialising..\n")
 
-from vcf2gwas.utils import Starter
+from vcf2gwas.utils import Converter, Starter, make_dir
 from parsing import *
 from utils import *
 
@@ -160,10 +160,6 @@ try:
     snp_prefix = snp_file.removesuffix(".vcf.gz")
 except Exception:
     snp_prefix = snp_file.removesuffix(".gz")
-
-Log.print_log("Indexing VCF file..")
-Converter.index_vcf(snp_file2)
-Log.print_log("VCF file successfully indexed\n")
 
 memory = P.set_memory()
 memory_org = memory
@@ -330,6 +326,21 @@ if memory2 < 1000:
 if memory2 == 0:
     exit(Log.print_log("Error: Memory not sufficient to carry out analysis!"))
 
+# indexing and filtering 
+
+Log.print_log("\nFiltering SNPs..")
+snp_file_path = os.path.split(snp_file2)[0]
+temp_dir = os.path.join(snp_file_path, "temp")
+dir_check = make_dir(temp_dir)
+snp_file2_org = snp_file2
+snp_file2 = os.path.join(temp_dir, snp_file)
+Log.print_log("Indexing VCF file..")
+Converter.index_vcf(snp_file2_org)
+Log.print_log("VCF file successfully indexed")
+Converter.filter_snps(min_af, snp_file2_org, snp_file2)
+Log.print_log("SNPs successfully filtered")
+os.remove(f'{snp_file2_org}.csi')
+
 #################### Prepare commands for main.py ####################
 
 args_list = []
@@ -382,7 +393,11 @@ Log.print_log("Analysis successfully completed\n")
 
 #################### summary and clean-up ####################
 
-os.remove(f'{snp_file2}.csi')
+if dir_check == False:
+    shutil.rmtree(temp_dir, ignore_errors=True)
+else:
+    os.remove(snp_file2)
+snp_file2 = snp_file2_org
 
 if model == None:
     path = out_dir2

@@ -111,9 +111,11 @@ def make_dir(name):
     creates the directory "name" if it doesn't already exist"""
 
     try:
+        dir_check = False
         os.mkdir(name)
     except OSError as e:
-        pass
+        dir_check = True
+    return dir_check
 
 def listtostring(l):
     """Description:
@@ -478,7 +480,7 @@ class Processing:
         removes excess individuals from VCF file"""
 
         df2 = pd.Series(diff)
-        df2.to_csv(str(subset+".txt"), header=None, index=None)
+        df2.to_csv(f'{subset}.txt', header=None, index=None)
 
         if df2.empty == True:
             shutil.copy(snp_file, f'{subset}.vcf.gz')
@@ -491,7 +493,7 @@ class Processing:
         removes excess individuals from csv file"""
 
         pheno2 = df[~df.index.isin(diff)]
-        pheno2.to_csv(f'subset_{File}')
+        pheno2.to_csv(f'sub_{File}')
         return pheno2
 
     def pheno_index(file):
@@ -641,7 +643,7 @@ class Converter:
         """Description:
         Filters out SNPs with allele frequency below threshold via bcftools"""
 
-        filtered = subprocess.run(['bcftools', 'view', '-m2', '-M2', '-v', 'snps', '-q', str(min_af), f'{subset}.vcf.gz', '-Oz', '-o', f'{subset2}.vcf.gz'], stdout=subprocess.PIPE, text=True) 
+        filtered = subprocess.run(['bcftools', 'view', '-m2', '-M2', '-v', 'snps', '-q', str(min_af), subset, '-Oz', '-o', subset2], stdout=subprocess.PIPE, text=True) 
         filtered.stdout
 
     def make_bed(subset2, chrom, memory, threads, list):
@@ -651,7 +653,6 @@ class Converter:
         string = "_"
         list2 = [l for l in list if string in l]
         if list2 != None:
-            print("yes")
             make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
             make_bed.stdout
         else:
@@ -664,7 +665,7 @@ class Converter:
         removes no longer needed files"""
 
         try:
-            os.remove(f'subset_{File}')
+            os.remove(f'sub_{File}')
         except:
             pass
         try:
@@ -963,7 +964,7 @@ class Post_analysis:
                     globals()[f'df{x}'].loc[(n)] = temp
                     dfnames.append(f'df{x}')
         if dfnames == []:
-            Log.print_log("Couldn't find files to summarize! (check if they were removed manually)")
+            Log.print_log("Couldn't find files to summarize!")
             values = None
         else:
             # concat the dataframes
