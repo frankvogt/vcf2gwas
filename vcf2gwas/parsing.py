@@ -37,7 +37,7 @@ def getArgs(argv=None):
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Command-line interface for vcf2gwas.\n \nExample usage: vcf2gwas -v <VCF file> -pf <phenotype file> -ap -lmm', epilog="For a detailed description of all options, please refer to the manual.")
 
-    parser.add_argument('--version', action='version', version='%(prog)s 0.5')
+    parser.add_argument('--version', action='version', version='%(prog)s 0.5.2')
     parser.add_argument("-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename")
     parser.add_argument("-pf", "--pfile", metavar="<filename>", action="append", type=str, help="specify phenotype filename \ncomma separated .csv file \nfirst column individuals, second column and onwards phenotypes")
     parser.add_argument("-cf", "--cfile", metavar="<filename>", type=str, help="specify covariate filename \ncomma separated .csv file \nfirst column individuals, second column and onwards covariates\n")
