@@ -29,6 +29,7 @@ import logging
 import argparse
 import multiprocessing as mp
 import random
+import time
 
 from psutil import virtual_memory
 try:
@@ -831,6 +832,7 @@ class Post_analysis:
         if data.empty == True:
             Log.print_log("GEMMA couldn't calculate any meaningful values!")
         else:
+            timer = time.perf_counter()
             fig = plt.figure(figsize=(16,12))
             ax = fig.add_subplot(111)
 
@@ -869,7 +871,9 @@ class Post_analysis:
             make_dir(file_path)
             plt.savefig(os.path.join(file_path, f'{pcol}_manh_{prefix}.png'))
             plt.close()
-            Log.print_log(f'Manhattan plot saved as "{pcol}_manh_{prefix}.png" in {file_path}')
+            timer_end = time.perf_counter()
+            timer_total = round(timer_end - timer, 2)
+            Log.print_log(f'Manhattan plot saved as "{pcol}_manh_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
 
     def ppoints(n):
         """Description:
@@ -897,6 +901,7 @@ class Post_analysis:
         if df.empty == True:
             Log.print_log("GEMMA couldn't calculate any meaningful values!")
         else:
+            timer = time.perf_counter()
             a = df['-log10(p_value)'].values.tolist()
             a = sorted(a, reverse=True)
             a_max = (max(a)+0.5)
@@ -922,7 +927,9 @@ class Post_analysis:
             make_dir(file_path)
             plt.savefig(os.path.join(file_path, f'{pcol}_qq_{prefix}.png'))
             plt.close()
-            Log.print_log(f'QQ-plot saved as "{pcol}_qq_{prefix}.png" in {file_path}')
+            timer_end = time.perf_counter()
+            timer_total = round(timer_end - timer, 2)
+            Log.print_log(f'QQ-plot saved as "{pcol}_qq_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
 
     def make_top_list(df, top_list, n):
         """Description:

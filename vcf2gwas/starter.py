@@ -22,7 +22,7 @@ along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 #print("\nvcf2gwas v0.5 \n")
 #print("Initialising..\n")
 
-from vcf2gwas.utils import Converter, Starter, make_dir
+from vcf2gwas.utils import Converter, Starter, make_dir, runtime_format
 from parsing import *
 from utils import *
 
@@ -149,17 +149,6 @@ check_files3(covar, covar2)
 
 # file preparation
 Log.print_log("Preparing files\n")
-
-if snp_file.endswith(".vcf"):
-    Log.print_log("Compressing VCF file..")
-    snp_file2 = Converter.compress_snp_file(snp_file2)
-    snp_file = f'{snp_file}.gz'
-    Log.print_log("VCF file successfully compressed\n")
-
-try:
-    snp_prefix = snp_file.removesuffix(".vcf.gz")
-except Exception:
-    snp_prefix = snp_file.removesuffix(".gz")
 
 memory = P.set_memory()
 memory_org = memory
@@ -326,7 +315,21 @@ if memory2 < 1000:
 if memory2 == 0:
     exit(Log.print_log("Error: Memory not sufficient to carry out analysis!"))
 
-# indexing and filtering 
+# compressing, indexing and filtering VCF file
+
+if snp_file.endswith(".vcf"):
+    Log.print_log("Compressing VCF file..")
+    timer = time.perf_counter()
+    snp_file2 = Converter.compress_snp_file(snp_file2)
+    timer_end = time.perf_counter()
+    timer_total = round(timer_end - timer, 2)
+    snp_file = f'{snp_file}.gz'
+    Log.print_log(f'VCF file successfully compressed (Duration: {runtime_format(timer_total)})\n')
+
+try:
+    snp_prefix = snp_file.removesuffix(".vcf.gz")
+except Exception:
+    snp_prefix = snp_file.removesuffix(".gz")
 
 Log.print_log("\nFiltering SNPs..")
 snp_file_path = os.path.split(snp_file2)[0]
@@ -334,11 +337,19 @@ temp_dir = os.path.join(snp_file_path, "temp")
 dir_check = make_dir(temp_dir)
 snp_file2_org = snp_file2
 snp_file2 = os.path.join(temp_dir, snp_file)
+
 Log.print_log("Indexing VCF file..")
+timer = time.perf_counter()
 Converter.index_vcf(snp_file2_org)
-Log.print_log("VCF file successfully indexed")
+timer_end = time.perf_counter()
+timer_total = round(timer_end - timer, 2)
+Log.print_log(f'VCF file successfully indexed (Duration: {runtime_format(timer_total)})')
+
+timer = time.perf_counter()
 Converter.filter_snps(min_af, snp_file2_org, snp_file2)
-Log.print_log("SNPs successfully filtered")
+timer_end = time.perf_counter()
+timer_total = round(timer_end - timer, 2)
+Log.print_log(f'SNPs successfully filtered (Duration: {runtime_format(timer_total)})')
 os.remove(f'{snp_file2_org}.csi')
 
 #################### Prepare commands for main.py ####################

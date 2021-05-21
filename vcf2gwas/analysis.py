@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from vcf2gwas.utils import make_dir
+from vcf2gwas.utils import make_dir, runtime_format
 from parsing import *
 from utils import *
 
@@ -115,10 +115,10 @@ covar_file_name = None
 Log.print_log("Preparing files\n")
 Log.print_log("Checking and adjusting files..")
 
-if snp_file.endswith(".vcf"):
-    Log.print_log("Compressing VCF file..")
-    snp_file2 = Converter.compress_snp_file(snp_file2)
-    Log.print_log("VCF file successfully compressed\n")
+#if snp_file.endswith(".vcf"):
+#    Log.print_log("Compressing VCF file..")
+#    snp_file2 = Converter.compress_snp_file(snp_file2)
+#    Log.print_log("VCF file successfully compressed\n")
 
 snp_prefix = snp_file.removesuffix(".vcf.gz")
 
@@ -189,8 +189,11 @@ Log.print_log("Filtering and converting files\n")
 os.rename(f'{subset}.vcf.gz', f'{subset2}.vcf.gz')
 
 Log.print_log("Converting to PLINK BED..")
+timer = time.perf_counter()
 Converter.make_bed(subset2, chrom, memory, threads, list1)
-Log.print_log("Successfully converted to PLINK BED\n")
+timer_end = time.perf_counter()
+timer_total = round(timer_end - timer, 2)
+Log.print_log(f'Successfully converted to PLINK BED (Duration: {runtime_format(timer_total)})\n')
 
 #remove old files
 if keep == False:
@@ -304,6 +307,7 @@ if model == None:
 else:
     Log.print_log("Running GEMMA\n")
     Log.print_log(f'Phenotypes to analyze: {listtostring(columns).replace(" ", ", ")}\n')
+    timer = time.perf_counter()
     # set lists of variables and make output directories
     for i in columns:
 
@@ -341,7 +345,9 @@ else:
     # run GEMMA in parallel
     with concurrent.futures.ProcessPoolExecutor(mp_context=mp.get_context('fork'), max_workers=threads) as executor:
         executor.map(Gemma.run_gemma, prefix_list, prefix2_list, itertools.repeat(model), itertools.repeat(n), N_list, path_list, itertools.repeat(Log), itertools.repeat(filename), itertools.repeat(filename2), itertools.repeat(pca), itertools.repeat(covar_file_name), i_list)
-    Log.print_log("\nGEMMA completed successfully\n")
+    timer_end = time.perf_counter()
+    timer_total = round(timer_end - timer, 2)
+    Log.print_log(f'\nGEMMA completed successfully (Duration: {runtime_format(timer_total)})\n')
 
     ############################## Processing and plotting ##############################
 
