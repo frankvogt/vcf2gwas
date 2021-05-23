@@ -19,10 +19,6 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-#print("\nvcf2gwas v0.5 \n")
-#print("Initialising..\n")
-
-from vcf2gwas.utils import Converter, Starter, make_dir, runtime_format
 from parsing import *
 from utils import *
 
@@ -394,7 +390,10 @@ else:
     Starter.edit_args3(args, threads, args_list)
 
 Log.print_log("\nFile preparations completed")
-
+print(pheno_list)
+print(pheno_files_path)
+print(args_list)
+exit()
 #################### Run main.py for analysis ####################
 
 Log.print_log("\nStarting analysis..")

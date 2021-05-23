@@ -438,7 +438,7 @@ class Starter:
             args_list.append(args2)
             args_list[i].insert(4, '--threads')
             args_list[i].insert(5, threads_list[i])
-            args_list[i] = [os.path.join(pheno_path[0], pheno_list[i]) if x==pheno_file else x for x in args_list[i]]
+            args_list[i] = [os.path.join(pheno_path[0], pheno_list[i]) if x==os.path.join(pheno_path[0], pheno_file) else x for x in args_list[i]]
             #n = 7
             if A == False:
                 args_list[i].insert(6, "--allphenotypes")
