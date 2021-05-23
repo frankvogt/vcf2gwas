@@ -37,7 +37,7 @@ def main(argvals=argvals):
         #subprocess.run(["conda", "install", "-c", "bioconda", "plink==1.90*"])
         #subprocess.run(["conda", "install", "-c", "bioconda", "gemma==0.98.3"])
     
-    print("\nvcf2gwas v0.5.2 \n")
+    print("\nvcf2gwas v0.5.3 \n")
     print("Initialising..\n")
     P = Parser(argvals)
     args = sys.argv[1:]
