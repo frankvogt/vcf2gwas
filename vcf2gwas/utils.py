@@ -937,9 +937,6 @@ class Post_analysis:
 
         new_df = df.head(n)
         new_df2 = new_df.dropna(axis=0, how="any")
-        if new_df2.empty == True:
-            new_df["chr"] = np.nan
-            new_df["ps"] = np.nan
         for i in ["chr", "rs", "ps"]:
             col = new_df[i].astype(str).tolist()
             top_list.append(col)
@@ -1323,6 +1320,8 @@ class Lin_models(Post_analysis):
         top001.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top001.csv'))
         if df3.empty == True:
             df2["rs"] = "NaN"
+            df2["chr"] = "NaN"
+            df2["ps"] = "NaN"
         return df2
 
 class Bslmm(Post_analysis):
