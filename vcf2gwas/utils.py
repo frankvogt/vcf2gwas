@@ -1015,7 +1015,7 @@ class Post_analysis:
                     l4_corr = i
                     l4_corr = [x for x in i if x != "SNP_pos"]
             # concat the lists into an array, convert to dataframe, set types and columns names
-            l = np.array([l3_corr,l4_corr,l2_corr])
+            l = np.array([l3_corr,l4_corr,l2_corr], dtype=object)
             values = pd.DataFrame(l.T)
             values[1] = values[1].apply(pd.to_numeric)
             values[1] = values[1].astype(int)
