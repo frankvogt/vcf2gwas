@@ -408,12 +408,14 @@ class Starter:
             pheno_list.append(df_name)
             df_new.to_csv(os.path.join(pheno_path, df_name))
 
-    def delete_string(args, string):
+    def delete_string(args, strings):
 
-        temp_list = [i for i, e in enumerate(args) if e == string]
-        temp_list2 = [x+1 for x in temp_list]
-        temp_list = temp_list+temp_list2
-        return [j for i, j in enumerate(args) if i not in temp_list]
+        for string in strings:
+            temp_list = [i for i, e in enumerate(args) if e == string]
+            temp_list2 = [x+1 for x in temp_list]
+            temp_list = temp_list+temp_list2
+            args = [j for i, j in enumerate(args) if i not in temp_list]
+        return args
 
     def edit_args1(pheno_list, args, args_list, threads_list, umap_switch, pca_switch, A, pheno_path):
 

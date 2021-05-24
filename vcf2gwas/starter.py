@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+from vcf2gwas.utils import Starter
 from parsing import *
 from utils import *
 
@@ -355,8 +356,9 @@ args = sys.argv[1:]
 # for testing
 if args == []:
     args = argvals
-args = Starter.delete_string(args, '-v')
-args = Starter.delete_string(args, '--vcf')
+#args = Starter.delete_string(args, '-v')
+#args = Starter.delete_string(args, '--vcf')
+args = Starter.delete_string(args, ['-v', '--vcf', '-T', '--threads', '-M', '--memory'])
 args.insert(0, snp_file2)
 args.insert(0, "--vcf")
 args.insert(0, 'python3.9')
@@ -369,17 +371,17 @@ if l == None:
 
 elif switch == True:
     Starter.adjust_threads(pheno_list, threads2, rest, threads_list)
-    args = Starter.delete_string(args, '-pf')
-    args = Starter.delete_string(args, '--pfile')
+    args = Starter.delete_string(args, ['-pf', '--pfile'])
+    #args = Starter.delete_string(args, '--pfile')
     if umap_switch == True or pca_switch == True:
-        args = Starter.delete_string(args, '-p')
-        args = Starter.delete_string(args, '--pheno')
+        args = Starter.delete_string(args, ['-p', '--pheno'])
+        #args = Starter.delete_string(args, '--pheno')
     Starter.edit_args1(pheno_list, args, args_list, threads_list, umap_switch, pca_switch, A, pheno_files_path)
 
 elif l != 1:
     Starter.adjust_threads(pheno_list, threads2, rest, threads_list)
-    args = Starter.delete_string(args, '-p')
-    args = Starter.delete_string(args, '--pheno')
+    args = Starter.delete_string(args, ['-p', '--pheno'])
+    #args = Starter.delete_string(args, '--pheno')
     Starter.edit_args2(pheno_list, args, args_list, threads_list, pheno, A, X_list, pheno_files_path)
     if umap_switch == True:
         Log.print_log(f'Info:\nAfter reducing dimensions of {pheno} via UMAP, it has been split up in {len(pheno_list)} parts in order to ensure maximum efficiency')
