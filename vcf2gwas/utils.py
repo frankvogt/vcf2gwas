@@ -936,6 +936,10 @@ class Post_analysis:
         returns list of the top n SNPs with highest p-value"""
 
         new_df = df.head(n)
+        new_df2 = new_df.dropna(axis=0, how="any")
+        if new_df2.empty == True:
+            new_df["chr"] = np.nan
+            new_df["ps"] = np.nan
         for i in ["chr", "rs", "ps"]:
             col = new_df[i].astype(str).tolist()
             top_list.append(col)
