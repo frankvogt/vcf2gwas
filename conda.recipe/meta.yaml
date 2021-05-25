@@ -1,6 +1,6 @@
 
 {% set name = "vcf2gwas" %}
-{% set version = "0.5.4" %}
+{% set version = "0.5.5" %}
 {% set data = load_setup_py_data() %}
 
 package:
