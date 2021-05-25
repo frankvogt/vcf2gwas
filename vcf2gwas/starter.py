@@ -308,7 +308,6 @@ if pheno_files != None:
             Log.print_log("Phenotype file split up successful")
         
         x += 1
-        print(l)
         if umap_switch == False and pca_switch == False:
             analysis_num += l
 
