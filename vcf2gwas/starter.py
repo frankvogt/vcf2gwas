@@ -192,6 +192,8 @@ threads_list = []
 l = None
 pheno_files2 = []
 
+analysis_num = 0
+
 if umap_switch == True:
     X = list(range(umap_n))
     X = [i+1 for i in X]
@@ -238,7 +240,7 @@ if pheno_files != None:
                 pheno_file3 = f'{pheno_file3}_umap.csv'
                 pheno_files2.append(pheno_file3)
                 Starter.umap_calc(df, pheno_file3, umap_n, seed, pheno_path)
-                Log.print_log(f"Saved as {pheno_file3} in {pheno_path}\nUMAP calculated successful\n")
+                Log.print_log(f'Saved as "{pheno_file3}" in {pheno_path}\nUMAP calculated successful\n')
         
         if pca_switch == True:
             if l < pca_n:
@@ -250,7 +252,7 @@ if pheno_files != None:
                 pheno_file4 = f'{pheno_file4}_pca.csv'
                 pheno_files2.append(pheno_file4)
                 Starter.pca_calc(df, pheno_file4, pca_n, pheno_path)
-                Log.print_log(f"Saved as {pheno_file4} in {pheno_path}\nPCA calculated successful\n")
+                Log.print_log(f'Saved as "{pheno_file4}" in {pheno_path}\nPCA calculated successful\n')
 
         x += 1
 
@@ -306,6 +308,12 @@ if pheno_files != None:
             Log.print_log("Phenotype file split up successful")
         
         x += 1
+        print(l)
+        if umap_switch == False and pca_switch == False:
+            analysis_num += l
+
+if umap_switch == True and pca_switch == True:
+    analysis_num += (umap_n + pca_n)*(len(pheno_files2)//2)
 
 if memory2 < 1000:
     Log.print_log("Warning: Memory might not be sufficient to carry out analysis!")
@@ -356,8 +364,6 @@ args = sys.argv[1:]
 # for testing
 if args == []:
     args = argvals
-#args = Starter.delete_string(args, '-v')
-#args = Starter.delete_string(args, '--vcf')
 args = Starter.delete_string(args, ['-v', '--vcf', '-T', '--threads', '-M', '--memory'])
 args.insert(0, snp_file2)
 args.insert(0, "--vcf")
@@ -372,16 +378,13 @@ if l == None:
 elif switch == True:
     Starter.adjust_threads(pheno_list, threads2, rest, threads_list)
     args = Starter.delete_string(args, ['-pf', '--pfile'])
-    #args = Starter.delete_string(args, '--pfile')
     if umap_switch == True or pca_switch == True:
         args = Starter.delete_string(args, ['-p', '--pheno'])
-        #args = Starter.delete_string(args, '--pheno')
     Starter.edit_args1(pheno_list, args, args_list, threads_list, umap_switch, pca_switch, A, pheno_files_path)
 
 elif l != 1:
     Starter.adjust_threads(pheno_list, threads2, rest, threads_list)
     args = Starter.delete_string(args, ['-p', '--pheno'])
-    #args = Starter.delete_string(args, '--pheno')
     Starter.edit_args2(pheno_list, args, args_list, threads_list, pheno, A, X_list, pheno_files_path)
     if umap_switch == True:
         Log.print_log(f'Info:\nAfter reducing dimensions of {pheno} via UMAP, it has been split up in {len(pheno_list)} parts in order to ensure maximum efficiency')
@@ -428,6 +431,21 @@ if model not in ("-gk", "-eigen", None):
 if switch == False and len(pheno_list) > 1:
     for file in pheno_list:
         os.remove(os.path.join(pheno_files_path[0], file))
+    if umap_switch == False and pca_switch == False:
+        path5 = os.path.join(path, "files")
+        pheno_temp = [f'{x.removesuffix(".csv")}_{snp_prefix}' for x in pheno_list]
+        for folder in os.listdir(path5):
+            if pheno_temp[0] in folder:
+                folder2 = folder.replace(".part1", "")
+                shutil.rmtree(os.path.join(path5, folder2), ignore_errors=True)
+                shutil.move(os.path.join(path5, folder), os.path.join(path5, folder2))
+                path6 = os.path.join(path5, folder2)
+                for file in os.listdir(path6):
+                    os.rename(os.path.join(path6, file), os.path.join(path6, file.replace(".part1", "")))
+        for folder in os.listdir(path5):
+            for pheno in pheno_temp:
+                if pheno in folder:
+                    shutil.rmtree(os.path.join(path5, folder))
 
 if umap_switch == True:
     path4 = os.path.join(path, "UMAP")
@@ -461,7 +479,7 @@ if X != None:
 if Y != None:
     Y = listtostring(Y)
 
-Log.summary(snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir2)
+Log.summary(snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir2, analysis_num)
 
 if model != None:
     shutil.move(os.path.join(out_dir2, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(out_dir2, model2, f'vcf2gwas{pc_prefix}.log.txt'))

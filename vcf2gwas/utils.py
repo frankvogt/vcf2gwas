@@ -220,13 +220,14 @@ class Logger:
 
         self.logger.info(text)
 
-    def summary(self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir):
+    def summary(self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir, analysis_num):
         """Description:
         prints summary of input variables and methods"""
 
-        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = ""
+        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = ""
 
         v = f'\n{out_dir}'
+        w = f'\n{analysis_num}'
         a = f'\n- VCF file: "{snp_file}"'
         if pheno_file != None:
             b = f'\n- Phenotype file(s): "{pheno_file}"'
@@ -279,7 +280,7 @@ class Logger:
             if pca_n != 2:
                 u = f'\n  --PCA {pca_n}'
 
-        self.logger.info(f'Output directory:{v}\n\nInput:\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{j}{k}{l}{m}{n}{o}{p}')
+        self.logger.info(f'Output directory:{v}\n\nPhenotypes analyzed in total:{w}\n\nInput:\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{j}{k}{l}{m}{n}{o}{p}')
 
 
 class Starter:
@@ -875,7 +876,7 @@ class Post_analysis:
             plt.close()
             timer_end = time.perf_counter()
             timer_total = round(timer_end - timer, 2)
-            Log.print_log(f'Manhattan plot saved as "{pcol}_manh_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
+            Log.print_log(f'Number of significant SNPs: {len(texts)} \nManhattan plot saved as "{pcol}_manh_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
 
     def ppoints(n):
         """Description:
