@@ -440,10 +440,15 @@ if switch == False and len(pheno_list) > 1:
                 shutil.move(os.path.join(path5, folder), os.path.join(path5, folder2))
                 path6 = os.path.join(path5, folder2)
                 for file in os.listdir(path6):
-                    os.rename(os.path.join(path6, file), os.path.join(path6, file.replace(".part1", "")))
+                    for string in [".log.txt", ".cXX.txt", ".log", ".bim", ".bed", ".nosex"]:
+                        if file.endswith(string):
+                            os.rename(os.path.join(path6, file), os.path.join(path6, file.replace(".part1", "")))
         for folder in os.listdir(path5):
             for pheno in pheno_temp:
                 if pheno in folder:
+                    for file in os.listdir(os.path.join(path5, folder)):
+                        if file.endswith(".fam"):
+                            shutil.move(os.path.join(path5, folder, file), os.path.join(path5, folder2, file))
                     shutil.rmtree(os.path.join(path5, folder))
 
 if umap_switch == True:
