@@ -28,7 +28,7 @@ Some of the benefits of this pipeline include:
 * VCF file does not need to be converted or edited by the user
 * Input files will be adjusted, filtered and formatted for GEMMA
 * GEMMA analysis will be carried out automatically (both GEMMA's linear (mixed) models and bayesian sparse linear mixed model available)
-* Dimension reduction via PCA or UMAP can be performed on phenotypes and used for analysis.
+* Dimensionality reduction via PCA or UMAP can be performed on phenotypes and used for analysis.
 * Once the analysis has been executed, the results will be analyzed:
     * Manhattan plots, QQ-plots and diagnostic plots (dependent on GEMMA's model)
     * Summaries of the SNPs 
