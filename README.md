@@ -36,6 +36,7 @@ Some of the benefits of this pipeline include:
 * vcf2gwas is able to analyze several input files with different sets of individuals and multiple phenotypes in a efficient manner due to parallelization, saving the user a lot of time compared to standard GWAS procedure
 * Results are reproducible on any compatible machine
 * Figures are publication-ready
+If you use vcf2gwas in your research please cite us (bioRxiv link coming soon)
 
 ### Built with
 
