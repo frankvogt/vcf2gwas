@@ -76,6 +76,7 @@ if covar != None:
     covar = os.path.split(covar)[1]
 
 pc_prefix = set_pc_prefix(pheno, covar, ".")
+pc_prefix2 = set_pc_prefix(pheno, covar, "_")
 
 # configure logger
 Log = Logger(pc_prefix, out_dir2)
@@ -118,7 +119,7 @@ n_top = P.set_n_top()
 # file checking
 Log.print_log(f'Genotype file: {snp_file}')
 if pheno_files != None:
-    Log.print_log(f'Phenotype file(s): {listtostring(pheno_files).replace(" ", ", ")}')
+    Log.print_log(f'Phenotype file(s): {listtostring(pheno_files, ", ")}')
 if covar != None:
     Log.print_log(f'Covariate file: {covar}')
 if gene_file != None:
@@ -234,25 +235,25 @@ if pheno_files != None:
             if l < umap_n:
                 exit(Log.print_log(f'Error: not enough phenotypes in {pheno_file} to perform UMAP (at least {umap_n} required)'))
             else:
-                Log.print_log(f"Performing UMAP dimension reduction on {pheno_file}")
+                Log.print_log(f"Performing UMAP dimensionality reduction on {pheno_file}..")
                 pheno_file3 = pheno_file
                 pheno_file3 = pheno_file3.removesuffix(".csv")
                 pheno_file3 = f'{pheno_file3}_umap.csv'
                 pheno_files2.append(pheno_file3)
                 Starter.umap_calc(df, pheno_file3, umap_n, seed, pheno_path)
-                Log.print_log(f'Saved as "{pheno_file3}" in {pheno_path}\nUMAP calculated successful\n')
+                Log.print_log(f'Saved as "{pheno_file3}" temporarily in {pheno_path}\nUMAP calculated successful\n')
         
         if pca_switch == True:
             if l < pca_n:
                 exit(Log.print_log(f'Error: not enough phenotypes in {pheno_file} to perform PCA (at least {pca_n} required)'))
             else:
-                Log.print_log(f"Performing PCA dimension reduction on {pheno_file}")
+                Log.print_log(f"Performing PCA dimensionality reduction on {pheno_file}..")
                 pheno_file4 = pheno_file
                 pheno_file4 = pheno_file4.removesuffix(".csv")
                 pheno_file4 = f'{pheno_file4}_pca.csv'
                 pheno_files2.append(pheno_file4)
                 Starter.pca_calc(df, pheno_file4, pca_n, pheno_path)
-                Log.print_log(f'Saved as "{pheno_file4}" in {pheno_path}\nPCA calculated successful\n')
+                Log.print_log(f'Saved as "{pheno_file4}" temporarily in {pheno_path}\nPCA calculated successful\n')
 
         x += 1
 
@@ -415,18 +416,20 @@ if model == None:
 else:
     path = os.path.join(out_dir2, model2)
 
+# summarizer and gene comparison
 if model not in ("-gk", "-eigen", None):
     path2 = os.path.join(path, "summary")
     path3 = os.path.join(path2, "top_SNPs")
     make_dir(path2)
     prefix_list = []
     for pheno in pheno_list:
-        pc_prefix2 = set_pc_prefix(pheno, covar, "_")
-        prefix_list.append(pc_prefix2)
-    filenames = Post_analysis.summarizer(path3, path2, pc_prefix, snp_prefix, n_top, Log, prefix_list)
+        pc_prefix3 = set_pc_prefix(pheno, covar, "_")
+        prefix_list.append(pc_prefix3)
+    filenames = Post_analysis.summarizer(path3, path2, pc_prefix3, snp_prefix, n_top, Log, prefix_list)
     if gene_file != None:
-        Post_analysis.gene_compare(filenames, gene_file, gene_file_path, gene_thresh, path2, pc_prefix, snp_prefix, Log)
+        Post_analysis.gene_compare(filenames, gene_file, gene_file_path, gene_thresh, path2, pc_prefix3, snp_prefix, Log)
 
+# move split up files (and reduce "files" folder)
 if switch == False and len(pheno_list) > 1:
     for file in pheno_list:
         os.remove(os.path.join(pheno_files_path[0], file))
@@ -451,24 +454,25 @@ if switch == False and len(pheno_list) > 1:
                             shutil.move(os.path.join(path5, folder, file), os.path.join(path5, folder2, file))
                     shutil.rmtree(os.path.join(path5, folder))
 
-if umap_switch == True:
-    path4 = os.path.join(path, "UMAP")
-    make_dir(path4)
+# move umap/pca files
+if umap_switch == True or pca_switch ==True:
+    switch_names = ["UMAP", "PCA"]
     x = 0
-    for pheno_file in pheno_files:
-        pheno_path = pheno_files_path[x]
-        for files in os.listdir(pheno_path):
-            if files.startswith(f'{pheno_file.removesuffix(".csv")}_umap'):
-                shutil.move(os.path.join(pheno_path, files), os.path.join(path4, files))
-
-if pca_switch == True:
-    path4 = os.path.join(path, "PCA")
-    make_dir(path4)
-    for pheno_file in pheno_files:
-        pheno_path = pheno_files_path[x]
-        for files in os.listdir(pheno_path):
-            if files.startswith(f'{pheno_file.removesuffix(".csv")}_pca'):
-                shutil.move(os.path.join(pheno_path, files), os.path.join(path4, files))   
+    for switch in [umap_switch, pca_switch]:
+        if switch == True:
+            path4 = os.path.join(path, switch_names[x])
+            make_dir(path4)
+            y = 0 
+            for pheno_file in pheno_files:
+                pheno_path = pheno_files_path[y]
+                if umap == True and pca_switch == True:
+                    pheno_path = pheno_files_path[y//2]
+                for files in os.listdir(pheno_path):
+                    if files.startswith(f'{pheno_file.removesuffix(".csv")}_{switch_names[x].lower()}'):
+                        shutil.move(os.path.join(pheno_path, files), os.path.join(path4, files))
+                y += 1
+            Log.print_log(f'Moved {switch_names[x]} files to {path4}')
+        x += 1
 
 finish = time.perf_counter()
 time_total = round(finish-start, 2)
@@ -477,14 +481,20 @@ time_total = runtime_format(time_total)
 Log.print_log(f'Clean up successful \n\nvcf2gwas has been successfully completed! \nRuntime: {time_total}\n')
 
 if pheno_files != None:
-    pheno_files = listtostring(pheno_files).replace(" ", ", ")
+    pheno_files = listtostring(pheno_files, ', ')
 if X != None:
-    X = listtostring(X)
+    X1 = []
+    if umap_switch == True:
+        X1.append(f'{umap_n} UMAP embedding(s)')
+    if pca_switch == True:
+        X1.append(f'{pca_n} principal components')
+    if umap_switch == False and pca_switch == False:
+        X1 = X
+    X = listtostring(X1, ', ')
 if Y != None:
-    Y = listtostring(Y)
+    Y = listtostring(Y, ', ')
 
 Log.summary(snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir2, analysis_num)
 
 if model != None:
-    shutil.move(os.path.join(out_dir2, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(out_dir2, model2, f'vcf2gwas{pc_prefix}.log.txt'))
-
+    shutil.move(os.path.join(out_dir2, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(out_dir2, model2, f'vcf2gwas_{snp_prefix}{pc_prefix2}.log.txt'))

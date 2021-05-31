@@ -19,7 +19,10 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+from vcf2gwas.parsing import Parser
 import warnings
+
+from matplotlib.pyplot import axes
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import os
 import subprocess
@@ -68,7 +71,17 @@ except ModuleNotFoundError:
     subprocess.run(["pip", "install", "umap-learn"])
     import umap
 
+from parsing import *
+
 #os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+#set fontsize
+argvals = None
+P = Parser(argvals)
+fontsize = P.set_fontsize()
+fontsize2 = fontsize - fontsize*0.1
+fontsize3 = fontsize - fontsize*0.5
+fontsize4 = fontsize - fontsize*0.7
 
 ############################## Functions ##############################
 
@@ -118,12 +131,12 @@ def make_dir(name):
         dir_check = True
     return dir_check
 
-def listtostring(l):
+def listtostring(l, string=' '):
     """Description:
     converts list to string"""
 
     try:
-        return ' '.join(map(str, l))
+        return string.join(map(str, l))
     except Exception as e:
         pass
 
@@ -186,11 +199,11 @@ def set_n(lm, gk, lmm, bslmm):
             n = str(i)
     return n
 
-def move_log(model, model2, pc_prefix, out_dir):
+def move_log(model, model2, pc_prefix, snp_prefix, out_dir):
     if model != None:
         path = os.path.join(out_dir, model2, "logs")
         make_dir(path)
-        shutil.move(os.path.join(out_dir, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(path, f'vcf2gwas{pc_prefix}.log.txt'))
+        shutil.move(os.path.join(out_dir, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(path, f'vcf2gwas_analysis_{snp_prefix}{pc_prefix}.log.txt'))
 
 
 ############################## Classes ##############################
@@ -306,10 +319,10 @@ class Starter:
                 threads2 = threads
             threads_list.append(str(threads2))
 
-    def label_point(x, y, val, ax):
+    def label_point(x, y, val, texts):
         a = pd.concat({'x': x, 'y': y, 'val': val}, axis=1)
         for i, point in a.iterrows():
-            ax.text(point['x']+.02, point['y'], str(point['val']))
+            texts.append(plt.text(point['x'], point['y']+np.random.random()/100, str(point['val']), fontsize="medium", fontweight="bold"))
 
     def umap_calc(df, pheno_file, n, seed, pheno_path):
         """Description:
@@ -336,9 +349,16 @@ class Starter:
 
         #plot embeddings
         if n == 2:
+            texts = []
             plt.subplots(figsize=(12,12))
-            sns.scatterplot("emb1","emb2", data=embeddingDf);
-            Starter.label_point(embeddingDf.emb1,embeddingDf.emb2,embeddingDf.host,plt.gca()) #custom function used
+            s = sns.scatterplot("emb1","emb2", data=embeddingDf);
+            Starter.label_point(embeddingDf.emb1, embeddingDf.emb2, embeddingDf.host, texts) #custom function used
+            plt.title("UMAP embeddings", fontsize=fontsize)
+            plt.xticks(fontsize=fontsize2, fontweight="bold")
+            plt.yticks(fontsize=fontsize2, fontweight="bold")
+            plt.xlabel("embedding 1", fontsize=fontsize, fontweight="bold")
+            plt.ylabel("embedding 2", fontsize=fontsize, fontweight="bold")
+            adjust_text(texts, embeddingDf['emb1'].values, embeddingDf['emb2'].values, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
             plt.savefig(os.path.join(pheno_path, f'{pheno_file.removesuffix(".csv")}.png'))
             plt.close()
 
@@ -368,9 +388,16 @@ class Starter:
 
         #plot PCs
         if n == 2:
+            texts = []
             plt.subplots(figsize=(12,12))
             sns.scatterplot("pc1","pc2", data=embeddingDf);
-            Starter.label_point(embeddingDf.pc1,embeddingDf.pc2,embeddingDf.host,plt.gca()) #custom function used
+            Starter.label_point(embeddingDf.pc1, embeddingDf.pc2, embeddingDf.host, texts) #custom function used
+            plt.title("Principal components", fontsize=fontsize)
+            plt.xticks(fontsize=fontsize2, fontweight="bold")
+            plt.yticks(fontsize=fontsize2, fontweight="bold")
+            plt.xlabel("principal component 1", fontsize=fontsize, fontweight="bold")
+            plt.ylabel("principal component 2", fontsize=fontsize, fontweight="bold")
+            adjust_text(texts, embeddingDf['pc1'].values, embeddingDf['pc2'].values, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
             plt.savefig(os.path.join(pheno_path, f'{pheno_file.removesuffix(".csv")}.png'))
             plt.close()
 
@@ -851,22 +878,24 @@ class Post_analysis:
             ax.set_xticklabels(x_labels)
             ax.set_xlim([0, len(data)])
             ax.set_ylim([0, data['-log10(p_value)'].max() + 1])
-            ax.set_xlabel('Chromosome')
+            ax.set_xlabel('Chromosome', fontsize=fontsize, fontweight="bold")
+            ax.set_title("Manhattan plot", fontsize=fontsize)
+            
             if case == "param":
-                ax.set_ylabel(f'{pcol}')
+                ax.set_ylabel(f'{pcol}', fontsize=fontsize, fontweight="bold")
             else:
-                ax.set_ylabel(f'-log10({pcol})')
+                ax.set_ylabel(f'-log10({pcol})', fontsize=fontsize, fontweight="bold")
             plt.axhline(y=sigval, color='gray', linestyle='-', linewidth = 0.5)
-            plt.xticks(fontsize=8, rotation=90)
-            plt.yticks(fontsize=8)
-            plt.title("Manhattan-plot")
+            plt.xticks(fontsize=fontsize2, rotation=45, fontweight="bold")
+            plt.yticks(fontsize=fontsize2, fontweight="bold")
+            #plt.title("Manhattan-plot")
             np.random.seed(0)
 
             if sigval > 0:
                 if refSNP:
                     for index, row in data.iterrows():
                         if row['-log10(p_value)'] >= sigval:
-                            texts.append(plt.text(index, row['-log10(p_value)']+np.random.random()/100, str(row[refSNP]), fontsize="small"))
+                            texts.append(plt.text(index, row['-log10(p_value)']+np.random.random()/100, str(row[refSNP]), fontsize="medium", fontweight="bold"))
                             #ax.annotate(str(row[refSNP]), xy = (index, row['-log10(p_value)']))
                     adjust_text(texts, data.index.values, data['-log10(p_value)'].values, autoalign='y', ha='left', only_move={'text':'y'}, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
 
@@ -922,9 +951,14 @@ class Post_analysis:
             ax.set(xlim=(0, (b_max)), ylim=(0, a_max))
             x = np.linspace(0, q)
             ax.plot(x,x, color="k", ls="--")
-            plt.title("QQ-Plot")
-            plt.xlabel("Expected  "r'$-log_{10}(p)$')
-            plt.ylabel("Observed  "r'$-log_{10}(p)$')
+            #plt.title("QQ-Plot")
+            ax.set_title("QQ-Plot", fontsize=fontsize)
+            #plt.xlabel("Expected  "r'$-log_{10}(p)$')
+            ax.set_xlabel("Expected  "r'$-log_{10}(p)$', fontsize=fontsize, fontweight="bold")
+            #plt.ylabel("Observed  "r'$-log_{10}(p)$')
+            ax.set_ylabel("Observed  "r'$-log_{10}(p)$', fontsize=fontsize, fontweight="bold")
+            plt.xticks(fontsize=fontsize2, fontweight="bold")
+            plt.yticks(fontsize=fontsize2, fontweight="bold")
 
             file_path = os.path.join(path, "QQ")
             make_dir(file_path)
@@ -1042,16 +1076,16 @@ class Post_analysis:
                 values_list.append(values2)
                 values = values.where(values["count"]>1)
                 values = values.dropna()
-                values[["SNP_pos", "count"]] = values[["SNP_pos", "count"]].astype(int)                
+                values[["SNP_pos", "count"]] = values[["SNP_pos", "count"]].astype(int)       
                 try:
                     # plot SNP counts
                     y = values["count"]
                     fig = plt.figure(figsize=(16,12))
                     sns.scatterplot(data=values, x="SNP_ID", y="count", s=100)
-                    plt.xticks(rotation=90)
-                    plt.xlabel("SNP ID")
-                    plt.yticks(np.arange(0, max(y)+2, 1))
-                    plt.ylabel("Occurrence of SNP")
+                    plt.xticks(rotation=45, fontsize=fontsize4, fontweight="bold")
+                    plt.xlabel("SNP ID", fontsize=fontsize, fontweight="bold")
+                    plt.yticks(np.arange(0, max(y)+2, 1), fontsize=fontsize2, fontweight="bold")
+                    plt.ylabel("Occurrence of SNP", fontsize=fontsize, fontweight="bold")
                     plt.savefig(os.path.join(path2, f'summarized_top_SNPs{pc_prefix}_{snp_prefix}.png'))
                     plt.close()
                     values_list.append(values)
@@ -1067,8 +1101,7 @@ class Post_analysis:
                     dfx2 = dfx.where(dfx.isin([xy]))
                     name = dfx2.dropna(axis=1, how="all")
                     name = name.columns.get_level_values(0).astype(str).to_list()
-                    name = listtostring(name)
-                    name = name.replace(" ", ", ")
+                    name = listtostring(name, ', ')
                     names.append(name)
                 values["phenotypes"] = names
                 #save as file
@@ -1373,15 +1406,21 @@ class Bslmm(Post_analysis):
             fig =plt.figure(figsize=(16,12))
             grid = plt.GridSpec(2,2, wspace=0.4, hspace=0.3)
             line = fig.add_subplot(grid[0,:2])
-            plt.xlabel("Index")
-            plt.ylabel(i)
+            plt.xlabel("Index", fontsize=fontsize, fontweight="bold")
+            plt.ylabel(i, fontsize=fontsize, fontweight="bold")
+            plt.xticks(fontsize=fontsize3, fontweight="bold")
+            plt.yticks(fontsize=fontsize3, fontweight="bold")
             hist = fig.add_subplot(grid[1,0])
-            plt.xlabel(i)
-            plt.ylabel("Frequency")
+            plt.xlabel(i, fontsize=fontsize, fontweight="bold")
+            plt.ylabel("Frequency", fontsize=fontsize, fontweight="bold")
+            plt.xticks(fontsize=fontsize3, fontweight="bold")
+            plt.yticks(fontsize=fontsize3, fontweight="bold")
             dens = fig.add_subplot(grid[1,1])
-            plt.xlabel(i)
-            plt.ylabel("Density")
-            fig.suptitle(i)
+            plt.xlabel(i, fontsize=fontsize, fontweight="bold")
+            plt.ylabel("Density", fontsize=fontsize, fontweight="bold")
+            plt.xticks(fontsize=fontsize3, fontweight="bold")
+            plt.yticks(fontsize=fontsize3, fontweight="bold")
+            fig.suptitle(f'Diagnostic plots of {i}', fontsize=fontsize)
             #add datapoints
             sns.lineplot(data=df[i], ax=line)
             sns.histplot(df[i], ax=hist, kde=False)

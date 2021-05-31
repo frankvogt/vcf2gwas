@@ -59,7 +59,6 @@ if pheno_file != None:
 pheno_file = listtostring(pheno_file)
 
 covar_file = P.set_covar()
-#covar_file = listtostring(covar_file)
 if covar_file != None:
     covar_file_path = covar_file
     covar_file = os.path.split(covar_file)[1]
@@ -270,8 +269,7 @@ if cols2 == []:
         cols2 = set_cols(cols2, Y, pheno_subset2)
 
 if multi == True:
-    columns = listtostring(cols1 + cols2) 
-    columns = [columns.replace(" ", "+")]
+    columns = [listtostring(cols1 + cols2, '+')]
 else:
     columns = cols1 + cols2
 if model == "-gk" or model == "-eigen":
@@ -306,7 +304,7 @@ if model == None:
     Log.print_log("GEMMA can't be executed since no model was specified!\n")
 else:
     Log.print_log("Running GEMMA\n")
-    Log.print_log(f'Phenotypes to analyze: {listtostring(columns).replace(" ", ", ")}\n')
+    Log.print_log(f'Phenotypes to analyze: {listtostring(columns, ", ")}\n')
     timer = time.perf_counter()
     # set lists of variables and make output directories
     for i in columns:
@@ -399,4 +397,4 @@ time_total = runtime_format(time_total)
 
 Log.print_log(f'Clean up successful \n\nAnalysis of {pheno_file} finished successfully\nRuntime: {time_total}\n')
 
-move_log(model, model2, pc_prefix, out_dir2)
+move_log(model, model2, pc_prefix, snp_prefix, out_dir2)

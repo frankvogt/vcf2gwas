@@ -37,7 +37,7 @@ def getArgs(argv=None):
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Command-line interface for vcf2gwas.\n \nExample usage: vcf2gwas -v <VCF file> -pf <phenotype file> -ap -lmm', epilog="For a detailed description of all options, please refer to the manual.")
 
-    parser.add_argument('--version', action='version', version='%(prog)s 0.5.6')
+    parser.add_argument('--version', action='version', version='%(prog)s 0.5.7')
     parser.add_argument("-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename")
     parser.add_argument("-pf", "--pfile", metavar="<filename>", action="append", type=str, help="specify phenotype filename \ncomma separated .csv file \nfirst column individuals, second column and onwards phenotypes")
     parser.add_argument("-cf", "--cfile", metavar="<filename>", type=str, help="specify covariate filename \ncomma separated .csv file \nfirst column individuals, second column and onwards covariates\n")
@@ -54,6 +54,7 @@ def getArgs(argv=None):
     parser.add_argument("-U", "--UMAP", metavar="<int>", type=int, nargs="?", const=2, help="perform UMAP on phenotypes and use resulting embeddings as phenotypes for GEMMA analysis \noptional: set amount of embeddings to be calculated (default: %(const)s) \nrecommended amount of embeddings: 1 - 5")
     parser.add_argument("-KC", "--kcpca", metavar="<float>", nargs='?', const=0.5, type=float, help="Kinship calculation via principal component analysis instead of GEMMA's internal method \noptional: r-squared threshold for LD pruning (default: %(const)s)")    
     parser.add_argument("-sv", "--sigval", metavar="<int>", type=int, default=6, help="set value where to draw significant line in manhattan plot \n<int> represents -log10(1e-<int>) (default: %(default)s) \nwhen using '-bslmm', value is adjusted to fit in the range of 0 to 1 \nset <int> to '0' to disable line")
+    parser.add_argument("-fs", "--fontsize", metavar="<int>", type=int, default=26, help="Set the fontsize of plots \nDefault: %(default)s")
     parser.add_argument("-o", "--output", metavar="<path>", type=str, default=os.getcwd(), help="change the output directory \ndefault: %(default)s\ndirectory will be created if non-existent")
 
     group = parser.add_mutually_exclusive_group()
@@ -127,6 +128,9 @@ class Parser:
 
     def set_sigval(self):
         return self.args.sigval
+
+    def set_fontsize(self):
+        return self.args.fontsize
 
     def set_seed(self):
         return self.args.seed
