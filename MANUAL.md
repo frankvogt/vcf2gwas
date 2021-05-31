@@ -32,6 +32,7 @@ The phenotype file `example.csv` is made up of the `avrRpm1` phenotype from the 
     * [Using PCA of genotypes instead of standard relatedness matrix](#using-pca-of-genotypes-instead-of-standard-relatedness-matrix)
     * [Filter out SNPs](#filter-out-snps)
     * [Change manhattan plot](#change-manhattan-plot)
+    * [Change font size in all plots](#change-font-size-in-all-plots)
     * [Keep temporary files](#keep-temporary-files)
 * [Output](#output)
     * [Plots](#plots)
