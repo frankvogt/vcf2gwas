@@ -261,6 +261,10 @@ set value where to draw significant line in manhattan plot
 when using '-bslmm', value is adjusted to fit in the range of 0 to 1  
 set <int> to '0' to disable line
 
+* `-fs`/ `--fontsize` <int>  
+set the fontsize of plots.  
+default value: 26
+
 * `-s` / `--seed`  
 perform UMAP with random seed  
 reduces reproducibility

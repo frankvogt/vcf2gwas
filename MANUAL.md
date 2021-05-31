@@ -246,6 +246,16 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -sv 7
 The line will now be drawn at *-log10(1e-7)*.  
 To disable the line and not label any SNPs, change the value to 0.
 
+### Change font size in all plots
+
+Since the resulting plots may be used in various contexts, the font size of the plots produced by vcf2gwas can be changed by using the `-fs/--fontsize option.
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -fs 20
+```
+
+The font sizes of the plots will now be changed from the default value of 26 pt to 20 pt.
+
 ### Keep temporary files
 
 During the analysis, various temporary files like subsetted and filtered VCF and `.csv` files are produced. By default they are removed once they are no longer needed but if one wants to retain these files, employ the `-r/--retain` option:
