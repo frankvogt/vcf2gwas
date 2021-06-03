@@ -30,7 +30,7 @@ Some of the benefits of this pipeline include:
 * GEMMA analysis will be carried out automatically (both GEMMA's linear (mixed) models and bayesian sparse linear mixed model available)
 * Dimensionality reduction via PCA or UMAP can be performed on phenotypes and used for analysis.
 * Once the analysis has been executed, the results will be analyzed:
-    * Manhattan plots, QQ-plots and diagnostic plots (dependent on GEMMA's model)
+    * Manhattan plots, Q-Q plots and diagnostic plots (dependent on GEMMA's model)
     * Summaries of the SNPs 
     * Comparison to desired genes
 * vcf2gwas is able to analyze several input files with different sets of individuals and multiple phenotypes in a efficient manner due to parallelization, saving the user a lot of time compared to standard GWAS procedure
