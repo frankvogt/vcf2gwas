@@ -36,7 +36,10 @@ Some of the benefits of this pipeline include:
 * vcf2gwas is able to analyze several input files with different sets of individuals and multiple phenotypes in a efficient manner due to parallelization, saving the user a lot of time compared to standard GWAS procedure
 * Results are reproducible on any compatible machine
 * Figures are publication-ready <br/>
-If you use vcf2gwas in your research please cite us (bioRxiv link coming soon)
+* Example plots are:
+<img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_manh.png" alt="Manhattan-plot" width="50%"/><img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_qq.png" alt="QQ-plot" width="50%"/>
+<br/>
+If you use vcf2gwas in your research please cite us : [vcf2gwas - Python API for comprehensive GWAS analysis using GEMMA](https://www.biorxiv.org/content/10.1101/2021.06.01.446586v1)
 
 ### Built with
 
