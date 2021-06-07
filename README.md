@@ -39,7 +39,7 @@ Some of the benefits of this pipeline include:
 * Example plots are: <br/>
 <img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_manh.png" alt="Manhattan-plot" width="50%"/><img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_qq.png" alt="QQ-plot" width="50%"/>
 <br/>
-If you use vcf2gwas in your research please cite us :
+If you use vcf2gwas in your research please cite us:
 <a href="https://www.biorxiv.org/content/10.1101/2021.06.01.446586v1">vcf2gwas - Python API for comprehensive GWAS analysis using GEMMA</a>
 
 ### Built with
@@ -62,7 +62,7 @@ The only requirement is an up to date version of [conda](https://conda.io/projec
 ### Installation
 
 It is a good practice to install the package in a clean environment.  
-So first create a new environment (you can name it as you like) , here with the exemplary name 'myenv':
+So first create a new environment (you can name it as you like), here with the exemplary name 'myenv':
 
 ```
 conda create -n myenv
@@ -140,7 +140,6 @@ To perform GWAS, GEMMA needs a relatedness matrix, which vcf2gwas will calculate
 ### Running vcf2gwas
 
 Once the virtual environment is activated, vcf2gwas can be run on the command-line by specifying the input files and the statistical model chosen for GEMMA. Below is an exemplary command for running a linear mixed model analysis on all phenotypes in `example.csv` using genotype information from `example.vcf.gz`, both in the [input](https://github.com/frankvogt/vcf2gwas/tree/main/vcf2gwas/input) directory.  
-This command can also be run to confirm the installation.
 
 ```
 vcf2gwas -v example.vcf.gz -pf example.csv -ap -lmm
@@ -316,8 +315,6 @@ output/
 ```
 
 The names of the folders in quotes as well as the file names will vary based on the selected options and the file and phenotype names.
-
-## Contributing
 
 ## License
 
