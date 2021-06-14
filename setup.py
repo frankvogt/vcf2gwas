@@ -8,9 +8,9 @@ requirements = [
     'scikit-learn==0.24*',
     'psutil==5.8*',
     'adjusttext==0.7*',
-    'bcftools==1.12*',
-    'plink==1.90*',
-    'gemma==0.98.3'
+    'bioconda::bcftools==1.12*',
+    'bioconda::plink==1.90*',
+    'bioconda::gemma==0.98.3'
     # package requirements go here
 ]
 
