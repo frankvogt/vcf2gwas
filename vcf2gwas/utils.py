@@ -773,7 +773,7 @@ class Gemma:
                 else:
                     subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, "-c", covar_file_name,'-o', prefix2, '-outdir', path], check=True)
         except subprocess.CalledProcessError as e:
-            exit(Log.print_log(f'Error: Not enough memory available to process files \n{e}'))
+            exit(Log.print_log(f'Error: \n{e} \nPossibly not enough memory available to process files.'))
         Log.print_log("Linear mixed model calculated successfully")
 
     def bslmm(prefix, prefix2, model, n, N, path, Log):

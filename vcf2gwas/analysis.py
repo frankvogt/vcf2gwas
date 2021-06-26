@@ -235,6 +235,9 @@ if covar_file == None:
     Log.print_log("No covariate file specified, continuing without")
 else:
     if model == "-lmm":
+        if B == True:
+            Y = list(range(length2))
+            Y = [i+1 for i in Y]
         covar_file_name = Processing.make_covarfile(fam, pheno_subset2, subset2, Y)
         Y = []
         cols2 = []
