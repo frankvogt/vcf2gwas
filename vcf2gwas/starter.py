@@ -111,6 +111,7 @@ lmm = P.set_lmm()
 bslmm = P.set_bslmm()
 
 model = set_model(lm, gk, eigen, lmm, bslmm)
+model2 = None
 if model != None:
     model2 = model.removeprefix("-")
 

@@ -89,6 +89,7 @@ lmm = P.set_lmm()
 bslmm = P.set_bslmm()
 
 model = set_model(lm, gk, eigen, lmm, bslmm)
+model2 = None
 if model != None:
     model2 = model.removeprefix("-")
 
@@ -145,7 +146,7 @@ else:
     list2 = Processing.pheno_index(pheno)
     diff1a = Processing.make_diff(list1, list2)
     diff2 = Processing.make_diff(list2, list1)
-    pheno_subset1 = Processing.make_uniform(list1, list2, diff1a, diff2, pheno, subset, snp_file2, pheno_file, "phenotpye", Log)
+    pheno_subset1 = Processing.make_uniform(list1, list2, diff1a, diff2, pheno, subset, snp_file2, pheno_file, "phenotype", Log)
     length1 = len(pheno_subset1.columns)
     Log.print_log(f'Removed {len(diff2)} out of {len(list2)} individuals, {(len(list2)-len(diff2))} remaining')
 

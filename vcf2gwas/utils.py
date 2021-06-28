@@ -126,7 +126,7 @@ def make_dir(name):
 
     try:
         dir_check = False
-        os.mkdir(name)
+        os.makedirs(name)
     except OSError as e:
         dir_check = True
     return dir_check
