@@ -64,6 +64,7 @@ if covar_file != None:
     covar_file = os.path.split(covar_file)[1]
 
 pc_prefix = set_pc_prefix(pheno_file, covar_file, "_")
+
 # configure logger
 Log = Logger(pc_prefix, out_dir2)
 

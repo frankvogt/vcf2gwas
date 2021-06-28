@@ -91,9 +91,9 @@ def set_pc_prefix(pheno_file, covar_file, string):
 
     if covar_file != None:
         pc_prefix = f'{string}{covar_file.removesuffix(".csv")}'
-    elif pheno_file != None:
+    if pheno_file != None:
         pc_prefix = f'{string}{pheno_file.removesuffix(".csv")}'
-    else:
+    if covar_file == None and pheno_file == None:
         pc_prefix = string
     return pc_prefix
 
