@@ -475,6 +475,9 @@ if umap_switch == True or pca_switch ==True:
             Log.print_log(f'Moved {switch_names[x]} files to {path4}')
         x += 1
 
+# remove temp covariate file
+Converter.remove_covar(covar)
+
 finish = time.perf_counter()
 time_total = round(finish-start, 2)
 time_total = runtime_format(time_total)

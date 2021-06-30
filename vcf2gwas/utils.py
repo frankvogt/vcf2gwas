@@ -712,6 +712,16 @@ class Converter:
         except:
             pass
 
+    def remove_covar(covar):
+        """Description:
+        removes temporary covariates file"""
+        
+        if covar != None:
+            try:
+                os.remove(f'sub_{covar}')
+            except:
+                pass
+
 
 class Gemma:
     """Description:
