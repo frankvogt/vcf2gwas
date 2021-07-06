@@ -1,5 +1,8 @@
 # vcf2gwas
-
+[![Anaconda-Server Badge](https://anaconda.org/fvogt257/vcf2gwas/badges/latest_release_date.svg)](https://anaconda.org/fvogt257/vcf2gwas)
+[![Anaconda-Server Badge](https://anaconda.org/fvogt257/vcf2gwas/badges/license.svg)](https://anaconda.org/fvogt257/vcf2gwas)
+[![Anaconda-Server Badge](https://anaconda.org/fvogt257/vcf2gwas/badges/installer/conda.svg)](https://conda.anaconda.org/fvogt257)
+[![Anaconda-Server Badge](https://anaconda.org/fvogt257/vcf2gwas/badges/platforms.svg)](https://anaconda.org/fvogt257/vcf2gwas)
 ## Contents
 
 * [About The Project](#about-the-project)
