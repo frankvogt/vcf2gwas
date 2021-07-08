@@ -247,6 +247,14 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -sv 7
 The line will now be drawn at *-log10(1e-7)*.  
 To disable the line and not label any SNPs, change the value to 0.
 
+To remove the SNP lables completely, utilize the `-nl/--nolabel` option.  
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -nl
+```
+
+This can be beneficial to reduce the overall runtime when the analysis results in many significant SNPs.  
+
 ### Change font size in all plots
 
 Since the resulting plots may be used in various contexts, the font size of the plots produced by vcf2gwas can be changed by using the `-fs/--fontsize option.

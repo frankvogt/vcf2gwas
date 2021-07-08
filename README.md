@@ -267,6 +267,10 @@ set value where to draw significant line in manhattan plot
 when using '-bslmm', value is adjusted to fit in the range of 0 to 1  
 set <int> to '0' to disable line
 
+* `-nl` / `--nolabel`  
+remove the SNP labels in the manhattan plot  
+reduces runtime if analysis results in many significant SNPs
+
 * `-fs`/ `--fontsize` <int>  
 set the fontsize of plots.  
 default value: 26
