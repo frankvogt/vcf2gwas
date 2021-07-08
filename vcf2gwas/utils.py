@@ -233,11 +233,11 @@ class Logger:
 
         self.logger.info(text)
 
-    def summary(self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir, analysis_num):
+    def summary(self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir, analysis_num, sigval, nolabel):
         """Description:
         prints summary of input variables and methods"""
 
-        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = ""
+        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = ""
 
         v = f'\n{out_dir}'
         w = f'\n{analysis_num}'
@@ -272,6 +272,8 @@ class Logger:
             k = f'\n  --memory {memory}'
         if threads != mp.cpu_count()-1:
             l = f'\n  --threads {threads}'
+        if sigval != 6:
+            x = f'\n  --sigval {sigval}'
         if A == True:
             m = '\n  --allphenotypes'
             c = '\n  Phenotypes chosen: All'
@@ -284,6 +286,8 @@ class Logger:
             p = f'\n  --kcpca (threshold: {pca})'
         if multi == True:
             s = '\n  --multi'
+        if nolabel == True:
+            y = '\n  --nolabel'
         if umap_n != None:
             t = '\n  --UMAP'
             if umap_n != 2:
@@ -293,7 +297,7 @@ class Logger:
             if pca_n != 2:
                 u = f'\n  --PCA {pca_n}'
 
-        self.logger.info(f'Output directory:{v}\n\nPhenotypes analyzed in total:{w}\n\nInput:\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{j}{k}{l}{m}{n}{o}{p}')
+        self.logger.info(f'Output directory:{v}\n\nPhenotypes analyzed in total:{w}\n\nInput:\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{j}{k}{l}{x}{m}{n}{y}{o}{p}')
 
 
 class Starter:
@@ -859,7 +863,7 @@ class Post_analysis:
         data_grouped = data.groupby((chromosome))
         return data, data_grouped
 
-    def manh_plot(df, case, Log, prefix, pcol, path, sigval, colors = ['#E24E42', '#008F95'], refSNP = False):
+    def manh_plot(df, case, Log, prefix, pcol, path, sigval, nolabel, colors = ['#E24E42', '#008F95'], refSNP = False):
         """Description:
         creates manhattan plot from prepared dataframe and saves plot
         based on: https://github.com/Pudkip/Pyhattan/blob/master/Pyhattan/__init__.py"""
@@ -895,19 +899,22 @@ class Post_analysis:
                 ax.set_ylabel(f'{pcol}', fontsize=fontsize, fontweight="bold")
             else:
                 ax.set_ylabel(f'-log10({pcol})', fontsize=fontsize, fontweight="bold")
-            plt.axhline(y=sigval, color='gray', linestyle='-', linewidth = 0.5)
+            if sigval > 0:
+                plt.axhline(y=sigval, color='black', linestyle='-', linewidth = 0.5)
             plt.xticks(fontsize=fontsize2, rotation=45, fontweight="bold")
             plt.yticks(fontsize=fontsize2, fontweight="bold")
             #plt.title("Manhattan-plot")
             np.random.seed(0)
 
             if sigval > 0:
-                if refSNP:
-                    for index, row in data.iterrows():
-                        if row['-log10(p_value)'] >= sigval:
-                            texts.append(plt.text(index, row['-log10(p_value)']+np.random.random()/100, str(row[refSNP]), fontsize="medium", fontweight="bold"))
-                            #ax.annotate(str(row[refSNP]), xy = (index, row['-log10(p_value)']))
-                    adjust_text(texts, data.index.values, data['-log10(p_value)'].values, autoalign='y', ha='left', only_move={'text':'y'}, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
+                if nolabel == False:
+                    if refSNP:
+                        for index, row in data.iterrows():
+                            if row['-log10(p_value)'] >= sigval:
+                                texts.append(plt.text(index, row['-log10(p_value)']+np.random.random()/100, str(row[refSNP]), fontsize="medium", fontweight="bold"))
+                                #ax.annotate(str(row[refSNP]), xy = (index, row['-log10(p_value)']))
+                        Log.print_log(f'Number of significant SNPs: {len(texts)} \n')
+                        adjust_text(texts, data.index.values, data['-log10(p_value)'].values, autoalign='y', ha='left', only_move={'text':'y'}, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
 
             file_path = os.path.join(path, "manhattan")
             make_dir(file_path)
@@ -915,7 +922,7 @@ class Post_analysis:
             plt.close()
             timer_end = time.perf_counter()
             timer_total = round(timer_end - timer, 2)
-            Log.print_log(f'Number of significant SNPs: {len(texts)} \nManhattan plot saved as "{pcol}_manh_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
+            Log.print_log(f'Manhattan plot saved as "{pcol}_manh_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
 
     def ppoints(n):
         """Description:
@@ -1265,7 +1272,7 @@ class Post_analysis:
                     Log.print_log(f'Could not parse contents of {gene_file}.\nPlease provide the file in the right format.')
             c += 1
 
-    def run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval):
+    def run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel):
         """Description:
         runs post-processing dependent on input"""
 
@@ -1281,7 +1288,7 @@ class Post_analysis:
                 Log.print_log(f'Variants with the best {p} score saved in {os.path.join(path, "best_p-values")}')
 
                 df3 = Lin_models.format_data(prefix2, "assoc", p, path)
-                Lin_models.manh_plot(df3, "assoc", Log, prefix2, p, path, sigval, refSNP="rs")
+                Lin_models.manh_plot(df3, "assoc", Log, prefix2, p, path, sigval, nolabel, refSNP="rs")
                 Lin_models.qq_plot(df, p, prefix2, path, Log)
 
             Lin_models.make_top_list(df2, top_ten, n_top)
@@ -1320,10 +1327,10 @@ class Post_analysis:
 
             # plot variants PIPs across linkage groups/chromosomes
             df4 = Bslmm.format_data(prefix2, "param", "gamma", path)
-            Bslmm.manh_plot(df4, "param", Log, prefix2, "gamma", path, sigval, refSNP="rs")
+            Bslmm.manh_plot(df4, "param", Log, prefix2, "gamma", path, sigval, nolabel, refSNP="rs")
             # plot effect sizes
             df5 = Bslmm.format_data(prefix2, "param", "eff", path)
-            Bslmm.manh_plot(df5, "param", Log, prefix2, "eff", path, sigval, refSNP="rs")
+            Bslmm.manh_plot(df5, "param", Log, prefix2, "eff", path, sigval, nolabel, refSNP="rs")
 
             #Bslmm.make_top_list(df3, top_ten, n_top)
             Bslmm.make_top_list(df3, top_ten, n_top)

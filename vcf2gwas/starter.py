@@ -173,6 +173,8 @@ pca = P.set_pca()
 keep = P.set_keep()
 multi = P.set_multi()
 seed = P.set_seed()
+sigval = P.set_sigval()
+nolabel = P.set_nolabel()
 
 umap_n = P.set_U()
 if umap_n != None:
@@ -498,7 +500,7 @@ if X != None:
 if Y != None:
     Y = listtostring(Y, ', ')
 
-Log.summary(snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir2, analysis_num)
+Log.summary(snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, gene_thresh, multi, umap_n, pca_n, out_dir2, analysis_num, sigval, nolabel)
 
 if model != None:
     shutil.move(os.path.join(out_dir2, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(out_dir2, model2, f'vcf2gwas_{snp_prefix}{pc_prefix2}.log.txt'))

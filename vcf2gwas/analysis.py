@@ -99,6 +99,7 @@ n_top = P.set_n_top()
 gene_thresh = P.set_gene_thresh()
 multi = P.set_multi()
 sigval = P.set_sigval()
+nolabel = P.set_nolabel()
 
 #snp_file2 = f'input/{snp_file}'
 pheno_file2 = None
@@ -355,8 +356,8 @@ else:
     ############################## Processing and plotting ##############################
 
     Log.print_log("Analyzing GEMMA results\n")
-    for (top_ten, Log, model, n, prefix2, path, n_top, i, sigval) in zip(itertools.repeat(top_ten), itertools.repeat(Log), itertools.repeat(model), itertools.repeat(n), prefix2_list, path_list, itertools.repeat(n_top), i_list, itertools.repeat(sigval)):
-        Post_analysis.run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval)
+    for (top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel) in zip(itertools.repeat(top_ten), itertools.repeat(Log), itertools.repeat(model), itertools.repeat(n), prefix2_list, path_list, itertools.repeat(n_top), i_list, itertools.repeat(sigval), itertools.repeat(nolabel)):
+        Post_analysis.run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel)
     Log.print_log("Analysis of GEMMA results completed successfully\n")
 
 ############################## Summary and Clean up ##############################

@@ -37,7 +37,7 @@ def getArgs(argv=None):
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Command-line interface for vcf2gwas.\n \nExample usage: vcf2gwas -v <VCF file> -pf <phenotype file> -ap -lmm', epilog="For a detailed description of all options, please refer to the manual.")
 
-    parser.add_argument('--version', action='version', version='%(prog)s 0.6.0')
+    parser.add_argument('--version', action='version', version='%(prog)s 0.6.1')
     parser.add_argument("-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename")
     parser.add_argument("-pf", "--pfile", metavar="<filename>", action="append", type=str, help="specify phenotype filename \ncomma separated .csv file \nfirst column individuals, second column and onwards phenotypes")
     parser.add_argument("-cf", "--cfile", metavar="<filename>", type=str, help="specify covariate filename \ncomma separated .csv file \nfirst column individuals, second column and onwards covariates\n")
@@ -67,6 +67,7 @@ def getArgs(argv=None):
     parser.add_argument("-ap", "--allphenotypes", action="store_true", help="all phenotypes will be used \nany phenotype selection with '-p' option will be overwritten")
     parser.add_argument("-ac", "--allcovariates", action="store_true", help="all covariates will be used \nany covariate selection with '-c' option will be overwritten")
     parser.add_argument("-m", "--multi", action="store_true", help="performs multivariate linear mixed model analysis with specified phenotypes \nonly active in combination with '-lmm' option")
+    parser.add_argument("-nl", "--nolabel", action="store_true", help="remove the SNP labels in the manhattan plot \nreduces runtime if analysis results in many significant SNPs")
     parser.add_argument("-s", "--seed", action="store_true", help="perform UMAP with random seed \nreduces reproducibility")
     parser.add_argument("-r", "--retain", action="store_true", help="keep all temporary intermediate files \ne.g. subsetted and filtered VCF and .csv files")
     
@@ -128,6 +129,9 @@ class Parser:
 
     def set_sigval(self):
         return self.args.sigval
+
+    def set_nolabel(self):
+        return self.args.nolabel
 
     def set_fontsize(self):
         return self.args.fontsize
