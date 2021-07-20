@@ -27,6 +27,7 @@ import subprocess
 import time
 import os
 import sys
+import math
 import concurrent.futures
 import multiprocessing as mp
 
@@ -131,7 +132,7 @@ if model == None:
     Log.print_log("Warning: No model specified for GEMMA analysis")
 if A == False and B == False:
     if X == None and Y == None:
-        Log.print_log("Warning: No phenotypes (or covariates) specified for GEMMA analysis")
+        exit(Log.print_log("Error: No phenotypes (or covariates) specified for GEMMA analysis"))
 
 pheno2 = None
 covar2 = None
@@ -155,6 +156,8 @@ memory_total = int(((virtual_memory().total/1e9)//2)*1e3)
 if memory_total < memory:
     memory = memory_total
 memory2 = memory
+if memory < 1000:
+    exit(Log.print_log("Error: Not enough memory available (at least 1000 MB required)"))
 
 threads = P.set_threads()
 threads_org = threads
@@ -163,6 +166,8 @@ if cpu == 0:
     cpu = 1
 if cpu < threads:
     threads = cpu
+if threads == 0:
+    exit(Log.print_log("Error: No logical cores available!"))
 
 n = set_n(lm, gk, lmm, bslmm)
 filename = P.set_filename()
@@ -220,11 +225,17 @@ if pheno_files != None:
     else:
         num = len(pheno_files)
 
-    if num > threads or num > memory/1e3:
+    if num > threads:
         if umap_switch == True and pca_switch == True:
-            exit(Log.print_log("Error: Too many input files for available ressources when performing both UMAP and PCA"))
+            exit(Log.print_log("Error: Not enough logical cores available to analyze the input files when performing both UMAP and PCA"))
         else:
-            exit(Log.print_log("Error: Too many phenotype input files for available ressources"))
+            exit(Log.print_log("Error: Not enough logical cores available to analyze all phenotype input files"))
+
+    if num > memory/1e3:
+        if umap_switch == True and pca_switch == True:
+            exit(Log.print_log("Error: Not enough memory available to analyze the input files when performing both UMAP and PCA"))
+        else:
+            exit(Log.print_log("Error: Not enough memory available to analyze all phenotype input files"))
 
     x = 0
     for pheno_file in pheno_files:
@@ -302,13 +313,16 @@ if pheno_files != None:
             Log.print_log("Phenotype file split up successful")
 
         else:
+            threads_temp = threads
+            if l <= threads:
+                threads_temp = math.floor(memory/1e3)
             rest = 0
             threads2 = 1
-            memory2 = memory//threads
+            memory2 = memory//threads_temp
             col_dict = {}
-            rest2 = l%threads
-            threads3 = l//threads
-            Starter.split_phenofile2(threads, threads3, rest2, col_dict, X_list, df, pheno_file, pheno_list, pheno_path)
+            rest2 = l%threads_temp
+            threads3 = l//threads_temp
+            Starter.split_phenofile2(threads_temp, threads3, rest2, col_dict, X_list, df, pheno_file, pheno_list, pheno_path)
             Log.print_log("Phenotype file split up successful")
         
         x += 1

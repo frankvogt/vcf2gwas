@@ -856,6 +856,7 @@ class Post_analysis:
         if case == "param":
             data['-log10(p_value)'] = (data[pcol])
         else:
+            data = data[data[pcol] > 0.0000000001]
             data['-log10(p_value)'] = -np.log10(data[pcol])
         data = data[data['-log10(p_value)'].notna()]
         data[chromosome] = data[chromosome].astype('category')
@@ -945,6 +946,7 @@ class Post_analysis:
         based on: https://github.com/stephenturner/qqman/blob/master/R/qq.R"""
 
         Log.print_log('Creating QQ-plot..')
+        df = df[df[pcol] > 0.0000000001]
         df['-log10(p_value)'] = -np.log10(df[pcol])
         df = df[df['-log10(p_value)'].notna()]
         if df.empty == True:
