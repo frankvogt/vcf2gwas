@@ -672,6 +672,10 @@ class Converter:
         out = subprocess.run(['bcftools', 'query', '-f', '%CHROM\n', snp_file], stdout=subprocess.PIPE, text=True)
         ls = (out.stdout).split()
         ls_set = set(ls)
+        try:
+            print(f'Chromosomes: {listtostring(sorted(ls_set), ", ")}')
+        except Exception:
+            pass
         return len(ls_set)
 
     def filter_snps(min_af, subset, subset2):
@@ -688,11 +692,13 @@ class Converter:
         string = "_"
         list2 = [l for l in list if string in l]
         if list2 != None:
-            make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
+            make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
+            #make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
             make_bed.stdout
         else:
             #make_bed = subprocess.run(['plink', '--dummy', '15000', '2000000', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
-            make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
+            make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)            
+            #make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
             make_bed.stdout
 
     def remove_files(subset, File, subset2, snp_file):
@@ -1080,17 +1086,18 @@ class Post_analysis:
             if values.empty == True:
                     Log.print_log(str("No SNPs in the summarized files!"))
             values_list = []
-            if len(x1) != 1 and len(dfnames) != 1:
-                # count occurrences of SNPs and filter
-                values = values.value_counts()
-                values = pd.DataFrame(values)
-                values = values.reset_index()
-                values.columns = ["SNP_ID", "SNP_pos", "chr", "count"]
             # remove unwanted SNPs
             if len(x1) == 1 and len(dfnames) == 1:
                 values = values.dropna()
                 values_list.append(values)
             else:
+            #if len(x1) != 1 and len(dfnames) != 1:
+                # count occurrences of SNPs and filter
+                values = values.value_counts()
+                values = pd.DataFrame(values)
+                values = values.reset_index()
+                values.columns = ["SNP_ID", "SNP_pos", "chr", "count"]
+                # remove unwanted SNPs
                 values2 = values.dropna()
                 values_list.append(values2)
                 values = values.where(values["count"]>1)
