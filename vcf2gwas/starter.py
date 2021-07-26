@@ -106,8 +106,10 @@ if B == True and Y != None:
     Log.print_log("Warning: option 'allcovariates' will overwrite your covariate selection")
 
 #check for duplicate selection
-x_test = set(X) & set(Y)
-x_test = list(x_test)
+x_test = []
+if X != None and Y != None:
+    x_test = set(X) & set(Y)
+    x_test = list(x_test)
 if pheno == covar and x_test != []:
     exit(Log.print_log(f'Error: The same data was selected as phenotype and covariate (column {listtostring(x_test, ", ")} in "{pheno}"). This will cause issues during the analysis with GEMMA'))
 
@@ -252,14 +254,14 @@ if pheno_files != None:
         df = Processing.load_pheno(pheno_file2)
         l = len(df.columns)
 
-        df_covar = Processing.load_pheno(covar2)
-        l_covar = len(df_covar.columns)
-
         #check if columns exist
         if set(X).issubset([i+1 for i in list(range(l))]) == False:
             exit(Log.print_log("Error: The selected phenotype data does not exist in the phenotype file"))
-        if set(Y).issubset([i+1 for i in list(range(l_covar))]) == False:
-            exit(Log.print_log("Error: The selected covariate data does not exist in the covariate file"))
+        if covar2 != None:
+            df_covar = Processing.load_pheno(covar2)
+            l_covar = len(df_covar.columns)
+            if set(Y).issubset([i+1 for i in list(range(l_covar))]) == False:
+                exit(Log.print_log("Error: The selected covariate data does not exist in the covariate file"))
 
         if umap_switch == True:
             if l < umap_n:
