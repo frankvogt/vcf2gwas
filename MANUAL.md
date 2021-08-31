@@ -329,9 +329,9 @@ QQ-plot comparing the expected and observed probability distributions:
 
 Amongst other things, vcf2gwas will sort the SNPs of every analyzed phenotype, save the specified amount of top SNPs for each phenotype, summarize these SNPs of all phenotypes to check if certain SNPs occur more than once and optionally compare these SNPs to the genes supplied by the gene file. Below is the [output](https://github.com/frankvogt/vcf2gwas/blob/main/files/compared_summarized_top_SNPs_complete_example.csv) shown of such a gene comparison when supplying a [gene file](https://github.com/frankvogt/vcf2gwas/blob/main/files/NLR.csv) containing information about NLR genes in *A. thaliana*:
 
-||||Upstream gene||Downstream gene|
-|SNP ID|Chr|Phenotypes|ID|Comment|Name|Distance|SNP pos|Distance|Name|Comment|ID|
+||||Upstream gene|Upstream gene|Upstream gene|Upstream gene||Downstream gene|Downstream gene|Downstream gene|Downstream gene|
 |---|---|---|---|---|---|---|---|---|---|---|---|
+|SNP ID|Chr|Phenotypes|ID|Comment|Name|Distance|SNP pos|Distance|Name|Comment|ID|
 |3:2237364|3|avrRpm|AT3G07040.1|NB-ARC domain-containing disease resistance protein|RPM1|8340|2237364|||||
 |3:2237394|3|avrRpm|AT3G07040.1|NB-ARC domain-containing disease resistance protein|RPM1|8370|2237394|||||
 |3:2237446|3|avrRpm|AT3G07040.1|NB-ARC domain-containing disease resistance protein|RPM1|8422|2237446|||||
