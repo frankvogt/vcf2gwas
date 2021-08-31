@@ -37,26 +37,84 @@ def getArgs(argv=None):
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Command-line interface for vcf2gwas.\n \nExample usage: vcf2gwas -v <VCF file> -pf <phenotype file> -ap -lmm', epilog="For a detailed description of all options, please refer to the manual.")
 
-    parser.add_argument('--version', action='version', version='%(prog)s 0.6.4')
-    parser.add_argument("-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename")
-    parser.add_argument("-pf", "--pfile", metavar="<filename>", action="append", type=str, help="specify phenotype filename \ncomma separated .csv file \nfirst column individuals, second column and onwards phenotypes")
-    parser.add_argument("-cf", "--cfile", metavar="<filename>", type=str, help="specify covariate filename \ncomma separated .csv file \nfirst column individuals, second column and onwards covariates\n")
-    parser.add_argument("-p", "--pheno", metavar="<int/str>", action="append", type=str, help="specify phenotypes used for analysis: \n '1' selects first phenotype from phenotype file (second column),\n '2' the second phenotype (third column) and so on")
-    parser.add_argument("-c", "--covar", metavar="<int/str>", action="append", type=str, help="specify covariates used for analysis: \n '1' selects first covariate from covariate file (second column),\n '2' the second covariate (third column) and so on")
-    parser.add_argument("-gf", "--genefile", metavar="<filename>", type=str, help= "specify gene file name \nresulting SNPs from analysis will be compared to these genes \ncomma separated .csv file \nfile must contain at least three columns: \n -'chr' column containing chromosome value (same format as in VCF file \n -'start' column containing start position of gene \n -'stop' column containing stop position of gene \nfor further formatting information, please refer to the manual")
-    parser.add_argument("-gt", "--genethresh", metavar="<int>", type=int, default=100000, help="set gene distance threshold when comparing genes (in bp) (default: %(default)s) \nonly SNPs with distances below threshold will be considered for comparison of each gene")
-    parser.add_argument("-q", "--minaf", metavar="<float>", type=float, default=0.01, help="minimum allele frequency of sites to be used (default: %(default)s) \ninput value needs to be a value between 0.0 and 1.0 ")
-    parser.add_argument("-chr", "--chromosome", metavar="<int/str>", action="append", type=str, help="specify chromosomes for analysis \nby default, all chromosomes will be analyzed \ninput value has to be in the same format as the CHROM value in the VCF file")
-    parser.add_argument("-t", "--topsnp", metavar="<int>", type=int, default=15, help="number of top SNPs of each phenotype to be summarized (default: %(default)s) \nafter analysis the specified amount of top SNPs from each phenotype will be considered")
-    parser.add_argument("-M", "--memory", metavar="<int>", type=int, default=int(((virtual_memory().total/1e9)//2)*1e3), help="set memory usage (in MB) \nif not specified, half of total memory will be used (%(default)s MB)")
-    parser.add_argument("-T", "--threads", metavar="<int>", type=int, default=mp.cpu_count()-1, help="set core usage \nif not specified, all available logical cores minus 1 will be used (%(default)s cores)")
-    parser.add_argument("-k", "--relmatrix", metavar="<filename>", type=str, help="specify relatedness matrix file name \nfor formatting details please refer to the manual")
-    parser.add_argument("-P", "--PCA", metavar="<int>", type=int, nargs="?", const=2, help="perform PCA on phenotypes and use resulting PCs as phenotypes for GEMMA analysis \noptional: set amount of PCs to be calculated (default: %(const)s) \nrecommended amount of PCs: 2 - 10")
-    parser.add_argument("-U", "--UMAP", metavar="<int>", type=int, nargs="?", const=2, help="perform UMAP on phenotypes and use resulting embeddings as phenotypes for GEMMA analysis \noptional: set amount of embeddings to be calculated (default: %(const)s) \nrecommended amount of embeddings: 1 - 5")
-    parser.add_argument("-KC", "--kcpca", metavar="<float>", nargs='?', const=0.5, type=float, help="Kinship calculation via principal component analysis instead of GEMMA's internal method \noptional: r-squared threshold for LD pruning (default: %(const)s)")    
-    parser.add_argument("-sv", "--sigval", metavar="<float>", type=float, default=6, help="set value where to draw significant line in manhattan plot \n<int> represents -log10(1e-<int>) (default: %(default)s) \nwhen using '-bslmm', value is adjusted to fit in the range of 0 to 1 \nset <int> to '0' to disable line")
-    parser.add_argument("-fs", "--fontsize", metavar="<int>", type=int, default=26, help="Set the fontsize of plots \nDefault: %(default)s")
-    parser.add_argument("-o", "--output", metavar="<path>", type=str, default=os.getcwd(), help="change the output directory \ndefault: %(default)s\ndirectory will be created if non-existent")
+    parser.add_argument(
+        '--version', action='version', version='%(prog)s 0.6.5'
+    )
+    parser.add_argument(
+        "-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename"
+    )
+    parser.add_argument(
+        "-pf", "--pfile", metavar="<filename>", action="append", type=str, 
+        help="specify phenotype filename \ncomma separated .csv file \nfirst column individuals, second column and onwards phenotypes"
+    )
+    parser.add_argument(
+        "-cf", "--cfile", metavar="<filename>", type=str, 
+        help="specify covariate filename \ncomma separated .csv file \nfirst column individuals, second column and onwards covariates\n"
+    )
+    parser.add_argument(
+        "-p", "--pheno", metavar="<int/str>", action="append", type=str, 
+        help="specify phenotypes used for analysis: \n type phenotype name \nOR \n '1' selects first phenotype from phenotype file (second column),\n '2' the second phenotype (third column) and so on"
+    )
+    parser.add_argument(
+        "-c", "--covar", metavar="<int/str>", action="append", type=str, 
+        help="specify covariates used for analysis: \n type covariate name \nOR \n '1' selects first covariate from covariate file (second column),\n '2' the second covariate (third column) and so on"
+    )
+    parser.add_argument(
+        "-gf", "--genefile", metavar="<filename>", type=str, 
+        help= "specify gene file name OR one of the abbreviations for common species \nresulting SNPs from analysis will be compared to these genes \n GFF3 formatted .gff file \nOR \n comma separated .csv file \n file must contain at least three columns: \n  -'chr' column containing chromosome value (same format as in VCF file \n  -'start' column containing start position of gene \n  -'stop' column containing stop position of gene \nfor further formatting information, please refer to the manual"
+    )
+    parser.add_argument(
+        "-gt", "--genethresh", metavar="<int>", type=int, default=100000, 
+        help="set gene distance threshold when comparing genes (in bp) (default: %(default)s) \nonly SNPs with distances below threshold will be considered for comparison of each gene"
+    )
+    parser.add_argument(
+        "-q", "--minaf", metavar="<float>", type=float, default=0.01, 
+        help="minimum allele frequency of sites to be used (default: %(default)s) \ninput value needs to be a value between 0.0 and 1.0 "
+    )
+    parser.add_argument(
+        "-chr", "--chromosome", metavar="<int/str>", action="append", type=str, 
+        help="specify chromosomes for analysis \nby default, all chromosomes will be analyzed \ninput value has to be in the same format as the CHROM value in the VCF file"
+    )
+    parser.add_argument(
+        "-t", "--topsnp", metavar="<int>", type=int, default=15, 
+        help="number of top SNPs of each phenotype to be summarized (default: %(default)s) \nafter analysis the specified amount of top SNPs from each phenotype will be considered"
+    )
+    parser.add_argument(
+        "-M", "--memory", metavar="<int>", type=int, default=int(((virtual_memory().total/1e9)//2)*1e3), 
+        help="set memory usage (in MB) \nif not specified, half of total memory will be used (%(default)s MB)"
+    )
+    parser.add_argument(
+        "-T", "--threads", metavar="<int>", type=int, default=mp.cpu_count()-1, 
+        help="set core usage \nif not specified, all available logical cores minus 1 will be used (%(default)s cores)"
+    )
+    parser.add_argument(
+        "-k", "--relmatrix", metavar="<filename>", type=str, 
+        help="specify relatedness matrix file name \nfor formatting details please refer to the manual"
+    )
+    parser.add_argument(
+        "-P", "--PCA", metavar="<int>", type=int, nargs="?", const=2, 
+        help="perform PCA on phenotypes and use resulting PCs as phenotypes for GEMMA analysis \noptional: set amount of PCs to be calculated (default: %(const)s) \nrecommended amount of PCs: 2 - 10"
+    )
+    parser.add_argument(
+        "-U", "--UMAP", metavar="<int>", type=int, nargs="?", const=2, 
+        help="perform UMAP on phenotypes and use resulting embeddings as phenotypes for GEMMA analysis \noptional: set amount of embeddings to be calculated (default: %(const)s) \nrecommended amount of embeddings: 1 - 5"
+    )
+    parser.add_argument(
+        "-KC", "--kcpca", metavar="<float>", nargs='?', const=0.5, type=float, 
+        help="Kinship calculation via principal component analysis instead of GEMMA's internal method \noptional: r-squared threshold for LD pruning (default: %(const)s)"
+    )    
+    parser.add_argument(
+        "-sv", "--sigval", metavar="<float>", type=float, 
+        help="set value where to draw significant line in manhattan plot \n<int> represents -log10(1e-<int>) \ndefault: Bonferroni corrected with total amount of SNPs used for analysis \nwhen using '-bslmm', value is adjusted to fit in the range of 0 to 1 \nset <int> to '0' to disable line"
+    )
+    parser.add_argument(
+        "-fs", "--fontsize", metavar="<int>", type=int, default=26, 
+        help="Set the fontsize of plots \nDefault: %(default)s"
+    )
+    parser.add_argument(
+        "-o", "--output", metavar="<path>", type=str, default=os.getcwd(), 
+        help="change the output directory \ndefault: %(default)s\ndirectory will be created if non-existent"
+    )
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-lm", type=int, choices=[1,2,3,4], nargs="?", const=1, help="Association Tests with a Linear Model \noptional: specify which frequentist test to use (default: %(const)s) \n 1: performs Wald test \n 2: performs likelihood ratio test \n 3: performs score test \n 4: performs all three tests")
