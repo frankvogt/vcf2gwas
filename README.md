@@ -35,7 +35,7 @@ Some of the benefits of this pipeline include:
 * Once the analysis has been executed, the results will be analyzed:
     * Manhattan plots, Q-Q plots and diagnostic plots (dependent on GEMMA's model)
     * Summaries of the SNPs 
-    * Comparison to desired genes
+    * Comparison to genes
 * vcf2gwas is able to analyze several input files with different sets of individuals and multiple phenotypes in a efficient manner due to parallelization, saving the user a lot of time compared to standard GWAS procedure
 * Results are reproducible on any compatible machine
 * Figures are publication-ready <br/>
@@ -126,9 +126,11 @@ A covariate file can be used to provide covariates for GEMMA analysis when runni
 The covariate file has to be formatted in the same way as the phenotype file, with individual IDs in the first column and the covariates in the remaining columns with their respective names as column names.
 
 #### Gene file:
-To compare the resulsts of the GWAS analysis with desired genes, a gene file can be provided as input. The gene file has to be in the comma separated `.csv` format as well with at least three columns containing information about chromosome, gene start position and gene stop position. These columns need to be named 'chr', 'start' and 'stop'.  
+vcf2gwas has GFF files for the most common species built-in. To compare the results, use the species abbreviation with the `-gf` / `--genefile` option (see [File affiliated options](#file-affiliated-options)). For more information about the available species, their abbreviations and the reference file used, please refer to the [manual](https://github.com/frankvogt/vcf2gwas/blob/main/MANUAL.md).  
+To compare the results of the GWAS analysis with specific genes, a gene file can be provided as input. The gene file has to be either a GFF3 formatted `.gff` file or a comma separated `.csv` file.  
+If in the `.csv` format, the file needs at least three columns containing information about chromosome, gene start position and gene stop position. These columns have to be named 'chr', 'start' and 'stop'.  
 Furthermore it is necessary that the chromosome information is in the same format as the chromosome information in the VCF file, otherwise vcf2gwas won't recognize the information correctly.  
-Optional columns providing additional information have to be called 'ID', 'name' and 'comment'. Below is an excerpt of an exemplary gene file:
+Optional columns providing additional information have to be called 'ID', 'name' and 'comment'. Below is an excerpt of an exemplary gene file in the `.csv` format:
 
 |chr|start|stop|ID|name|comment|
 |---|---|---|---|---|---|
@@ -161,6 +163,8 @@ Specify phenotype file.
 
 * `-p` / `--pheno` <int>  
 Specify phenotypes used for analysis:  
+Type the phenotype name  
+OR  
 '1' selects first phenotype from phenotype file (second column), '2' the second phenotype (third column) and so on.
 
 * `-ap` / `--allphentypes`  
@@ -171,10 +175,17 @@ Specify covariate file.
 
 * `-c` / `--covar` <int>  
 Specify covariates used for analysis:  
+Type the covariate name  
+OR  
 '1' selects first covariate from covariate file (second column), '2' the second covariate (third column) and so on.
 
 * `-ac` / `--allcovariates`  
 All covariates in the covariate file will be used.
+
+* `-chr`/ `--chromosome` <int/str>  
+Specify chromosomes for analysis.  
+By default, all chromosomes will be analyzed.  
+Input value has to be in the same format as the CHROM value in the VCF file
 
 * `-gf` / `--genefile` <filename>  
 Specify gene file.
@@ -263,8 +274,9 @@ optional: r-squared threshold for LD pruning (default: 0.5)
 
 * `-sv` / `--sigval` <int>  
 set value where to draw significant line in manhattan plot  
-<int> represents -log10(1e-<int>) (default: 6)  
-when using '-bslmm', value is adjusted to fit in the range of 0 to 1  
+<int> represents -log10(1e-<int>)  
+Default: Bonferroni corrected with total amount of SNPs used for analysis.  
+When using '-bslmm', value is adjusted to fit in the range of 0 to 1  
 set <int> to '0' to disable line
 
 * `-nl` / `--nolabel`  
