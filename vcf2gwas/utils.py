@@ -431,7 +431,7 @@ class Logger:
             k = f'\n  --memory {memory}'
         if threads != mp.cpu_count()-1:
             l = f'\n  --threads {threads}'
-        if sigval != 6:
+        if sigval != None:
             x = f'\n  --sigval {sigval}'
         if A == True:
             m = '\n  --allphenotypes'
@@ -1219,7 +1219,7 @@ class Post_analysis:
             np.random.seed(0)
 
             # Bonferroni correction
-            if sigval == 6 and x != 0:
+            if sigval == None and x != 0:
                 sig_level = (0.05 / x)
                 sigval = -np.log10(sig_level)
 
@@ -1757,6 +1757,7 @@ class Summary:
 
     def chr_converter(df, chr):
 
+        df["chr"] = df["chr"].astype("str")
         chr2 = df["chr"].tolist()
         chr_dict = {}
         chr_set = set(chr)
