@@ -57,6 +57,11 @@ def main(argvals=argvals):
         installer()
         args = f'python3.9 {source} -v input/example.vcf.gz -pf input/example.csv -p 1 -lm'.split()
     
+    lmm = P.set_lmm()
+    covar = P.set_covar()
+    if lmm == None and covar != None:
+        sys.exit(print("Error: A covariate file can only be added when using the linear mixed model ('-lmm')"))
+
     subprocess.run(args)
 
 if __name__ == '__main__':

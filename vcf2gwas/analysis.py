@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+import sys
 from vcf2gwas.utils import make_dir, runtime_format
 from parsing import *
 from utils import *
@@ -29,6 +30,7 @@ import multiprocessing as mp
 import itertools
 import os
 import shutil
+import signal
 
 import pandas as pd
 import seaborn as sns
@@ -40,6 +42,7 @@ argvals = None
 ############################## Initialising Program ##############################
 
 timestamp = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
+timestamp2 = read_timestamp()
 start = time.perf_counter()
 # set argument parser
 P = Parser(argvals)
@@ -48,6 +51,7 @@ out_dir2 = os.path.join(out_dir, "output")
 
 # set variables
 pheno_file = P.set_pheno()
+pheno_file_temp = pheno_file
 pheno_file_path = []
 if pheno_file != None:
     plist = []
@@ -59,11 +63,24 @@ if pheno_file != None:
 pheno_file = listtostring(pheno_file)
 
 covar_file = P.set_covar()
+covar_temp = covar_file
 if covar_file != None:
     covar_file_path = covar_file
     covar_file = os.path.split(covar_file)[1]
 
+lm = P.set_lm()
+gk = P.set_gk()
+eigen = P.set_eigen()
+lmm = P.set_lmm()
+bslmm = P.set_bslmm()
+model = set_model(lm, gk, eigen, lmm, bslmm)
+model2 = None
+if model != None:
+    model2 = model.removeprefix("-")
+
 pc_prefix = set_pc_prefix(pheno_file, covar_file, "_")
+if model in ["-gk", "-eigen"]:
+    pc_prefix = set_pc_prefix(pheno_file, covar_file, "")
 
 # configure logger
 Log = Logger(pc_prefix, out_dir2)
@@ -74,7 +91,11 @@ Log.print_log(f'\nBeginning with analysis of {pheno_file}\n')
 snp_file2 = P.set_geno()
 snp_file = os.path.split(snp_file2)[1]
 X = P.get_phenotypes()
+if pheno_file_temp != None and X != None:
+    X = pheno_switcher(pheno_file_temp, X)
 Y = P.get_covariates()
+if covar_temp != None and Y != None:
+    Y = pheno_switcher(covar_temp, Y)
 min_af = P.set_q()
 A = P.set_A()
 B = P.set_B()
@@ -82,17 +103,6 @@ pca = P.set_pca()
 keep = P.set_keep()
 memory = P.set_memory()
 threads = P.set_threads()
-
-lm = P.set_lm()
-gk = P.set_gk()
-eigen = P.set_eigen()
-lmm = P.set_lmm()
-bslmm = P.set_bslmm()
-
-model = set_model(lm, gk, eigen, lmm, bslmm)
-model2 = None
-if model != None:
-    model2 = model.removeprefix("-")
 
 n_top = P.set_n_top()
 #gene_file = P.set_gene_file()
@@ -179,7 +189,8 @@ Log.print_log("Files successfully adjusted\n")
 if (len(list1)-(len(diff1a)+len(diff1b))) == 0:
     if keep == False:
         Converter.remove_files(subset, pheno_file, subset2, snp_file2)
-    exit(Log.print_log("Error: No individuals left! Check if IDs in VCF and phenotype file are of the same format"))
+    Log.print_log("Error: No individuals left! Check if IDs in VCF and phenotype file are of the same format")
+    sys.exit(1)
 
 ############################## Filter, make ped and bed ##############################
 
@@ -235,7 +246,8 @@ else:
 if covar_file == None:
     Y = []
     cols2 = []
-    Log.print_log("No covariate file specified, continuing without")
+    if model == "-lmm":
+        Log.print_log("No covariate file specified, continuing without")
 else:
     if model == "-lmm":
         if B == True:
@@ -333,7 +345,7 @@ else:
         make_dir(os.path.join(out_dir2, model2))
         path = None
         if model not in ("-gk", "-eigen"):
-            path = os.path.join(out_dir2, model2, i)
+            path = os.path.join(out_dir2, model2, i, f'{i}_{timestamp2}')
             make_dir(path)
         
         prefix_list.append(prefix)
@@ -370,8 +382,8 @@ else:
     path = os.path.join(out_dir2, model2)
 
 if model not in ("-gk", "-eigen", None):
-    make_dir(os.path.join(path, "summary"))
-    path2 = os.path.join(path, "summary", "top_SNPs")
+    #make_dir(os.path.join(path, "summary"))
+    path2 = os.path.join(path, "summary", "temp","top_SNPs")
     make_dir(path2)
     Post_analysis.print_top_list(top_ten, columns, path2, pc_prefix, snp_prefix)
     Log.print_log("Top SNPs saved")
@@ -385,13 +397,13 @@ for files in os.listdir():
     if files.startswith((f'sub{pc_prefix}', subset2)):
         shutil.move(files, os.path.join(path3, files))
 if model == "-gk":
-    path2 = os.path.join(path, "rel_matrix")
+    path2 = os.path.join(path, "rel_matrix", f'rel_matrix_{timestamp2}')
     make_dir(path2)
     for files in os.listdir(path3):
         if files.endswith("XX.txt"):
             shutil.move(os.path.join(path3, files), os.path.join(path2, files))
 if model == "-eigen":
-    path2 = os.path.join(path, "eigen_v")
+    path2 = os.path.join(path, "eigen_v", f'rel_matrix_{timestamp2}')
     make_dir(path2)
     for files in os.listdir(path3):
         if files.endswith(("eigenD.txt", "eigenU.txt")):
@@ -403,4 +415,6 @@ time_total = runtime_format(time_total)
 
 Log.print_log(f'Clean up successful \n\nAnalysis of {pheno_file} finished successfully\nRuntime: {time_total}\n')
 
-move_log(model, model2, pc_prefix, snp_prefix, out_dir2)
+move_log(model, model2, pc_prefix, snp_prefix, out_dir2, timestamp2)
+
+sys.exit(0)
