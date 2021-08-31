@@ -16,7 +16,7 @@ requirements = [
 
 setup(
     name='vcf2gwas',
-    version='0.6.4',
+    version='0.6.5',
     description="Python API for comprehensive GWAS analysis using GEMMA",
     license="GNUv3",
     author="Frank Vogt",
@@ -24,7 +24,7 @@ setup(
     url='https://github.com/frankvogt/vcf2gwas',
     packages=['vcf2gwas'],
     package_dir={'vcf2gwas': 'vcf2gwas'},
-    package_data={'vcf2gwas': ['*.yml', 'input/example.*', 'README.*', 'LIC*']},
+    package_data={'vcf2gwas': ['*.yml', 'input/example.*', 'GFF_files/GFF*, 'README.*', 'LIC*']},
     entry_points={
         'console_scripts': [
             'vcf2gwas=vcf2gwas.__main__:main'
