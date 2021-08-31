@@ -109,9 +109,11 @@ This is advantageous if one wants to analyze the same phenotypes with a differen
 
 ### Analyzing multiple phenotypes
 
-To analyze multiple phenotypes in one run you can either specify multiple phenotypes
+To analyze multiple phenotypes in one run you can either specify multiple phenotypes (by either typing the phenotype names or specifying the phenotype column position)
 
 ```
+vcf2gwas -v [filename] -pf [filename] -p [name1] -p [name2] -p [name3] -lmm
+
 vcf2gwas -v [filename] -pf [filename] -p [num1] -p [num2] -p [num3] -lmm
 ```
 
@@ -131,16 +133,44 @@ vcf2gwas -v [filename] -pf [filename] -p [num1] -cf [filename] -c 1 -lmm
 ```
 
 Here, the 1st covariate column of the covariate file will be considered in the analysis of the selected phenotype.
-Similarly to the phenotype options, multiple covariates can be selected as well as all at once using `-ac/--allcovariates`.
-If covariates are selected when running a different GEMMA model, the covariates will simply be added to the analysis as phenotypes. 
+Similarly to the phenotype options, multiple covariates can be selected (either by name or column number) as well as all at once using `-ac/--allcovariates`.
 
 ### Comparing results to specific genes
 
-Comparing the GWAS results to specific genes of interest can be a tedious task. To facilitate this process, vcf2gwas supports adding a 'gene-file' containing the position as well as additional information of genes to the analysis by using the `-gf/--genefile` option:
+Comparing the GWAS results to specific genes of interest can be a tedious task. To facilitate this process, vcf2gwas comes with GFF gene files already built-in for the most common species. Comparison to a species can be selected by employing the `-gf/--genefile` option and the abbreviation for the species:
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -gf [abbreviation]
+```
+
+Below are all supported species, their abbreviations as well as the used references and their sources:
+
+|Species|Abbreviation|Scientific name|Reference|Source|
+|---|---|---|---|---|
+|anopheles|AG|anopheles gambiae|AgamP4.51|[link](http://ftp.ensemblgenomes.org/pub/metazoa/release-51/gff3/anopheles_gambiae/)|
+|arabidopsis|AT|arabidopsis thaliana|TAIR10.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/arabidopsis_thaliana/)|
+|c elegans|CE|caenorhabditis elegans|WBcel235|[link](http://ftp.ensembl.org/pub/release-104/gff3/caenorhabditis_elegans/)|
+|drosophila|DM|drosophila melanogaster|BDGP6.32|[link](http://ftp.ensembl.org/pub/release-104/gff3/drosophila_melanogaster/)|
+|zebrafish|DR|danio rerio|GRCz11|[link](http://ftp.ensembl.org/pub/release-104/gff3/danio_rerio/)|
+|chicken|GG|gallus gallus|GRCg6a|[link](http://ftp.ensembl.org/pub/release-104/gff3/gallus_gallus/)|
+|human|HS|homo sapiens|GRCh38.p13|[link](http://ftp.ensembl.org/pub/release-104/gff3/homo_sapiens/)|
+|mouse|MM|mus musculus|GRCm39|[link](http://ftp.ensembl.org/pub/release-104/gff3/mus_musculus/)|
+|rice|OS|oryza sativa|IRGSP-1.0.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/oryza_sativa/)|
+|rat|RN|rattus norvegicus|Rnor_6.0|[link](http://ftp.ensembl.org/pub/release-104/gff3/rattus_norvegicus/)|
+|yeast|SC|saccharomyces cerevisiae|R64-1-1|[link](http://ftp.ensembl.org/pub/release-104/gff3/saccharomyces_cerevisiae/)|
+|tomato|SL|solanum lycopersicum|SL3.0.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/solanum_lycopersicum/)|
+|grape|VV|vitis vinifera|12X.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/vitis_vinifera/)|
+|maize|ZM|zea mays|Zm-B73-REFERENCE-NAM-5.0.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/zea_mays/)|
+
+Futhermore, vcf2gwas supports adding a 'gene-file' (either a GFF3 formatted `.gff` or comma-separated `.csv` file) containing the position as well as additional information of genes to the analysis by using the `-gf/--genefile` option:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -gf [filename]
 ```
+If the file is in the `.csv` format, the file needs at least three columns containing information about chromosome, gene start position and gene stop position. These columns have to be named 'chr', 'start' and 'stop'.  
+
+vcf2gwas recognizes chromosomes in the following formats (here the first chromosome): `Chr1`, `chr1`, `1`.  
+If the chromosomes in the `VCF` file are of a different format, it is necessary that the chromosome information in the gene file is formatted in the same way, otherwise vcf2gwas won't recognize the information correctly.  
 
 vcf2gwas will summarize the `n` best SNPs (specified with `-t/--topsnp`) of every analyzed phenotype and compare them to the genes in the file by calculating the distance between each SNP and gene upstream as well as downstream. These results can be filtered by saving only those SNPs with a distance to a gene lower than a specific threshold (set with `-gt/--genethresh`).
 
@@ -165,6 +195,16 @@ vcf2gwas -v [filename] -eigen
 ```
 
 Of course the `-eigen` option can also be used when supplying your own relatedness matrix with the `-k/--relmatrix` option.
+
+### Analyzing a subset of chromosomes
+
+By default vcf2gwas analyzes all chromosomes available in the `VCF` file. If one wants to analyze only a subset of the chromosomes, employ the `-chr/--chromosome` option:
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -chr [num1] -chr [num2]
+```
+
+Here, only the two specified chromosomes chromosomes will be used for the analysis, speeding up the whole process.
 
 ### Changing the output directory
 
@@ -289,7 +329,8 @@ QQ-plot comparing the expected and observed probability distributions:
 
 Amongst other things, vcf2gwas will sort the SNPs of every analyzed phenotype, save the specified amount of top SNPs for each phenotype, summarize these SNPs of all phenotypes to check if certain SNPs occur more than once and optionally compare these SNPs to the genes supplied by the gene file. Below is the [output](https://github.com/frankvogt/vcf2gwas/blob/main/files/compared_summarized_top_SNPs_complete_example.csv) shown of such a gene comparison when supplying a [gene file](https://github.com/frankvogt/vcf2gwas/blob/main/files/NLR.csv) containing information about NLR genes in *A. thaliana*:
 
-|SNP_ID|chr|phenotypes|gene_ID(up)|gene_comment(up)|gene_name(up)|gene_distance(up)|SNP_pos|gene_distance(down)|gene_name(down)|gene_comment(down)|gene_ID(down)|
+||||Upstream gene||Downstream gene|
+|SNP ID|Chr|Phenotypes|ID|Comment|Name|Distance|SNP pos|Distance|Name|Comment|ID|
 |---|---|---|---|---|---|---|---|---|---|---|---|
 |3:2237364|3|avrRpm|AT3G07040.1|NB-ARC domain-containing disease resistance protein|RPM1|8340|2237364|||||
 |3:2237394|3|avrRpm|AT3G07040.1|NB-ARC domain-containing disease resistance protein|RPM1|8370|2237394|||||

@@ -182,7 +182,7 @@ OR
 * `-ac` / `--allcovariates`  
 All covariates in the covariate file will be used.
 
-* `-chr`/ `--chromosome` <int/str>  
+* `-chr`/ `--chromosome` <str>  
 Specify chromosomes for analysis.  
 By default, all chromosomes will be analyzed.  
 Input value has to be in the same format as the CHROM value in the VCF file
