@@ -1,4 +1,5 @@
-SNP_ID,chr,phenotypes,gene_ID(left),gene_comment(left),gene_name(left),gene_distance(left),SNP_pos,gene_distance(right),gene_name(right),gene_comment(right),gene_ID(right)
+,,,Upstream gene,Upstream gene,Upstream gene,Upstream gene,,Downstream gene,Downstream gene,Downstream gene,Downstream gene
+SNP ID,Chr,Phenotype,ID,Comment,Name,Distance,SNP position,Distance,Name,Comment,ID
 3:2237364,3,avrRpm,AT3G07040.1,NB-ARC domain-containing disease resistance protein,RPM1,8340,2237364,,,,
 3:2237394,3,avrRpm,AT3G07040.1,NB-ARC domain-containing disease resistance protein,RPM1,8370,2237394,,,,
 3:2237446,3,avrRpm,AT3G07040.1,NB-ARC domain-containing disease resistance protein,RPM1,8422,2237446,,,,
