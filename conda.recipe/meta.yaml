@@ -1,11 +1,11 @@
 
-{% set name = "vcf2gwas" %}
-{% set version = "0.6.4" %}
+#{% set name = "vcf2gwas" %}
+#{% set version = "0.6.4" %}
 {% set data = load_setup_py_data() %}
 
 package:
-  name: {{ name|lower }}
-  version: {{ version }}
+  name: {{ data.get('name') }}
+  version: {{ data.get('version') }}
 
 source:
   git_url: https://github.com/frankvogt/vcf2gwas.git
