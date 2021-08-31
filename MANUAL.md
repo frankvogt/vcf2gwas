@@ -25,6 +25,7 @@ The phenotype file `example.csv` is made up of the `avrRpm1` phenotype from the 
     * [Adding covariates](#adding-covariates)
     * [Comparing results to specific genes](#comparing-results-to-specific-genes)
     * [Adding a relatedness matrix](#adding-a-relatedness-matrix)
+    * [Analyzing a subset of chromosomes](#analyzing-a-subset-of-chromosomes)
     * [Changing the output directory](#changing-the-output-directory)
 * [Miscellaneous options](#miscellaneous-options)
     * [Limiting memory and core usage](#limiting-memory-and-core-usage)
