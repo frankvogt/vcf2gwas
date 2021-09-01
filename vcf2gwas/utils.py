@@ -929,11 +929,11 @@ class Converter:
         """Description:
         indexes VCF file"""
 
-        try:
-            subprocess.run(['bcftools', 'index', '-f', snp_file])
-        except Exception as e:
-            subprocess.run(['bcftools', 'sort', snp_file, "-Oz", "o", snp_file])
-            subprocess.run(['bcftools', 'index', '-f', snp_file])
+        process = subprocess.run(['bcftools', 'index', '-f', snp_file])
+        if process.returncode != 0:
+            print("VCF unsorted \nSorting..")
+            subprocess.run(['bcftools', 'sort', snp_file, "-Oz", "-o", snp_file])
+            subprocess.run(['bcftools', 'index', '-f', snp_file])       
 
     def set_chrom(snp_file):
         """Description:
@@ -1219,7 +1219,7 @@ class Post_analysis:
             np.random.seed(0)
 
             # Bonferroni correction
-            if sigval == None and x != 0:
+            if sigval != 0 and x != 0:
                 sig_level = (0.05 / x)
                 sigval = -np.log10(sig_level)
 
@@ -1919,11 +1919,18 @@ class Summary:
                     except Exception:
                         pass
                     #make multicolumns
-                    multicols = [
-                        np.array(["", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
-                        np.array(["SNP ID", "Chr", "Phenotype", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
-                    ]
-                    values.columns = multicols
+                    if len(values.columns) == 12:
+                        multicols = [
+                            np.array(["", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
+                            np.array(["SNP ID", "Chr", "Phenotype", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
+                        ]
+                        values.columns = multicols
+                    elif len(values.columns) == 13:
+                        multicols = [
+                            np.array(["", "", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
+                            np.array(["SNP ID", "Chr", "Count", "Phenotype", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
+                        ]
+                        values.columns = multicols                       
                     #save file
                     if n > 0:
                         values.to_csv(os.path.join(path, f'{gene_file_name}_compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv'), index=False)
