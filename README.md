@@ -122,7 +122,7 @@ Example files to run GEMMA can be found in the input folder (VCF file + correspo
 |6901|0|
 
 #### Covariate file:
-A covariate file can be used to provide covariates for GEMMA analysis when running the linear mixed model. When running any other model, the contained covariates will be added as phenotypes for the analysis.  
+A covariate file can be used to provide covariates for GEMMA analysis when running the linear mixed model.  
 The covariate file has to be formatted in the same way as the phenotype file, with individual IDs in the first column and the covariates in the remaining columns with their respective names as column names.
 
 #### Gene file:
