@@ -278,7 +278,7 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -q 0.02
 
 ### Change manhattan plot
 
-The manhattan plot which will be produced from the GEMMA output, features by default a significant value line. The significance level is by determined by Bonferroni-correcting the standard significance level of 0.05 with the amount of SNPs used by GEMMA in the analysis. All SNPs above that line will be labeled.  
+The manhattan plot which will be produced from the GEMMA output, features by default a significant value line. The significance level is determined by Bonferroni-correcting the standard significance level of 0.05 with the amount of SNPs used by GEMMA in the analysis. All SNPs above that line will be labeled.  
 To change the threshold line manually, use the `-sv/--sigval` option.
 
 ```
