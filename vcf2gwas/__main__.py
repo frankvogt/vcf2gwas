@@ -55,7 +55,9 @@ def main(argvals=argvals):
     if geno == "test":
         source = os.path.join(os.path.dirname(__file__), 'starter.py')
         installer()
-        args = f'python3.9 {source} -v input/example.vcf.gz -pf input/example.csv -p 1 -lm'.split()
+        vcf = os.path.join("input", "example.vcf.gz")
+        pheno = os.path.join("input", "example.csv")
+        args = f'python3.9 {source} -v {vcf} -pf {pheno} -p 1 -lm'.split()
     
     lm = P.set_lm()
     lmm = P.set_lmm()

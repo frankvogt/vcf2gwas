@@ -351,7 +351,7 @@ else:
 
         if model in ("-eigen", "-lmm"):
             if filename == None:
-                filename = Gemma.rel_matrix(prefix, Log)
+                filename = Gemma.rel_matrix(prefix, Log, covar_file_name)
 
     # run GEMMA in parallel
     with concurrent.futures.ProcessPoolExecutor(mp_context=mp.get_context('fork'), max_workers=threads) as executor:

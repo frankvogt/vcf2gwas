@@ -726,12 +726,17 @@ class Starter:
             file2.close()
             lines = [int(i.rstrip()) for i in lines]
             lines2 = [int(i.rstrip()) for i in lines2]
-            x = max(lines)
+            x1 = min(lines)
+            x2 = max(lines)
             n1 = min(lines2)
             n2 = max(lines2)
         except:
-            x = 0
+            x1 = x2 = 0
             n1 = n2 = 0
+        if x1 == x2:
+            x = x1
+        else:
+            x = listtostring([x1, x2], " - ")
         if n1 == n2:
             n = n1
         else:
@@ -746,11 +751,17 @@ class Starter:
         try:
             lines = file.readlines()
             file.close()
-            x = lines[-1].rstrip()
+            lines = [i.rstrip() for i in lines]
+            x1 = min(lines)
+            x2 = max(lines)
         except:
-            x = 0
-        if x == 0:
-            x = "-"
+            x1 = x2 = 0
+        if x1 == x2:
+            x = x1
+            if x == 0:
+                x = "-"
+        else:
+            x = listtostring([x1, x2], " - ")
         os.remove("vcf2gwas_sig_level.txt")
         return x
 
@@ -1087,13 +1098,16 @@ class Gemma:
         file.write(str(code))
         file.close()
     
-    def rel_matrix(prefix, Log, model='-gk', n='1'):
+    def rel_matrix(prefix, Log, covar_file_name, model='-gk', n='1'):
         """Description:
         creates relatedness matrix and sets filename variable"""
 
         Log.print_log('Creating relatedness matrix..')
-        # comment out following two lines for testing if file is already in output    
-        process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-o', prefix, '-outdir', "."])
+        # comment out following lines for testing if file is already in output
+        if covar_file_name == None:
+            process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-o', prefix, '-outdir', "."])
+        else:
+            process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-c', covar_file_name, '-o', prefix, '-outdir', "."])
         Gemma.write_returncodes(process.returncode)
         if process.returncode != 0:
             Log.print_log(f'Error: GEMMA was not able to complete the analysis')
@@ -1113,7 +1127,7 @@ class Gemma:
         if covar_file_name == None:
             process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-o', prefix2, '-outdir', path])
         else:
-            process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, "-c", covar_file_name, '-o', prefix2, '-outdir', path])
+            process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-c', covar_file_name, '-o', prefix2, '-outdir', path])
         Gemma.write_returncodes(process.returncode)
         if process.returncode != 0:
             Log.print_log(f'Error: GEMMA was not able to complete the analysis')
@@ -1177,7 +1191,7 @@ class Gemma:
             Gemma.lm(prefix, prefix2, model, n, N, path, Log, covar_file_name)
 
         elif model == "-gk":
-            Gemma.rel_matrix(prefix, Log, model, n)
+            Gemma.rel_matrix(prefix, Log, covar_file_name, model, n)
 
         elif model == "-eigen":
             if filename != None:
@@ -1280,6 +1294,7 @@ class Post_analysis:
             np.random.seed(0)
 
             # Bonferroni correction
+            sig_level = 0
             if sigval != 0 and x != 0:
                 sig_level = (0.05 / x)
                 sigval = -np.log10(sig_level)
