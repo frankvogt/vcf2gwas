@@ -350,7 +350,7 @@ class Logger:
     def summary(
         self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, 
         pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
-        out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level
+        out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch
     ):
         """Description:
         prints summary of input variables and methods"""
@@ -403,6 +403,9 @@ class Logger:
                 e = '\n  Covariates chosen: None'
             else:
                 e = f'\n  Covariates chosen: {Y}'
+            if geno_pca_switch == True:
+                d = f'\n- Covariates: principal components ({Y})'
+                e = "" 
         if gene_file != None:
             if species == None:
                 q = f'\n- Gene comparison file: "{gene_file}"'
@@ -437,8 +440,9 @@ class Logger:
             m = '\n  --allphenotypes'
             c = f'\n  Phenotypes chosen: all phenotypes'
         if B == True:
-            n = '\n  --allcovariates'
-            e = f'\n  Covariates chosen: all covariates'
+            if geno_pca_switch == False:
+                n = '\n  --allcovariates'
+                e = f'\n  Covariates chosen: all covariates'
         if keep == True:
             o = '\n  --retain'
         if pca != None:
@@ -913,6 +917,43 @@ class Processing:
             if file.startswith("plink"):
                 os.remove(file)
 
+    def pca_analysis2(snp_file, n, memory, threads, chrom, list1):
+        """Description:
+        performs LD pruning and principal component analysis via plink"""
+        
+        name = "vcf2gwas_geno_pca"
+        string = "_"
+        list2 = [l for l in list1 if string in l]
+        if list2 != None:
+            if chrom <= 24:
+                do_pca = subprocess.run(['plink', '--pca', str(n), '--vcf', snp_file, '--mind', '1', '--out', name, '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
+                do_pca.stdout
+            else:
+                do_pca = subprocess.run(['plink', '--pca', str(n), '--vcf', snp_file, '--mind', '1', '--out', name, '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--double-id', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
+                do_pca.stdout
+        else:
+            if chrom <= 24:
+                do_pca = subprocess.run(['plink', '--pca', str(n), '--vcf', snp_file, '--mind', '1', '--out', name, '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
+                do_pca.stdout
+            else:
+                do_pca = subprocess.run(['plink', '--pca', str(n), '--vcf', snp_file, '--mind', '1', '--out', name, '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
+                do_pca.stdout        
+
+        df = pd.read_csv(f'{name}.eigenvec', header=None, sep="\s+")
+        while len(df.columns) > n+1:
+            df = df.drop(df.columns[0], axis=1)
+        cols = [""]
+        cols2 = []
+        for i in range(n):
+            cols.append(f'PC{i+1}')
+            cols2.append(f'PC{i+1}')
+        df.columns = cols
+        for file in os.listdir():
+            if file.startswith(name):
+                os.remove(file)
+        df.to_csv(f'{name}.csv', index=False)
+        return cols2
+
 
 class Converter:
     """Description:
@@ -935,17 +976,18 @@ class Converter:
             subprocess.run(['bcftools', 'sort', snp_file, "-Oz", "-o", snp_file])
             subprocess.run(['bcftools', 'index', '-f', snp_file])       
 
-    def set_chrom(snp_file):
+    def set_chrom(snp_file, switch=True):
         """Description:
         sets variable to amount of chromosomes"""
 
         out = subprocess.run(['bcftools', 'query', '-f', '%CHROM\n', snp_file], stdout=subprocess.PIPE, text=True)
         ls = (out.stdout).split()
         ls_set = set(ls)
-        try:
-            print(f'Chromosomes: {listtostring(sorted(ls_set), ", ")}')
-        except Exception:
-            pass
+        if switch == True:
+            try:
+                print(f'Chromosomes: {listtostring(sorted(ls_set), ", ")}')
+            except Exception:
+                pass
         return len(ls_set)
 
     def check_chrom(snp_file, chr):
@@ -981,14 +1023,14 @@ class Converter:
             filtered = subprocess.run(['bcftools', 'view', "-r", chr, '-m2', '-M2', '-v', 'snps', '-q', str(min_af), subset, '-Oz', '-o', subset2], stdout=subprocess.PIPE, text=True) 
             filtered.stdout
 
-    def make_bed(subset2, chrom, memory, threads, list):
+    def make_bed(subset2, chrom, memory, threads, list1):
         """Description:
         converts VCF file to PLINK BED files via plink"""
 
         string = "_"
-        list2 = [l for l in list if string in l]
+        list2 = [l for l in list1 if string in l]
         if list2 != None:
-            if chrom <= 23:
+            if chrom <= 24:
                 make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
                 make_bed.stdout            
             else:    
@@ -996,7 +1038,7 @@ class Converter:
                 make_bed.stdout
         else:
             #make_bed = subprocess.run(['plink', '--dummy', '15000', '2000000', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
-            if chrom <= 23:            
+            if chrom <= 24:            
                 make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)            
                 make_bed.stdout                            
             else:
@@ -1038,17 +1080,23 @@ class Converter:
 class Gemma:
     """Description:
     contains functions peforming GWAS analysis by calling GEMMA"""
+
+    def write_returncodes(code):
+
+        file = open("vcf2gwas_process_report.txt", 'a')
+        file.write(str(code))
+        file.close()
     
     def rel_matrix(prefix, Log, model='-gk', n='1'):
         """Description:
         creates relatedness matrix and sets filename variable"""
 
         Log.print_log('Creating relatedness matrix..')
-        # comment out following two lines for testing if file is already in ouput
-        try:    
-            subprocess.run(['gemma', '-bfile', prefix, model, n, '-o', prefix, '-outdir', "."], check=True)
-        except subprocess.CalledProcessError as e:
-            Log.print_log(f'Error: GEMMA was not able to complete the analysis \n{e}')
+        # comment out following two lines for testing if file is already in output    
+        process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-o', prefix, '-outdir', "."])
+        Gemma.write_returncodes(process.returncode)
+        if process.returncode != 0:
+            Log.print_log(f'Error: GEMMA was not able to complete the analysis')
             sys.exit(1)
         if n == '1':
             filename = f'{prefix}.cXX.txt'
@@ -1057,15 +1105,18 @@ class Gemma:
         Log.print_log("Relatedness matrix created successfully")
         return filename
 
-    def lm(prefix, prefix2, model, n, N, path, Log):
+    def lm(prefix, prefix2, model, n, N, path, Log, covar_file_name):
         """Description:
         performs GWAS with linear model"""
 
         Log.print_log('Calculating linear model..')
-        try:
-            subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-o', prefix2, '-outdir', path], check=True)
-        except subprocess.CalledProcessError as e:
-            Log.print_log(f'Error: GEMMA was not able to complete the analysis \n{e}')
+        if covar_file_name == None:
+            process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-o', prefix2, '-outdir', path])
+        else:
+            process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, "-c", covar_file_name, '-o', prefix2, '-outdir', path])
+        Gemma.write_returncodes(process.returncode)
+        if process.returncode != 0:
+            Log.print_log(f'Error: GEMMA was not able to complete the analysis')
             sys.exit(1)
         Log.print_log("Linear model calculated successfully")
 
@@ -1074,10 +1125,10 @@ class Gemma:
         performs eigen-decomposition of relatedness matrix"""
 
         Log.print_log('Decomposing relatedness matrix..')
-        try:
-            subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, '-o', prefix, '-outdir', "."], check=True)
-        except subprocess.CalledProcessError as e:
-            Log.print_log(f'Error: GEMMA was not able to complete the analysis \n{e}')
+        process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, '-o', prefix, '-outdir', "."])
+        Gemma.write_returncodes(process.returncode)
+        if process.returncode != 0:
+            Log.print_log(f'Error: GEMMA was not able to complete the analysis')
             sys.exit(1)
         Log.print_log("Eigen-decomposition of relatedness matrix successful")
 
@@ -1086,19 +1137,19 @@ class Gemma:
         performs GWAS with linear mixed model"""
 
         Log.print_log('Calculating linear mixed model..')
-        try:
-            if covar_file_name == None:
-                if pca != None:
-                    subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path], check=True)
-                else:
-                    subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path], check=True)
+        if covar_file_name == None:
+            if pca != None:
+                process = subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path], check=True)
             else:
-                if pca != None:
-                    subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, "-c", covar_file_name, '-o', prefix2, '-outdir', path], check=True)
-                else:
-                    subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, "-c", covar_file_name,'-o', prefix2, '-outdir', path], check=True)
-        except subprocess.CalledProcessError as e:
-            Log.print_log(f'Error: \n{e} \nPossibly not enough memory available to process files.')
+                process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path], check=True)
+        else:
+            if pca != None:
+                process = subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, "-c", covar_file_name, '-o', prefix2, '-outdir', path], check=True)
+            else:
+                process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, "-c", covar_file_name,'-o', prefix2, '-outdir', path], check=True)
+        Gemma.write_returncodes(process.returncode)
+        if process.returncode != 0:
+            Log.print_log(f'Error code: \n{process.returncode} \nPossibly not enough memory available to process files.')
             sys.exit(1)
         Log.print_log("Linear mixed model calculated successfully")
 
@@ -1107,10 +1158,10 @@ class Gemma:
         performs GWAS with bayesian sparse linear mixed model"""
 
         Log.print_log('Calculating bayesian sparse linear mixed model..')
-        try:
-            subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-o', prefix2, '-outdir', path], check=True)
-        except subprocess.CalledProcessError as e:
-            Log.print_log(f'Error: GEMMA was not able to complete the analysis \n{e}')
+        process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-o', prefix2, '-outdir', path], check=True)
+        Gemma.write_returncodes(process.returncode)
+        if process.returncode != 0:
+            Log.print_log(f'Error: GEMMA was not able to complete the analysis')
             sys.exit(1)
         Log.print_log("Bayesian sparse linear mixed model calculated successfully")
 
@@ -1123,7 +1174,7 @@ class Gemma:
             Log.print_log(f'Output will be saved in {path}/')
 
         if model == "-lm":
-            Gemma.lm(prefix, prefix2, model, n, N, path, Log)
+            Gemma.lm(prefix, prefix2, model, n, N, path, Log, covar_file_name)
 
         elif model == "-gk":
             Gemma.rel_matrix(prefix, Log, model, n)
@@ -1153,6 +1204,16 @@ class Gemma:
 class Post_analysis:
     """Description:
     contains functions and subclasses regarding analysis of GWAS output"""
+
+    def check_return_codes():
+
+        code_file = open("vcf2gwas_process_report.txt", 'r')
+        code_file_str = code_file.read()
+        if "0" not in code_file_str:
+            code_file.close()
+            sys.exit(1)
+        else:
+            code_file.close()
 
     def load_df(prefix, case, path):
         """Description:

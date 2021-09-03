@@ -85,7 +85,12 @@ else:
     switch = False
 
 covar = P.set_covar()
-covar_temp = covar
+if covar.lower() == "pca":
+    covar = "vcf2gwas_geno_pca.csv"
+    geno_pca_switch = True
+else:
+    geno_pca_switch = False
+covar_temp = [covar]
 if covar != None:
     covar_file = covar
     covar = os.path.split(covar)[1]
@@ -130,7 +135,10 @@ Log.print_log(f'Genotype file: {snp_file}')
 if pheno_files != None:
     Log.print_log(f'Phenotype file(s): {listtostring(pheno_files, ", ")}')
 if covar != None:
-    Log.print_log(f'Covariate file: {covar}')
+    if geno_pca_switch == True:
+        Log.print_log(f'Covariates: principal components')
+    else:
+        Log.print_log(f'Covariate file: {covar}')
 if gene_file != None:
     if species == None:
         Log.print_log(f'Gene comparison file: {gene_file}')
@@ -148,7 +156,8 @@ if pheno_files != None:
         x += 1
 if covar != None:
     covar2 = covar_file
-check_files3(covar, covar2)
+    if geno_pca_switch == False:
+        check_files3(covar, covar2)
 
 # get phenotype / covariate selection input
 X = P.get_phenotypes()
@@ -156,6 +165,9 @@ X_org = X
 if pheno_files_temp != None and X != None:
     X = pheno_switcher(pheno_files_temp, X)
 Y = P.get_covariates()
+if geno_pca_switch == True:
+    n_pca = int(listtostring(Y))
+    Y = None
 if covar_temp == None:
     Y = None
 Y_org = Y
@@ -163,6 +175,8 @@ if covar_temp != None and Y != None:
     Y = pheno_switcher(covar_temp, Y)
 A = P.set_A()
 B = P.set_B()
+if geno_pca_switch == True:
+    B = True
 if A == True and X != None:
     X = None
     Log.print_log("Warning: option 'allphenotypes' will overwrite your phenotype selection")
@@ -181,7 +195,6 @@ if pheno == covar and x_test != []:
 # get more variables
 n_top = P.set_n_top()
 chr = P.set_chr()
-#chr = flatten_list(chr)
 chr2, chr_num = Converter.check_chrom(snp_file2, chr)
 chr_list = chr2
 chr3 = listtostring(chr2, ", ")
@@ -199,6 +212,8 @@ min_af = P.set_q()
 pca = P.set_pca()
 keep = P.set_keep()
 multi = P.set_multi()
+if multi == True:
+    switch = True
 seed = P.set_seed()
 sigval = P.set_sigval()
 nolabel = P.set_nolabel()
@@ -304,10 +319,11 @@ if pheno_files != None:
         if set(X).issubset([i+1 for i in list(range(l))]) == False:
             sys.exit(Log.print_log("Error: The selected phenotype data does not exist in the phenotype file"))
         if covar2 != None:
-            df_covar = Processing.load_pheno(covar2)
-            l_covar = len(df_covar.columns)
-            if set(Y).issubset([i+1 for i in list(range(l_covar))]) == False:
-                sys.exit(Log.print_log("Error: The selected covariate data does not exist in the covariate file"))
+            if geno_pca_switch == False:
+                df_covar = Processing.load_pheno(covar2)
+                l_covar = len(df_covar.columns)
+                if set(Y).issubset([i+1 for i in list(range(l_covar))]) == False:
+                    sys.exit(Log.print_log("Error: The selected covariate data does not exist in the covariate file"))
 
         if umap_switch == True:
             if l < umap_n:
@@ -404,13 +420,13 @@ if memory2 == 0:
 #################### compressing, indexing and filtering VCF file ####################
 
 if snp_file.endswith(".vcf"):
-    Log.print_log("Compressing VCF file..")
+    Log.print_log("\nCompressing VCF file..")
     timer = time.perf_counter()
     snp_file2 = Converter.compress_snp_file(snp_file2)
     timer_end = time.perf_counter()
     timer_total = round(timer_end - timer, 2)
     snp_file = f'{snp_file}.gz'
-    Log.print_log(f'VCF file successfully compressed (Duration: {runtime_format(timer_total)})\n')
+    Log.print_log(f'VCF file successfully compressed (Duration: {runtime_format(timer_total)})')
 
 try:
     snp_prefix = snp_file.removesuffix(".vcf.gz")
@@ -423,7 +439,7 @@ dir_check = make_dir(temp_dir)
 snp_file2_org = snp_file2
 snp_file2 = os.path.join(temp_dir, snp_file)
 
-Log.print_log("Indexing VCF file..")
+Log.print_log("\nIndexing VCF file..")
 timer = time.perf_counter()
 Converter.index_vcf(snp_file2_org)
 timer_end = time.perf_counter()
@@ -438,6 +454,15 @@ timer_total = round(timer_end - timer, 2)
 Log.print_log(f'SNPs successfully filtered (Duration: {runtime_format(timer_total)})')
 os.remove(f'{snp_file2_org}.csi')
 
+if geno_pca_switch == True:
+    Log.print_log("\nExtracting principal components from VCF file..")
+    timer = time.perf_counter()
+    list1 = Processing.process_snp_file(snp_file2)
+    chrom = Converter.set_chrom(snp_file2, switch=False)
+    covar_cols = Processing.pca_analysis2(snp_file2, n_pca, memory, threads, chrom, list1)
+    timer_end = time.perf_counter()
+    timer_total = round(timer_end - timer, 2)
+    Log.print_log(f'PCA successful (Duration: {runtime_format(timer_total)})')
 #################### Prepare commands for main.py ####################
 
 args_list = []
@@ -476,14 +501,16 @@ else:
     Starter.edit_args3(args, threads, args_list)
 
 if covar != None:
-    if covar == pheno:
-        args_list2 = []
-        for args in args_list:
-            args = Starter.delete_string(args, ['-cf', '--cfile'])
-            args.insert(4, covar2)
-            args.insert(4, "--cfile")
-            args_list2.append(args)
-        args_list = args_list2
+    args_list2 = []
+    for args in args_list:
+        args = Starter.delete_string(args, ['-cf', '--cfile'])
+        if B == True:
+            args = Starter.delete_string(args, ['-c', '--covar'])
+            args.insert(4, "--allcovariates")
+        args.insert(4, covar2)
+        args.insert(4, "--cfile")
+        args_list2.append(args)
+    args_list = args_list2
 
 Log.print_log("\nFile preparations completed")
 
@@ -562,7 +589,10 @@ elif switch == True:
         for pheno in pheno_temp:
             if pheno == folder:
                 os.rename(os.path.join(path5, folder), os.path.join(path5, f'{folder}_{timestamp2}'))
-
+if geno_pca_switch == True:
+    for folder in os.listdir(path5):
+        if folder.endswith(timestamp2):
+            shutil.move(covar2, os.path.join(path5, folder, f'{snp_prefix}_PCA.csv'))
 
 
 # move umap/pca files
@@ -613,11 +643,17 @@ if Y != None:
     Y, Y_names = pheno_switcher2(covar_temp, Y_org, Y)
     Y_names = listtostring(Y_names, ", ")
     Y = listtostring(Y, ', ')
+if geno_pca_switch == True:
+    Y = len(covar_cols)
 
 # print summary and move log files
 snp_total, snp_sig = Starter.get_snpcounts()
 sig_level = Starter.get_sig_level()
-Log.summary(snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level)
+Log.summary(
+    snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, 
+    pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
+    out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch
+)
 
 log_path1 = os.path.join(path, "logs", "temp")
 log_path2 = os.path.join(path, "logs", f'logs{pc_prefix2}_{snp_prefix}_{timestamp2}')

@@ -38,7 +38,7 @@ def getArgs(argv=None):
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Command-line interface for vcf2gwas.\n \nExample usage: vcf2gwas -v <VCF file> -pf <phenotype file> -ap -lmm', epilog="For a detailed description of all options, please refer to the manual.")
 
     parser.add_argument(
-        '--version', action='version', version='%(prog)s 0.6.6'
+        '--version', action='version', version='%(prog)s 0.6.7'
     )
     parser.add_argument(
         "-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename"
@@ -49,11 +49,11 @@ def getArgs(argv=None):
     )
     parser.add_argument(
         "-cf", "--cfile", metavar="<filename>", type=str, 
-        help="specify covariate filename \ncomma separated .csv file \nfirst column individuals, second column and onwards covariates\n"
+        help="To extract principal components from the VCF file, type 'PCA' \nOR \nspecify covariate filename \ncomma separated .csv file \nfirst column individuals, second column and onwards covariates"
     )
     parser.add_argument(
         "-p", "--pheno", metavar="<int/str>", action="append", type=str, 
-        help="specify phenotypes used for analysis: \n type phenotype name \nOR \n '1' selects first phenotype from phenotype file (second column),\n '2' the second phenotype (third column) and so on"
+        help="if 'PCA' selected with the -cf/--cfile option, set the amount of PCs used for analysis \nelse: specify phenotypes used for analysis: \n type phenotype name \nOR \n '1' selects first phenotype from phenotype file (second column),\n '2' the second phenotype (third column) and so on"
     )
     parser.add_argument(
         "-c", "--covar", metavar="<int/str>", action="append", type=str, 

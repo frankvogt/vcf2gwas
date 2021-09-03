@@ -37,7 +37,7 @@ def main(argvals=argvals):
         #subprocess.run(["conda", "install", "-c", "bioconda", "plink==1.90*"])
         #subprocess.run(["conda", "install", "-c", "bioconda", "gemma==0.98.3"])
     
-    print("\nvcf2gwas v0.6.6 \n")
+    print("\nvcf2gwas v0.6.7 \n")
     print("Initialising..\n")
     P = Parser(argvals)
     args = sys.argv[1:]
@@ -57,10 +57,12 @@ def main(argvals=argvals):
         installer()
         args = f'python3.9 {source} -v input/example.vcf.gz -pf input/example.csv -p 1 -lm'.split()
     
+    lm = P.set_lm()
     lmm = P.set_lmm()
     covar = P.set_covar()
-    if lmm == None and covar != None:
-        sys.exit(print("Error: A covariate file can only be added when using the linear mixed model ('-lmm')"))
+    if lm == None and lmm == None:
+        if covar != None:
+            sys.exit(print("Error: A covariate file can only be added when using the linear model ('-lm') or the linear mixed model ('-lmm')"))
 
     subprocess.run(args)
 

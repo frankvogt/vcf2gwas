@@ -63,7 +63,7 @@ if pheno_file != None:
 pheno_file = listtostring(pheno_file)
 
 covar_file = P.set_covar()
-covar_temp = covar_file
+covar_temp = [covar_file]
 if covar_file != None:
     covar_file_path = covar_file
     covar_file = os.path.split(covar_file)[1]
@@ -127,11 +127,6 @@ covar_file_name = None
 Log.print_log("Preparing files\n")
 Log.print_log("Checking and adjusting files..")
 
-#if snp_file.endswith(".vcf"):
-#    Log.print_log("Compressing VCF file..")
-#    snp_file2 = Converter.compress_snp_file(snp_file2)
-#    Log.print_log("VCF file successfully compressed\n")
-
 snp_prefix = snp_file.removesuffix(".vcf.gz")
 
 chrom = Converter.set_chrom(snp_file2)
@@ -171,7 +166,7 @@ else:
     list3 = Processing.pheno_index(covar)
     diff1b = Processing.make_diff(list1, list3)
     diff3 = Processing.make_diff(list3, list1)
-    if set(diff1a) == set(diff1b):
+    if set(diff1a) == set(diff1b) and len(set(diff1a)) != 0:       
         pheno_subset2 = Processing.rm_pheno(covar, diff3, covar_file)
         Log.print_log(str("Not all individuals in covariate and genotype file match"))
     else:
@@ -249,7 +244,7 @@ if covar_file == None:
     if model == "-lmm":
         Log.print_log("No covariate file specified, continuing without")
 else:
-    if model == "-lmm":
+    if model in ["-lm", "-lmm"]:
         if B == True:
             Y = list(range(length2))
             Y = [i+1 for i in Y]
@@ -363,6 +358,7 @@ else:
         executor.map(Gemma.run_gemma, prefix_list, prefix2_list, itertools.repeat(model), itertools.repeat(n), N_list, path_list, itertools.repeat(Log), itertools.repeat(filename), itertools.repeat(filename2), itertools.repeat(pca), itertools.repeat(covar_file_name), i_list)
     timer_end = time.perf_counter()
     timer_total = round(timer_end - timer, 2)
+    Post_analysis.check_return_codes()
     Log.print_log(f'\nGEMMA completed successfully (Duration: {runtime_format(timer_total)})\n')
 
     ############################## Processing and plotting ##############################
