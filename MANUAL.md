@@ -126,15 +126,25 @@ vcf2gwas -v [filename] -pf [filename] -ap -lmm
 
 ### Adding covariates
 
-GEMMA supports adding covariates to the linear mixed model analysis. 
-Selecting covariates from a covariate file follows the same scheme as selecting phenotypes, using `-c/--covar` and `-cf/--cfile`, respectively:
+GEMMA supports adding covariates to the linear model and the linear mixed model analysis.  
+To extract principal components from the `VCF` file for subsequent use as covariates in the analysis, use `-cf/--cfile` and `-c/--covar` with the 'PCA' argument and the amount of PCs desired for the analysis, respectively:
+
+```
+vcf2gwas -v [filename] -pf [filename] -p [num1] -cf PCA -c 2 -lmm
+```
+
+Now, 2 principal components will be extracted from the `VCF` file and used for the linear mixed model analysis.  
+
+Alternatively, a covariate file formatted in the same way as the phenotype file can be added manually.
+Selecting covariates from a covariate file follows the same scheme as selecting phenotypes by using `-cf/--cfile` and `-c/--covar`:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p [num1] -cf [filename] -c 1 -lmm
 ```
 
 Here, the 1st covariate column of the covariate file will be considered in the analysis of the selected phenotype.
-Similarly to the phenotype options, multiple covariates can be selected (either by name or column number) as well as all at once using `-ac/--allcovariates`.
+Similarly to the phenotype options, multiple covariates can be selected (either by name or column number) as well as all at once using `-ac/--allcovariates`.  
+**Note**: Even if no covariates were added to the analysis, GEMMA will always use the intercept as a covariate.
 
 ### Comparing results to specific genes
 
@@ -294,7 +304,7 @@ To remove the SNP lables completely, utilize the `-nl/--nolabel` option.
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -nl
 ```
 
-This can be beneficial to reduce the overall runtime when the analysis results in many significant SNPs.  
+**Note**: This can be beneficial to reduce the overall runtime when the analysis results in many significant SNPs.  
 
 ### Change font size in all plots
 
