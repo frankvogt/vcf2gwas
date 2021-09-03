@@ -85,9 +85,10 @@ else:
     switch = False
 
 covar = P.set_covar()
-if covar.lower() == "pca":
-    covar = "vcf2gwas_geno_pca.csv"
-    geno_pca_switch = True
+if covar != None:
+    if covar.lower() == "pca":
+        covar = "vcf2gwas_geno_pca.csv"
+        geno_pca_switch = True
 else:
     geno_pca_switch = False
 covar_temp = [covar]
