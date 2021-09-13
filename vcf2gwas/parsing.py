@@ -105,7 +105,7 @@ def getArgs(argv=None):
     )    
     parser.add_argument(
         "-sv", "--sigval", metavar="<float>", type=float, 
-        help="set value where to draw significant line in manhattan plot \n<int> represents -log10(1e-<int>) \ndefault: Bonferroni corrected with total amount of SNPs used for analysis \nwhen using '-bslmm', value is adjusted to fit in the range of 0 to 1 \nset <int> to '0' to disable line"
+        help="set value where to draw significant line in manhattan plot \n<int> represents -log10(1e-<int>) \ndefault: Bonferroni corrected with total amount of SNPs used for analysis \nset <int> to '0' to disable line"
     )
     parser.add_argument(
         "-fs", "--fontsize", metavar="<int>", type=int, default=26, 
