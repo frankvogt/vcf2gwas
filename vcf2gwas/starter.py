@@ -85,12 +85,11 @@ else:
     switch = False
 
 covar = P.set_covar()
+geno_pca_switch = False
 if covar != None:
     if covar.lower() == "pca":
         covar = "vcf2gwas_geno_pca.csv"
         geno_pca_switch = True
-else:
-    geno_pca_switch = False
 covar_temp = [covar]
 if covar != None:
     covar_file = covar
@@ -464,6 +463,7 @@ if geno_pca_switch == True:
     timer_end = time.perf_counter()
     timer_total = round(timer_end - timer, 2)
     Log.print_log(f'PCA successful (Duration: {runtime_format(timer_total)})')
+    
 #################### Prepare commands for main.py ####################
 
 args_list = []

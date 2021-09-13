@@ -1241,18 +1241,15 @@ class Post_analysis:
         based on: https://github.com/Pudkip/Pyhattan/blob/master/Pyhattan/__init__.py"""
 
         data = pd.read_table(os.path.join(path, f'{prefix}.{case}.txt'), sep = sep)
-        if case == "param":
-            data['-log10(p_value)'] = (data[pcol])
-        else:
-            data = data[data[pcol] > 0.00000000000000000001]
-            data['-log10(p_value)'] = -np.log10(data[pcol])
+        data = data[data[pcol] > 0.00000000000000000001]
+        data['-log10(p_value)'] = -np.log10(data[pcol])
         data = data[data['-log10(p_value)'].notna()]
         data[chromosome] = data[chromosome].astype('category')
         data['ind'] = range(len(data))
         data_grouped = data.groupby((chromosome))
         return data, data_grouped
 
-    def manh_plot(df, case, Log, prefix, pcol, path, sigval, x, nolabel, colors = ['#E24E42', '#008F95'], refSNP = False):
+    def manh_plot(df, Log, prefix, pcol, path, sigval, x, nolabel, colors = ['#E24E42', '#008F95'], refSNP = False):
         """Description:
         creates manhattan plot from prepared dataframe and saves plot
         based on: https://github.com/Pudkip/Pyhattan/blob/master/Pyhattan/__init__.py"""
@@ -1284,18 +1281,16 @@ class Post_analysis:
             ax.set_ylim([0, data['-log10(p_value)'].max() + 1])
             ax.set_xlabel('Chromosome', fontsize=fontsize, fontweight="bold")
             ax.set_title("Manhattan plot", fontsize=fontsize)
-            
-            if case == "param":
-                ax.set_ylabel(f'{pcol}', fontsize=fontsize, fontweight="bold")
-            else:
-                ax.set_ylabel(f'-log10({pcol})', fontsize=fontsize, fontweight="bold")
+            ax.set_ylabel(f'-log10({pcol})', fontsize=fontsize, fontweight="bold")
             plt.xticks(fontsize=fontsize2, rotation=45, fontweight="bold")
             plt.yticks(fontsize=fontsize2, fontweight="bold")
             np.random.seed(0)
 
             # Bonferroni correction
             sig_level = 0
-            if sigval != 0 and x != 0:
+            if sigval != None:
+                sig_level = sigval
+            if sigval == None and x != 0:
                 sig_level = (0.05 / x)
                 sigval = -np.log10(sig_level)
 
@@ -1429,7 +1424,7 @@ class Post_analysis:
                 Log.print_log(f'Variants with the best {p} score saved in {os.path.join(path, "best_p-values")}')
 
                 df3 = Lin_models.format_data(prefix2, "assoc", p, path)
-                n = Lin_models.manh_plot(df3, "assoc", Log, prefix2, p, path, sigval, x, nolabel, refSNP="rs")
+                n = Lin_models.manh_plot(df3, Log, prefix2, p, path, sigval, x, nolabel, refSNP="rs")
                 Lin_models.qq_plot(df, p, prefix2, path, Log)
 
             Lin_models.make_top_list(df2, top_ten, n_top, n)
@@ -1438,8 +1433,6 @@ class Post_analysis:
             # procedure based on steps outlined in: 
             # http://romainvilloutreix.alwaysdata.net/romainvilloutreix/wp-content/uploads/2017/01/gwas_gemma-2017-01-17.pdf
 
-            if sigval:
-                sigval = sigval*0.05
             ## get hyperparameters
             Log.print_log("Summarizing hyperparameters..")
             # format column names
@@ -1469,10 +1462,10 @@ class Post_analysis:
 
             # plot variants PIPs across linkage groups/chromosomes
             df4 = Bslmm.format_data(prefix2, "param", "gamma", path)
-            n1 = Bslmm.manh_plot(df4, "param", Log, prefix2, "gamma", path, sigval, x, nolabel, refSNP="rs")
+            n1 = Bslmm.manh_plot(df4, Log, prefix2, "gamma", path, sigval, x, nolabel, refSNP="rs")
             # plot effect sizes
             df5 = Bslmm.format_data(prefix2, "param", "eff", path)
-            n2 = Bslmm.manh_plot(df5, "param", Log, prefix2, "eff", path, sigval, x, nolabel, refSNP="rs")
+            n2 = Bslmm.manh_plot(df5, Log, prefix2, "eff", path, sigval, x, nolabel, refSNP="rs")
             n = max([n1, n2])
 
             Bslmm.make_top_list(df3, top_ten, n_top, n)
