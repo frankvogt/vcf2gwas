@@ -31,7 +31,7 @@ Some of the benefits of this pipeline include:
 * VCF file does not need to be converted or edited by the user
 * Input files will be adjusted, filtered and formatted for GEMMA
 * GEMMA analysis will be carried out automatically (both GEMMA's linear (mixed) models and bayesian sparse linear mixed model available)
-* Dimensionality reduction via PCA or UMAP can be performed on phenotypes and used for analysis.
+* Dimensionality reduction via PCA or UMAP can be performed on phenotypes / genotypes and used for analysis.
 * Once the analysis has been executed, the results will be analyzed:
     * Manhattan plots, Q-Q plots and diagnostic plots (dependent on GEMMA's model)
     * Summaries of the SNPs 
@@ -122,7 +122,7 @@ Example files to run GEMMA can be found in the input folder (VCF file + correspo
 |6901|0|
 
 #### Covariate file:
-A covariate file can be used to provide covariates for GEMMA analysis when running the linear mixed model.  
+**Note**: A covariate file can only be used to provide covariates for the GEMMA analysis when running the linear model or the linear mixed model.  
 The covariate file has to be formatted in the same way as the phenotype file, with individual IDs in the first column and the covariates in the remaining columns with their respective names as column names.
 
 #### Gene file:
@@ -171,9 +171,13 @@ OR
 All phenotypes in the phenotype file will be used.
 
 * `-cf` / `--cfile` <filename>  
+Type 'PCA' to extract principal components from the `VCF` file  
+OR  
 Specify covariate file.
 
 * `-c` / `--covar` <int>  
+If 'PCA' selected for the `-cf` / `--cfile` option, set the amount of PCs used for the analysis  
+Else:  
 Specify covariates used for analysis:  
 Type the covariate name  
 OR  
@@ -276,7 +280,6 @@ optional: r-squared threshold for LD pruning (default: 0.5)
 set value where to draw significant line in manhattan plot  
 <int> represents -log10(1e-<int>)  
 Default: Bonferroni corrected with total amount of SNPs used for analysis.  
-When using '-bslmm', value is adjusted to fit in the range of 0 to 1  
 set <int> to '0' to disable line
 
 * `-nl` / `--nolabel`  
