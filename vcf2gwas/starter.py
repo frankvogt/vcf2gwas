@@ -132,6 +132,8 @@ gene_thresh = P.set_gene_thresh()
 
 # file checking
 Log.print_log(f'Genotype file: {snp_file}')
+if model in ["-lm", "-lmm", "-bslmm"] and pheno_files == None:
+    sys.exit("Error: No phenotype file specified")
 if pheno_files != None:
     Log.print_log(f'Phenotype file(s): {listtostring(pheno_files, ", ")}')
 if covar != None:
@@ -217,6 +219,9 @@ if multi == True:
 seed = P.set_seed()
 sigval = P.set_sigval()
 nolabel = P.set_nolabel()
+burn = P.set_burn()
+sampling = P.set_sampling()
+snpmax = P.set_snpmax()
 
 # check model / phenotype / genotype selection
 if model == None:
@@ -653,7 +658,7 @@ sig_level = Starter.get_sig_level()
 Log.summary(
     snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, 
     pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
-    out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch
+    out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax
 )
 
 log_path1 = os.path.join(path, "logs", "temp")

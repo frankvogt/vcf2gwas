@@ -110,8 +110,10 @@ gene_thresh = P.set_gene_thresh()
 multi = P.set_multi()
 sigval = P.set_sigval()
 nolabel = P.set_nolabel()
+burn = str(P.set_burn())
+sampling = str(P.set_sampling())
+snpmax = str(P.set_snpmax())
 
-#snp_file2 = f'input/{snp_file}'
 pheno_file2 = None
 covar_file2 = None
 
@@ -355,7 +357,10 @@ else:
 
     # run GEMMA in parallel
     with concurrent.futures.ProcessPoolExecutor(mp_context=mp.get_context('fork'), max_workers=threads) as executor:
-        executor.map(Gemma.run_gemma, prefix_list, prefix2_list, itertools.repeat(model), itertools.repeat(n), N_list, path_list, itertools.repeat(Log), itertools.repeat(filename), itertools.repeat(filename2), itertools.repeat(pca), itertools.repeat(covar_file_name), i_list)
+        executor.map(
+            Gemma.run_gemma, prefix_list, prefix2_list, itertools.repeat(model), itertools.repeat(n), N_list, path_list, itertools.repeat(Log), itertools.repeat(filename), 
+            itertools.repeat(filename2), itertools.repeat(pca), itertools.repeat(covar_file_name), i_list, itertools.repeat(burn), itertools.repeat(sampling), itertools.repeat(snpmax)
+        )
     timer_end = time.perf_counter()
     timer_total = round(timer_end - timer, 2)
     Post_analysis.check_return_codes()
@@ -364,7 +369,10 @@ else:
     ############################## Processing and plotting ##############################
 
     Log.print_log("Analyzing GEMMA results\n")
-    for (top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel) in zip(itertools.repeat(top_ten), itertools.repeat(Log), itertools.repeat(model), itertools.repeat(n), prefix2_list, path_list, itertools.repeat(n_top), i_list, itertools.repeat(sigval), itertools.repeat(nolabel)):
+    for (top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel) in zip(
+        itertools.repeat(top_ten), itertools.repeat(Log), itertools.repeat(model), itertools.repeat(n), prefix2_list, path_list, 
+        itertools.repeat(n_top), i_list, itertools.repeat(sigval), itertools.repeat(nolabel)
+        ):
         Post_analysis.run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel)
     Log.print_log("Analysis of GEMMA results completed successfully\n")
 

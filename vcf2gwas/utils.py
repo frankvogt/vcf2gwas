@@ -350,12 +350,12 @@ class Logger:
     def summary(
         self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, 
         pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
-        out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch
+        out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax
     ):
         """Description:
         prints summary of input variables and methods"""
 
-        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ""
+        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ""
 
         model_dict = {
             "lm" : "linear model",
@@ -436,6 +436,12 @@ class Logger:
             l = f'\n  --threads {threads}'
         if sigval != None:
             x = f'\n  --sigval {sigval}'
+        if burn != 100000:
+            ag = f'\n  --burn {burn}'
+        if sampling != 1000000:
+            ah = f'\n  --sampling {sampling}'
+        if snpmax != 300:
+            aj = f'\n  --snpmax {snpmax}'
         if A == True:
             m = '\n  --allphenotypes'
             c = f'\n  Phenotypes chosen: all phenotypes'
@@ -462,7 +468,7 @@ class Logger:
                 u = f'\n  --PCA {pca_n}'
 
         self.logger.info(
-            f'\nSummary:\n\nOutput directory:{v}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{aa}{j}{k}{l}{x}{m}{n}{y}{o}{p}'
+            f'\nSummary:\n\nOutput directory:{v}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{o}{p}'
         )
 
 
@@ -1167,19 +1173,19 @@ class Gemma:
             sys.exit(1)
         Log.print_log("Linear mixed model calculated successfully")
 
-    def bslmm(prefix, prefix2, model, n, N, path, Log):
+    def bslmm(prefix, prefix2, model, n, N, path, Log, burn, sampling, snpmax):
         """Description:
         performs GWAS with bayesian sparse linear mixed model"""
 
         Log.print_log('Calculating bayesian sparse linear mixed model..')
-        process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-o', prefix2, '-outdir', path], check=True)
+        process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-w', burn, '-s', sampling, '-smax', snpmax, '-o', prefix2, '-outdir', path], check=True)
         Gemma.write_returncodes(process.returncode)
         if process.returncode != 0:
             Log.print_log(f'Error: GEMMA was not able to complete the analysis')
             sys.exit(1)
         Log.print_log("Bayesian sparse linear mixed model calculated successfully")
 
-    def run_gemma(prefix, prefix2, model, n, N, path, Log, filename, filename2, pca, covar_file_name, i):
+    def run_gemma(prefix, prefix2, model, n, N, path, Log, filename, filename2, pca, covar_file_name, i, burn, sampling, snpmax):
         """Description:
         runs GEMMA dependent on input"""
 
@@ -1207,7 +1213,7 @@ class Gemma:
             Gemma.lmm(pca, prefix, prefix2, filename, filename2, model, n, N, path, Log, covar_file_name)
 
         elif model == "-bslmm":
-            Gemma.bslmm(prefix, prefix2, model, n, N, path, Log)
+            Gemma.bslmm(prefix, prefix2, model, n, N, path, Log, burn, sampling, snpmax)
 
         else:
             Log.print_log("No model was chosen!")

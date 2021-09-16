@@ -38,7 +38,7 @@ def getArgs(argv=None):
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Command-line interface for vcf2gwas.\n \nExample usage: vcf2gwas -v <VCF file> -pf <phenotype file> -ap -lmm', epilog="For a detailed description of all options, please refer to the manual.")
 
     parser.add_argument(
-        '--version', action='version', version='%(prog)s 0.6.8'
+        '--version', action='version', version='%(prog)s 0.6.9'
     )
     parser.add_argument(
         "-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename"
@@ -108,8 +108,20 @@ def getArgs(argv=None):
         help="set value where to draw significant line in manhattan plot \n<int> represents -log10(1e-<int>) \ndefault: Bonferroni corrected with total amount of SNPs used for analysis \nset <int> to '0' to disable line"
     )
     parser.add_argument(
+        "-w", "--burn", metavar="<int>", type=int, default=100000,
+        help="specify burn-in steps when using BSLMM model \ndefault: %(default)s"
+    )
+    parser.add_argument(
+        "-s", "--sampling", metavar="<int>", type=int, default=1000000,
+        help="specify sampling steps when using BSLMM model \ndefault: %(default)s"
+    )
+    parser.add_argument(
+        "-smax", "--snpmax", metavar="<int>", type=int, default=300,
+        help="specify maximum value for 'gamma' when using BSLMM model \ndefault: %(default)s"
+    )
+    parser.add_argument(
         "-fs", "--fontsize", metavar="<int>", type=int, default=26, 
-        help="Set the fontsize of plots \nDefault: %(default)s"
+        help="Set the fontsize of plots \ndefault: %(default)s"
     )
     parser.add_argument(
         "-o", "--output", metavar="<path>", type=str, default=os.getcwd(), 
@@ -127,7 +139,7 @@ def getArgs(argv=None):
     parser.add_argument("-ac", "--allcovariates", action="store_true", help="all covariates will be used \nany covariate selection with '-c' option will be overwritten")
     parser.add_argument("-m", "--multi", action="store_true", help="performs multivariate linear mixed model analysis with specified phenotypes \nonly active in combination with '-lmm' option")
     parser.add_argument("-nl", "--nolabel", action="store_true", help="remove the SNP labels in the manhattan plot \nreduces runtime if analysis results in many significant SNPs")
-    parser.add_argument("-s", "--seed", action="store_true", help="perform UMAP with random seed \nreduces reproducibility")
+    parser.add_argument("-sd", "--seed", action="store_true", help="perform UMAP with random seed \nreduces reproducibility")
     parser.add_argument("-r", "--retain", action="store_true", help="keep all temporary intermediate files \ne.g. subsetted and filtered VCF and .csv files")
     
     return parser.parse_args(argv)
@@ -191,6 +203,15 @@ class Parser:
 
     def set_sigval(self):
         return self.args.sigval
+
+    def set_burn(self):
+        return self.args.burn
+    
+    def set_sampling(self):
+        return self.args.sampling
+    
+    def set_snpmax(self):
+        return self.args.snpmax
 
     def set_nolabel(self):
         return self.args.nolabel
