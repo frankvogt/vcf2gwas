@@ -244,6 +244,18 @@ optional: specify which model to fit (default: 1)
 performs multivariate linear mixed model analysis with specified phenotypes  
 only active in combination with '-lmm' option
 
+* `-w` / `--burn`  
+specify burn-in steps when using BSLMM model.  
+Default value: 100,000
+
+* `-s` / `--sampling`  
+specify sampling steps when using BSLMM model.  
+Default value: 1,000,000
+
+* `-smax` / `--snpmax`  
+specify maximum value for 'gamma' when using BSLMM model.  
+Default value: 300
+
 #### Miscellaneous options:
 
 * `-M` / `--memory` <int>  
@@ -278,7 +290,7 @@ optional: r-squared threshold for LD pruning (default: 0.5)
 
 * `-sv` / `--sigval` <int>  
 set value where to draw significant line in manhattan plot  
-<int> represents -log10(1e-<int>)  
+<int> represents -log10(1e-<int>).  
 Default: Bonferroni corrected with total amount of SNPs used for analysis.  
 set <int> to '0' to disable line
 
@@ -288,9 +300,9 @@ reduces runtime if analysis results in many significant SNPs
 
 * `-fs`/ `--fontsize` <int>  
 set the fontsize of plots.  
-default value: 26
+Default value: 26
 
-* `-s` / `--seed`  
+* `-sd` / `--seed`  
 perform UMAP with random seed  
 reduces reproducibility
 
