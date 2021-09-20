@@ -1,0 +1,3 @@
+vcf2gwas command-line input:
+
+vcf2gwas -v input/mouse_hs1940.vcf.gz -pf input/mouse_hs1940.csv -p MCH -p CD8 -lmm -gf MM

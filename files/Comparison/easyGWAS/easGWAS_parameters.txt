@@ -1,0 +1,8 @@
+easGWAS parameters:
+
+Selected SNPs: All SNPs selected
+SNP encoding: Additive
+MAF Filter: 0.1
+Selected Principle Components: 0
+Selected Algorithm: EMMAX
+Selected Transformation: None
