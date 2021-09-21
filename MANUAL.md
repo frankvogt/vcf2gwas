@@ -185,7 +185,9 @@ If the file is in the `.csv` format, the file needs at least three columns conta
 vcf2gwas recognizes chromosomes in the following formats (here the first chromosome): `Chr1`, `chr1`, `1`.  
 If the chromosomes in the `VCF` file are of a different format, it is necessary that the chromosome information in the gene file is formatted in the same way, otherwise vcf2gwas won't recognize the information correctly.  
 
-vcf2gwas will summarize the `n` best SNPs (specified with `-t/--topsnp`) of every analyzed phenotype and compare them to the genes in the file by calculating the distance between each SNP and gene upstream as well as downstream. These results can be filtered by saving only those SNPs with a distance to a gene lower than a specific threshold (set with `-gt/--genethresh`).
+vcf2gwas will summarize the `n` best SNPs (specified with `-t/--topsnp`) of every analyzed phenotype and compare them to the genes in the file by calculating the distance between each SNP and gene upstream as well as downstream. These results can be filtered by saving only those SNPs with a distance to a gene lower than a specific threshold (set with `-gt/--genethresh`).  
+
+**Note**: Since for each SNP only the gene with the closest start/end upstream and downstream is shown, this feature only serves to give a hint of possibly associated genes. Closer inspection by the user is strongly recommended.
 
 ### Adding a relatedness matrix
 
