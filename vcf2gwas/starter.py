@@ -48,16 +48,20 @@ os.makedirs(out_dir2, exist_ok=True)
 
 timestamp = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
 timestamp2 = time.strftime("%Y%m%d_%H%M")
-write_timestamp(timestamp2)
 start = time.perf_counter()
 
-file = open("vcf2gwas_process_report.txt", 'a')
+dir_temp = "_vcf2gwas_temp"
+qc_dir = os.path.join(dir_temp, f'QC_{timestamp2}')
+make_dir(qc_dir)
+write_timestamp(timestamp2)
+
+file = open(os.path.join(dir_temp, "vcf2gwas_process_report.txt"), 'a')
 file.close()
-file = open("vcf2gwas_snpcount_total.txt", 'a')
+file = open(os.path.join(dir_temp, "vcf2gwas_snpcount_total.txt"), 'a')
 file.close()
-file = open("vcf2gwas_snpcount_sig.txt", 'a')
+file = open(os.path.join(dir_temp, "vcf2gwas_snpcount_sig.txt"), 'a')
 file.close()
-file = open("vcf2gwas_sig_level.txt", 'a')
+file = open(os.path.join(dir_temp, "vcf2gwas_sig_level.txt"), 'a')
 file.close()
 
 # get genotype file input
@@ -68,6 +72,15 @@ snp_file = os.path.split(snp_file2)[1]
 
 # get phenotype / covariate input
 pheno_files = P.set_pheno()
+if pheno_files != None:
+    p_list_temp = []
+    pheno_dir = os.path.join(dir_temp, "Pheno")
+    make_dir(pheno_dir)
+    for pf in pheno_files:
+        p_file = os.path.join(pheno_dir, os.path.split(pf)[1])
+        shutil.copy(pf, p_file)
+        p_list_temp.append(p_file)
+    pheno_files = p_list_temp
 pheno_files_temp = pheno_files
 pheno_files_path = []
 if pheno_files != None:
@@ -88,7 +101,7 @@ covar = P.set_covar()
 geno_pca_switch = False
 if covar != None:
     if covar.lower() == "pca":
-        covar = "vcf2gwas_geno_pca.csv"
+        covar = os.path.join(dir_temp, "vcf2gwas_geno_pca.csv")
         geno_pca_switch = True
 covar_temp = [covar]
 if covar != None:
@@ -168,6 +181,9 @@ if pheno_files_temp != None and X != None:
     X = pheno_switcher(pheno_files_temp, X)
 Y = P.get_covariates()
 if geno_pca_switch == True:
+    if Y == None:
+        Y = ["2"]
+        Log.print_log("Info: no number of principal components specified, now using 2 PCs for the analysis")
     n_pca = int(listtostring(Y))
     Y = None
 if covar_temp == None:
@@ -219,17 +235,10 @@ if multi == True:
 seed = P.set_seed()
 sigval = P.set_sigval()
 nolabel = P.set_nolabel()
+noqc = P.set_noqc()
 burn = P.set_burn()
 sampling = P.set_sampling()
 snpmax = P.set_snpmax()
-
-# check model / phenotype / genotype selection
-if model == None:
-    sys.exit(Log.print_log("Error: No model specified for GEMMA analysis"))
-if model not in ["-gk", "-eigen"]:
-    if A == False and B == False:
-        if X == None and Y == None:
-            sys.exit(Log.print_log("Error: No phenotypes (or covariates) specified for GEMMA analysis"))
 
 Log.print_log("Arguments parsed successfully\n")
 
@@ -268,6 +277,15 @@ if pca_n != None:
     pca_switch = True
 else:
     pca_switch = False
+
+# check model / phenotype / genotype selection
+if model == None:
+    sys.exit(Log.print_log("Error: No model specified for GEMMA analysis"))
+if model not in ["-gk", "-eigen"]:
+    if A == False and B == False:
+        if umap_switch == False and pca_switch == False:
+            if X == None and Y == None:
+                sys.exit(Log.print_log("Error: No phenotypes (or covariates) specified for GEMMA analysis"))
 
 pheno_list = []
 X_list = []
@@ -339,7 +357,7 @@ if pheno_files != None:
                 pheno_file3 = pheno_file3.removesuffix(".csv")
                 pheno_file3 = f'{pheno_file3}_umap.csv'
                 pheno_files2.append(pheno_file3)
-                Starter.umap_calc(df, pheno_file3, umap_n, seed, pheno_path)
+                Starter.umap_calc(df, pheno_file3, umap_n, seed, pheno_path, Log)
                 Log.print_log(f'Saved as "{pheno_file3}" temporarily in {pheno_path}\nUMAP calculated successful\n')
         
         if pca_switch == True:
@@ -351,7 +369,7 @@ if pheno_files != None:
                 pheno_file4 = pheno_file4.removesuffix(".csv")
                 pheno_file4 = f'{pheno_file4}_pca.csv'
                 pheno_files2.append(pheno_file4)
-                Starter.pca_calc(df, pheno_file4, pca_n, pheno_path)
+                Starter.pca_calc(df, pheno_file4, pca_n, pheno_path, Log)
                 Log.print_log(f'Saved as "{pheno_file4}" temporarily in {pheno_path}\nPCA calculated successful\n')
 
         x += 1
@@ -380,6 +398,14 @@ if pheno_files != None:
         else:
             l = 1
 
+        #QC
+        if noqc == False:
+            try:
+                QC.pheno_QC(df, X, qc_dir)
+                Log.print_log("Phenotype distribution(s) successfully plotted")
+            except Exception as e:
+                sys.exit(Log.print_log(f'Error: {e}'))
+            
         if switch == True:
             rest = threads%len(pheno_files2)
             threads2 = threads//len(pheno_files2)
@@ -409,7 +435,7 @@ if pheno_files != None:
             threads3 = l//threads_temp
             Starter.split_phenofile2(threads_temp, threads3, rest2, col_dict, X_list, df, pheno_file, pheno_list, pheno_path)
             Log.print_log("Phenotype file split up successful")
-        
+
         x += 1
         if umap_switch == False and pca_switch == False:
             analysis_num += l
@@ -439,8 +465,9 @@ except Exception:
     snp_prefix = snp_file.removesuffix(".gz")
 
 snp_file_path = os.path.split(snp_file2)[0]
-temp_dir = os.path.join(snp_file_path, "temp")
-dir_check = make_dir(temp_dir)
+temp_dir = os.path.join(dir_temp, "VCF")
+make_dir(temp_dir)
+#dir_check = make_dir(temp_dir)
 snp_file2_org = snp_file2
 snp_file2 = os.path.join(temp_dir, snp_file)
 
@@ -450,6 +477,15 @@ Converter.index_vcf(snp_file2_org)
 timer_end = time.perf_counter()
 timer_total = round(timer_end - timer, 2)
 Log.print_log(f'VCF file successfully indexed (Duration: {runtime_format(timer_total)})')
+
+chrom, chrom_list = Converter.set_chrom(snp_file2_org, switch=False)
+if noqc == False:
+    Log.print_log("\nStarting genotype Quality Control..")
+    timer = time.perf_counter()
+    QC.geno_QC(snp_file2_org, dir_temp, qc_dir, chrom_list, Log)
+    timer_end = time.perf_counter()
+    timer_total = round(timer_end - timer, 2)
+    Log.print_log(f'Quality control successful (Duration: {runtime_format(timer_total)})')
 
 Log.print_log("\nFiltering SNPs..")
 timer = time.perf_counter()
@@ -463,12 +499,11 @@ if geno_pca_switch == True:
     Log.print_log("\nExtracting principal components from VCF file..")
     timer = time.perf_counter()
     list1 = Processing.process_snp_file(snp_file2)
-    chrom = Converter.set_chrom(snp_file2, switch=False)
-    covar_cols = Processing.pca_analysis2(snp_file2, n_pca, memory, threads, chrom, list1)
+    covar_cols = Processing.pca_analysis2(snp_file2, n_pca, memory, threads, chrom, list1, dir_temp)
     timer_end = time.perf_counter()
     timer_total = round(timer_end - timer, 2)
     Log.print_log(f'PCA successful (Duration: {runtime_format(timer_total)})')
-    
+
 #################### Prepare commands for main.py ####################
 
 args_list = []
@@ -502,7 +537,6 @@ elif l != 1:
         Log.print_log(f'Info:\nAfter reducing dimensions of {pheno} via UMAP, it has been split up in {len(pheno_list)} parts in order to ensure maximum efficiency')
     else:
         Log.print_log(f'Info:\n{pheno} has been split up in {len(pheno_list)} parts in order to ensure maximum efficiency')
-
 else:
     Starter.edit_args3(args, threads, args_list)
 
@@ -529,10 +563,10 @@ Starter.check_return_codes(Log)
 
 #################### summary and clean-up ####################
 
-if dir_check == False:
-    shutil.rmtree(temp_dir, ignore_errors=True)
-else:
-    os.remove(snp_file2)
+#if dir_check == False:
+#    shutil.rmtree(temp_dir, ignore_errors=True)
+#else:
+#    os.remove(snp_file2)
 snp_file2 = snp_file2_org
 
 if model == None:
@@ -555,6 +589,14 @@ if model not in ("-gk", "-eigen", None):
     if gene_file != None:
         Summary.gene_compare(filenames, gene_file, gene_file_path, gene_thresh, path2, pc_prefix3, snp_prefix, chr_list, Log)
 
+#move QC files
+if noqc == False:
+    if pheno_files != None:
+        qc_path = os.path.join(path, "QC")
+        make_dir(qc_path)
+        shutil.move(qc_dir, qc_path)
+        Log.print_log(f'Quality control files moved to {qc_path}')
+
 # move split up files (and reduce "files" folder)
 path5 = os.path.join(path, "files")
 pheno_temp = [f'files_{x.removesuffix(".csv")}_{snp_prefix}' for x in pheno_list]
@@ -562,27 +604,27 @@ if switch == False:
     if len(pheno_list) > 1:
         for file in pheno_list:
             os.remove(os.path.join(pheno_files_path[0], file))
-        if umap_switch == False and pca_switch == False:
-            #path5 = os.path.join(path, "files")
-            #pheno_temp = [f'{x.removesuffix(".csv")}_{snp_prefix}' for x in pheno_list]
-            for folder in os.listdir(path5):
-                if pheno_temp[0] == folder:
-                    folder2 = folder.replace(".part1", "")
-                    folder2 = f'{folder2}_{timestamp2}'
-                    #shutil.rmtree(os.path.join(path5, folder2), ignore_errors=True)
-                    shutil.move(os.path.join(path5, folder), os.path.join(path5, folder2))
-                    path6 = os.path.join(path5, folder2)
-                    for file in os.listdir(path6):
-                        for string in [".log.txt", ".cXX.txt", ".log", ".bim", ".bed", ".nosex"]:
-                            if file.endswith(string):
-                                os.rename(os.path.join(path6, file), os.path.join(path6, file.replace(".part1", "")))
-            for folder in os.listdir(path5):
-                for pheno in pheno_temp:
-                    if pheno == folder:
-                        for file in os.listdir(os.path.join(path5, folder)):
-                            if file.endswith(".fam"):
-                                shutil.move(os.path.join(path5, folder, file), os.path.join(path5, folder2, file))
-                        shutil.rmtree(os.path.join(path5, folder))
+        #if umap_switch == False and pca_switch == False:
+        #path5 = os.path.join(path, "files")
+        #pheno_temp = [f'{x.removesuffix(".csv")}_{snp_prefix}' for x in pheno_list]
+        for folder in os.listdir(path5):
+            if pheno_temp[0] == folder:
+                folder2 = folder.replace(".part1", "")
+                folder2 = f'{folder2}_{timestamp2}'
+                #shutil.rmtree(os.path.join(path5, folder2), ignore_errors=True)
+                shutil.move(os.path.join(path5, folder), os.path.join(path5, folder2))
+                path6 = os.path.join(path5, folder2)
+                for file in os.listdir(path6):
+                    for string in [".log.txt", ".cXX.txt", ".log", ".bim", ".bed", ".nosex", ".covariates.txt"]:
+                        if file.endswith(string):
+                            os.rename(os.path.join(path6, file), os.path.join(path6, file.replace(".part1", "")))
+        for folder in os.listdir(path5):
+            for pheno in pheno_temp:
+                if pheno == folder:
+                    for file in os.listdir(os.path.join(path5, folder)):
+                        if file.endswith(".fam"):
+                            shutil.move(os.path.join(path5, folder, file), os.path.join(path5, folder2, file))
+                    shutil.rmtree(os.path.join(path5, folder))
     else:
         for folder in os.listdir(path5):
             if model in ["-gk", "-eigen"]:
@@ -607,7 +649,7 @@ if umap_switch == True or pca_switch ==True:
     x = 0
     for switch in [umap_switch, pca_switch]:
         if switch == True:
-            path4 = os.path.join(path, switch_names[x])
+            path4 = os.path.join(path, switch_names[x], f'{switch_names[x]}_{timestamp2}')
             make_dir(path4)
             y = 0 
             for pheno_file in pheno_files:
@@ -628,7 +670,7 @@ finish = time.perf_counter()
 time_total = round(finish-start, 2)
 time_total = runtime_format(time_total)
 
-Log.print_log(f'Clean up successful \n\nvcf2gwas has been successfully completed! \nRuntime: {time_total}\n')
+Log.print_log(f'\nClean up successful \n\nvcf2gwas has been successfully completed! \nRuntime: {time_total}\n')
 
 if pheno_files != None:
     pheno_files = listtostring(pheno_files, ', ')
@@ -658,7 +700,7 @@ sig_level = Starter.get_sig_level()
 Log.summary(
     snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, 
     pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
-    out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax
+    out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc
 )
 
 log_path1 = os.path.join(path, "logs", "temp")
@@ -667,3 +709,5 @@ os.rename(log_path1, log_path2)
 
 if model != None:
     shutil.move(os.path.join(out_dir2, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(out_dir2, model2, f'vcf2gwas_{snp_prefix}{pc_prefix2}_{timestamp2}.log.txt'))
+
+shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)

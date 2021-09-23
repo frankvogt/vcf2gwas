@@ -71,9 +71,19 @@ try:
 except ModuleNotFoundError:
     subprocess.run(["pip", "install", "umap-learn"])
     import umap
+try:
+    import zarr
+except ModuleNotFoundError:
+    subprocess.run(["pip", "install", "zarr"])
+try:
+    import allel
+except ModuleNotFoundError:
+    subprocess.run(["pip", "install", "scikit-allel"])
 
 from parsing import *
 
+sns.set_style('white')
+#sns.set_style('ticks')
 #os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 #set fontsize
@@ -83,6 +93,15 @@ fontsize = P.set_fontsize()
 fontsize2 = fontsize - fontsize*0.1
 fontsize3 = fontsize - fontsize*0.5
 fontsize4 = fontsize - fontsize*0.7
+fontsize5 = fontsize - fontsize*0.92
+fontsize6 = fontsize - fontsize*0.94
+
+plt.rc("lines", linewidth=fontsize5, markersize=fontsize4)
+plt.rc('font', size=fontsize3, weight="bold")
+plt.rc('axes', linewidth=fontsize5)
+plt.rc('xtick.major', width=fontsize5, size=fontsize4)
+plt.rc('ytick.major', width=fontsize5, size=fontsize4)
+sns.set_color_codes()
 
 ############################## Functions ##############################
 
@@ -106,13 +125,13 @@ def set_pc_prefix(pheno_file, covar_file, string):
 
 def write_timestamp(time):
 
-    file = open("vcf2gwas_timestamp.txt", 'a')
+    file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_timestamp.txt"), 'a')
     file.write(f'{time}\n')
     file.close()
 
 def read_timestamp():
 
-    file = open("vcf2gwas_timestamp.txt", "r")
+    file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_timestamp.txt"), "r")
     lines = file.readlines()
     last = lines[-1].rstrip()
     return last      
@@ -350,12 +369,12 @@ class Logger:
     def summary(
         self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, 
         pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
-        out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax
+        out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc
     ):
         """Description:
         prints summary of input variables and methods"""
 
-        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ""
+        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = ""
 
         model_dict = {
             "lm" : "linear model",
@@ -458,6 +477,8 @@ class Logger:
             f = f'\n- Model: "{model}" (multivariate linear mixed model)'
         if nolabel == True:
             y = '\n  --nolabel'
+        if noqc == True:
+            ak = '\n  --noqc'
         if umap_n != None:
             t = '\n  --UMAP'
             if umap_n != 2:
@@ -468,7 +489,7 @@ class Logger:
                 u = f'\n  --PCA {pca_n}'
 
         self.logger.info(
-            f'\nSummary:\n\nOutput directory:{v}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{o}{p}'
+            f'\nSummary:\n\nOutput directory:{v}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{o}{p}'
         )
 
 
@@ -479,7 +500,7 @@ class Starter:
     def run_vcf2gwas(args):
         process = subprocess.run(args)
         code = process.returncode
-        file = open("vcf2gwas_process_report.txt", 'a')
+        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"), 'a')
         file.write(str(code))
         file.close()
 
@@ -548,13 +569,15 @@ class Starter:
         for i, point in a.iterrows():
             texts.append(plt.text(point['x'], point['y']+np.random.random()/100, str(point['val']), fontsize="medium", fontweight="bold"))
 
-    def umap_calc(df, pheno_file, n, seed, pheno_path):
+    def umap_calc(df, pheno_file, n, seed, pheno_path, Log):
         """Description:
         performs dimension reduction via UMAP"""
 
         df.fillna("NA", inplace=True)
         df = df.replace("NA",np.nan)
         df = df.dropna(how="any")
+        if df.empty:
+            sys.exit(Log.print_log("Error: Too many missing values to perform UMAP!"))
         x = df.values
         y = df.index.tolist()
         if seed == True:
@@ -563,8 +586,8 @@ class Starter:
             rand = 322
         emb_list = []
         for i in range(n):
-            emb_list.append(f'emb{i+1}')
-
+            emb_list.append(f'Emb{i+1}')
+        
         #run umap 
         reducer = umap.UMAP(random_state=rand, min_dist=0.1, n_components=n, n_neighbors=5, metric="manhattan")
         embedding = reducer.fit_transform(x)
@@ -575,14 +598,15 @@ class Starter:
         if n == 2:
             texts = []
             plt.subplots(figsize=(12,12))
-            s = sns.scatterplot("emb1","emb2", data=embeddingDf);
-            Starter.label_point(embeddingDf.emb1, embeddingDf.emb2, embeddingDf.host, texts) #custom function used
+            sns.scatterplot("Emb1","Emb2", data=embeddingDf)
+            sns.despine(offset=10)
+            Starter.label_point(embeddingDf.Emb1, embeddingDf.Emb2, embeddingDf.host, texts) #custom function used
             plt.title("UMAP embeddings", fontsize=fontsize)
             plt.xticks(fontsize=fontsize2, fontweight="bold")
             plt.yticks(fontsize=fontsize2, fontweight="bold")
-            plt.xlabel("embedding 1", fontsize=fontsize, fontweight="bold")
-            plt.ylabel("embedding 2", fontsize=fontsize, fontweight="bold")
-            adjust_text(texts, embeddingDf['emb1'].values, embeddingDf['emb2'].values, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
+            plt.xlabel("Embedding 1", fontsize=fontsize, fontweight="bold")
+            plt.ylabel("Embedding 2", fontsize=fontsize, fontweight="bold")
+            adjust_text(texts, embeddingDf['Emb1'].values, embeddingDf['Emb2'].values, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
             plt.savefig(os.path.join(pheno_path, f'{pheno_file.removesuffix(".csv")}.png'))
             plt.close()
 
@@ -590,38 +614,53 @@ class Starter:
         embeddingDf.index.name = None
         embeddingDf.to_csv(os.path.join(pheno_path, pheno_file))
 
-    def pca_calc(df, pheno_file, n, pheno_path):
+    def pca_calc(df, pheno_file, n, pheno_path, Log):
         """Description:
         performs principal component analysis"""
 
         df.fillna("NA", inplace=True)
         df = df.replace("NA",np.nan)
         df = df.dropna(how="any")
+        if df.empty:
+            sys.exit(Log.print_log("Error: Too many missing values to perform PCA!"))
         x = df.values
         y = df.index.tolist()
 
         pc_list = []
         for i in range(n):
-            pc_list.append(f'pc{i+1}')
+            pc_list.append(f'PC{i+1}')
 
         #run pca 
         pca = PCA(n_components=n)
         embedding = pca.fit_transform(x)
         embeddingDf = pd.DataFrame(data = embedding, columns=pc_list)
         embeddingDf['host']=y
+        
+        #plot scree plot
+        df_scree = pd.DataFrame({'var':pca.explained_variance_ratio_, 'PC':pc_list})
+        plt.subplots(figsize=(16,12))
+        sns.barplot(x='PC', y='var', data=df_scree, color='b')
+        plt.title("Scree plot", fontsize=fontsize)
+        plt.xticks(fontsize=fontsize2, fontweight="bold")
+        plt.yticks(fontsize=fontsize2, fontweight="bold")
+        plt.xlabel("Principal Components", fontsize=fontsize, fontweight="bold")
+        plt.ylabel("Variance Explained", fontsize=fontsize, fontweight="bold")
+        plt.savefig(os.path.join(pheno_path, f'{pheno_file.removesuffix(".csv")}_scree.png'))
+        plt.close()
 
         #plot PCs
         if n == 2:
             texts = []
             plt.subplots(figsize=(12,12))
-            sns.scatterplot("pc1","pc2", data=embeddingDf);
-            Starter.label_point(embeddingDf.pc1, embeddingDf.pc2, embeddingDf.host, texts) #custom function used
+            sns.scatterplot("PC1","PC2", data=embeddingDf)
+            sns.despine(offset=10)
+            Starter.label_point(embeddingDf.PC1, embeddingDf.PC2, embeddingDf.host, texts) #custom function used
             plt.title("Principal components", fontsize=fontsize)
             plt.xticks(fontsize=fontsize2, fontweight="bold")
             plt.yticks(fontsize=fontsize2, fontweight="bold")
-            plt.xlabel("principal component 1", fontsize=fontsize, fontweight="bold")
-            plt.ylabel("principal component 2", fontsize=fontsize, fontweight="bold")
-            adjust_text(texts, embeddingDf['pc1'].values, embeddingDf['pc2'].values, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
+            plt.xlabel("Principal Component 1", fontsize=fontsize, fontweight="bold")
+            plt.ylabel("Principal Component 2", fontsize=fontsize, fontweight="bold")
+            adjust_text(texts, embeddingDf['PC1'].values, embeddingDf['PC2'].values, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
             plt.savefig(os.path.join(pheno_path, f'{pheno_file.removesuffix(".csv")}.png'))
             plt.close()
 
@@ -686,13 +725,14 @@ class Starter:
                     args_list[i].insert(8, "--allphenotypes")
 
     def edit_args2(pheno_list, args, args_list, threads_list, pheno_file, A, X_list, pheno_path):
-
+        
         for i in range(len(pheno_list)):
             args2 = list(args)
             args_list.append(args2)
             args_list[i].insert(4, '--threads')
             args_list[i].insert(5, threads_list[i])
-            args_list[i] = [os.path.join(pheno_path[0], pheno_list[i]) if x==os.path.join(pheno_path[0], pheno_file) else x for x in args_list[i]]
+            args_list[i] = [os.path.join(pheno_path[0], pheno_list[i]) if pheno_file in x else x for x in args_list[i]]
+            #args_list[i] = [os.path.join(pheno_path[0], pheno_list[i]) if x==os.path.join(pheno_path[0], pheno_file) else x for x in args_list[i]]
             #n = 7
             if A == False:
                 args_list[i].insert(6, "--allphenotypes")
@@ -705,26 +745,28 @@ class Starter:
 
     def check_return_codes(Log):
 
-        os.remove("vcf2gwas_timestamp.txt")
-        code_file = open("vcf2gwas_process_report.txt", 'r')
+        os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_timestamp.txt"))
+        code_file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"), 'r')
         code_file_str = code_file.read()
         if "1" in code_file_str:
             code_file.close()
-            os.remove("vcf2gwas_process_report.txt")
+            shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
+            #os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"))
             sys.exit()
         if "0" not in code_file_str:
             code_file.close()
-            os.remove("vcf2gwas_process_report.txt")
+            shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
+            #os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"))
             sys.exit(Log.print_log("Error: During the analysis, vcf2gwas encountered an unexpected error"))
         else:
             code_file.close()
-            os.remove("vcf2gwas_process_report.txt")
+            os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"))
             Log.print_log("Analysis successfully completed\n")
             
     def get_snpcounts():
 
-        file = open("vcf2gwas_snpcount_total.txt", "r")
-        file2 = open("vcf2gwas_snpcount_sig.txt", "r")
+        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_total.txt"), "r")
+        file2 = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_sig.txt"), "r")
         try:
             lines = file.readlines()
             lines2 = file2.readlines()
@@ -747,13 +789,13 @@ class Starter:
             n = n1
         else:
             n = listtostring([n1, n2], " - ")
-        os.remove("vcf2gwas_snpcount_total.txt")
-        os.remove("vcf2gwas_snpcount_sig.txt")
+        os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_total.txt"))
+        os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_sig.txt"))
         return x, n 
 
     def get_sig_level():
 
-        file = open("vcf2gwas_sig_level.txt", "r")
+        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_sig_level.txt"), "r")
         try:
             lines = file.readlines()
             file.close()
@@ -768,8 +810,100 @@ class Starter:
                 x = "-"
         else:
             x = listtostring([x1, x2], " - ")
-        os.remove("vcf2gwas_sig_level.txt")
+        os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_sig_level.txt"))
         return x
+
+
+class QC:
+
+    def pheno_QC(df, X, folder):
+
+        for x in X:
+
+            x_name = df.columns[x-1]
+
+            fig = plt.figure(figsize=(16,12))
+            sns.histplot(df[x_name])
+            sns.despine(offset=10)
+            plt.title(f'Distribution of {x_name}', fontsize=fontsize)
+            plt.xticks(fontsize=fontsize2, fontweight="bold")
+            plt.xlabel(x_name, fontsize=fontsize, fontweight="bold")
+            plt.yticks(fontsize=fontsize2, fontweight="bold")
+            plt.ylabel("Count", fontsize=fontsize, fontweight="bold")
+            plt.savefig(os.path.join(folder, f'Distribution_{x_name}.png'))
+            plt.close()
+
+    def plot_windowed_variant_density(pos, window_size, outname, qc_dir, title=None):
+
+        # setup windows 
+        bins = np.arange(0, pos.max(), window_size)
+        
+        # use window midpoints as x coordinate
+        x = (bins[1:] + bins[:-1])/2
+        
+        # compute variant density in each window
+        h, _ = np.histogram(pos, bins=bins)
+        y = h / window_size
+        
+        # plot
+        plt.subplots(figsize=(16, 10))
+        sns.lineplot(x=x, y=y)
+        sns.despine(offset=10)
+        #sns.set_context("talk")
+        if title:
+            plt.title(title, fontsize=fontsize)
+        plt.xticks(fontsize=fontsize2, fontweight="bold")
+        plt.yticks(fontsize=fontsize2, fontweight="bold")
+        
+        plt.xlabel('Chromosome position (bp)', fontsize=fontsize, fontweight="bold")
+        plt.ylabel('Variant density (bp$^{-1}$)', fontsize=fontsize, fontweight="bold")
+        plt.savefig(os.path.join(qc_dir, f'{outname}.png'))
+        plt.close()
+
+    def plot_variant_hist(variants, f, outname, qc_dir, bins=30):
+        
+        if f == 'DP':
+            bins = 50
+        x = variants[f][:]
+        plt.subplots(figsize=(16, 12))
+        sns.histplot(data=x, bins=bins)
+        sns.despine(offset=10)
+        plt.xticks(fontsize=fontsize2, fontweight="bold")
+        plt.yticks(fontsize=fontsize2, fontweight="bold")
+        plt.xlabel(f, fontsize=fontsize, fontweight="bold")
+        plt.ylabel('No. variants', fontsize=fontsize, fontweight="bold")
+        plt.title(f'Variant {f} distribution', fontsize=fontsize)
+        plt.savefig(os.path.join(qc_dir, f'{outname}.png'))
+        plt.close()
+
+    def geno_QC(vcf, dir_name, qc_dir, chr, Log):
+
+        for i in chr:
+            Log.print_log(f'QC for Chromosome: {i}')
+            chr_dir = os.path.join(qc_dir, i)
+            os.makedirs(chr_dir)
+            zname = os.path.join(dir_name, f'vcf_temp_{i}.zarr')
+            allel.vcf_to_zarr(vcf, zname, fields='*', region=i, overwrite=True)
+            callset = zarr.open_group(zname, mode='r')
+
+            names = ['POS', 'REF', 'ALT']
+            for s in ['DP', 'MQ', 'QD']:
+                try:
+                    callset[f'variants/{s}']
+                    names.append(s)
+                except Exception:
+                    pass
+
+            variants = allel.VariantChunkedTable(callset['variants'], names=names)
+
+            pos = variants['POS'][:]
+            QC.plot_windowed_variant_density(pos, 100000, f'VD_{i}', chr_dir, title='Raw variant density')
+    
+            for val in ['DP', 'MQ', 'QD']:
+                if val in names:
+                    QC.plot_variant_hist(variants, val, f'{val}_{i}', chr_dir)
+            
+            shutil.rmtree(zname, ignore_errors=True)
 
 
 class Processing:
@@ -816,7 +950,7 @@ class Processing:
         removes excess individuals from csv file"""
 
         pheno2 = df[~df.index.isin(diff)]
-        pheno2.to_csv(f'sub_{File}')
+        #pheno2.to_csv(f'sub_{File}')
         return pheno2
 
     def pheno_index(file):
@@ -884,7 +1018,7 @@ class Processing:
         Log.print_log(f'{string}(s) added to .fam file')
         return pheno_subset_new.columns.tolist()
 
-    def make_covarfile(fam, pheno_subset, subset2, Y):
+    def make_covarfile(fam, pheno_subset, subset2, Y, Log):
         """Description:
         creates covariate file for linear mixed model by adding intercept column and removing old index"""
 
@@ -934,11 +1068,11 @@ class Processing:
             if file.startswith("plink"):
                 os.remove(file)
 
-    def pca_analysis2(snp_file, n, memory, threads, chrom, list1):
+    def pca_analysis2(snp_file, n, memory, threads, chrom, list1, dir_temp):
         """Description:
         performs LD pruning and principal component analysis via plink"""
         
-        name = "vcf2gwas_geno_pca"
+        name = os.path.join(dir_temp, "vcf2gwas_geno_pca")
         string = "_"
         list2 = [l for l in list1 if string in l]
         if list2 != None:
@@ -965,9 +1099,9 @@ class Processing:
             cols.append(f'PC{i+1}')
             cols2.append(f'PC{i+1}')
         df.columns = cols
-        for file in os.listdir():
-            if file.startswith(name):
-                os.remove(file)
+        for file in os.listdir(dir_temp):
+            if file.startswith("vcf2gwas_geno_pca"):
+                os.remove(os.path.join(dir_temp, file))
         df.to_csv(f'{name}.csv', index=False)
         return cols2
 
@@ -1005,7 +1139,7 @@ class Converter:
                 print(f'Chromosomes: {listtostring(sorted(ls_set), ", ")}')
             except Exception:
                 pass
-        return len(ls_set)
+        return len(ls_set), ls_set
 
     def check_chrom(snp_file, chr):
 
@@ -1100,7 +1234,7 @@ class Gemma:
 
     def write_returncodes(code):
 
-        file = open("vcf2gwas_process_report.txt", 'a')
+        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"), 'a')
         file.write(str(code))
         file.close()
     
@@ -1227,7 +1361,7 @@ class Post_analysis:
 
     def check_return_codes():
 
-        code_file = open("vcf2gwas_process_report.txt", 'r')
+        code_file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"), 'r')
         code_file_str = code_file.read()
         if "0" not in code_file_str:
             code_file.close()
@@ -1277,7 +1411,7 @@ class Post_analysis:
             texts = []
 
             for num, (name, group) in enumerate(data_grouped):
-                group.plot(kind='scatter', x='ind', y='-log10(p_value)', color=colors[num % len(colors)], ax=ax, s=15)
+                group.plot(kind='scatter', x='ind', y='-log10(p_value)', color=colors[num % len(colors)], ax=ax, s=fontsize3)
                 x_labels.append(name)
                 x_labels_pos.append((group['ind'].iloc[-1] - (group['ind'].iloc[-1] - group['ind'].iloc[0]) / 2))
 
@@ -1308,7 +1442,7 @@ class Post_analysis:
                             if nolabel == False:                  
                                 texts.append(plt.text(index, row['-log10(p_value)']+np.random.random()/100, str(row[refSNP]), fontsize="medium", fontweight="bold"))
                 if sigval > 0:
-                    plt.axhline(y=sigval, color='black', linestyle='-', linewidth = 0.5)
+                    plt.axhline(y=sigval, color='black', linestyle='-', linewidth = fontsize6)
                     Log.print_log(f'Number of significant SNPs: {n} \nLevel of significance: {np.format_float_scientific(sig_level, precision=2)} \nNumber of total SNPs: {x}')
                     if nolabel == False:
                         adjust_text(texts, data.index.values, data['-log10(p_value)'].values, autoalign='y', ha='left', only_move={'text':'y'}, expand_text=(1.02, 1.02), expand_align=(1.02, 1.02), force_text=(0,0.7), lim=250, arrowprops=dict(arrowstyle="-", color='k', lw=0.5, alpha=0.6))
@@ -1321,11 +1455,11 @@ class Post_analysis:
             timer_total = round(timer_end - timer, 2)
             Log.print_log(f'Manhattan plot saved as "{pcol}_manh_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
 
-        file = open("vcf2gwas_snpcount_total.txt", 'a')
+        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_total.txt"), 'a')
         file.write(f'{x}\n')
-        file = open("vcf2gwas_snpcount_sig.txt", 'a')
+        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_sig.txt"), 'a')
         file.write(f'{n}\n')
-        file = open("vcf2gwas_sig_level.txt", 'a')
+        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_sig_level.txt"), 'a')
         file.write(f'{np.format_float_scientific(sig_level, precision=2)}\n')
         file.close()
 
@@ -1372,7 +1506,7 @@ class Post_analysis:
             q = np.maximum(a_max, b_max)
 
             fig, ax = plt.subplots(figsize=(16,12))
-            ax.plot(b,a, ls="", marker="o")
+            ax.plot(b,a, ls="", marker="o", alpha=0.5, markeredgecolor="black", markeredgewidth=1)
             ax.set(xlim=(0, (b_max)), ylim=(0, a_max))
             x = np.linspace(0, q)
             ax.plot(x,x, color="k", ls="--")
@@ -1745,7 +1879,8 @@ class Summary:
                     # plot SNP counts
                     y = values["count"]
                     fig = plt.figure(figsize=(16,12))
-                    sns.scatterplot(data=values, x="SNP_ID", y="count", s=100)
+                    sns.scatterplot(data=values, x="SNP_ID", y="count", s=(fontsize*2))
+                    sns.despine(offset=10)
                     plt.xticks(rotation=45, fontsize=fontsize4, fontweight="bold")
                     plt.xlabel("SNP ID", fontsize=fontsize, fontweight="bold")
                     plt.yticks(np.arange(0, max(y)+2, 1), fontsize=fontsize2, fontweight="bold")

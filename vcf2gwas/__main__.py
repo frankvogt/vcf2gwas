@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+import shutil
 import sys
 import os
 import subprocess
@@ -29,25 +30,11 @@ from vcf2gwas.install import main as installer
 argvals = None
 
 def main(argvals=argvals):
-    #string = str(subprocess.run(["conda", "list"], capture_output=True))
-    #modules = ["gemma", "plink", "bcftools"]
-    #if any(x not in string for x in modules):
-    #    installer()
-        #subprocess.run(["conda", "install", "-c", "bioconda", "bcftools==1.12*"])
-        #subprocess.run(["conda", "install", "-c", "bioconda", "plink==1.90*"])
-        #subprocess.run(["conda", "install", "-c", "bioconda", "gemma==0.98.3"])
     
-    print("\nvcf2gwas v0.6.9 \n")
+    print("\nvcf2gwas v0.7.0 \n")
     print("Initialising..\n")
     P = Parser(argvals)
     args = sys.argv[1:]
-    #args.insert(0, 'conda')
-    #args.insert(1, 'run')
-    #args.insert(2, '--no-capture-output')
-    #args.insert(3, '-n')
-    #args.insert(4, 'vcf2gwas')
-    #args.insert(5, 'python')
-    #args.insert(6, os.path.join(os.path.dirname(__file__), 'starter.py'))
     args.insert(0, 'python3.9')
     args.insert(1, os.path.join(os.path.dirname(__file__), 'starter.py'))
     
@@ -67,6 +54,8 @@ def main(argvals=argvals):
             sys.exit(print("Error: A covariate file can only be added when using the linear model ('-lm') or the linear mixed model ('-lmm')"))
 
     subprocess.run(args)
+
+    shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
 
 if __name__ == '__main__':
     sys.exit(main())

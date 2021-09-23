@@ -48,6 +48,7 @@ start = time.perf_counter()
 P = Parser(argvals)
 out_dir = P.set_out_dir()
 out_dir2 = os.path.join(out_dir, "output")
+dir_temp = "_vcf2gwas_temp"
 
 # set variables
 pheno_file = P.set_pheno()
@@ -130,13 +131,11 @@ Log.print_log("Preparing files\n")
 Log.print_log("Checking and adjusting files..")
 
 snp_prefix = snp_file.removesuffix(".vcf.gz")
-
-chrom = Converter.set_chrom(snp_file2)
-
+chrom, chrom_list = Converter.set_chrom(snp_file2)
 subset = f'sub{pc_prefix}_{snp_prefix}'
 folder = f'files{pc_prefix}_{snp_prefix}'
-
-subset2 = f'mod_{subset}'
+subset2 = os.path.join(dir_temp, f'mod_{subset}')
+subset = os.path.join(dir_temp, subset)
 
 # make list from genotype file
 Log.print_log("Checking individuals in VCF file..")
@@ -170,7 +169,7 @@ else:
     diff3 = Processing.make_diff(list3, list1)
     if set(diff1a) == set(diff1b) and len(set(diff1a)) != 0:       
         pheno_subset2 = Processing.rm_pheno(covar, diff3, covar_file)
-        Log.print_log(str("Not all individuals in covariate and genotype file match"))
+        Log.print_log("Not all individuals in covariate and genotype file match")
     else:
         pheno_subset2 = Processing.make_uniform(list1, list3, diff1b, diff3, covar, subset, snp_file2, covar_file, "covariate", Log)
     length2 = len(pheno_subset2.columns)
@@ -250,7 +249,7 @@ else:
         if B == True:
             Y = list(range(length2))
             Y = [i+1 for i in Y]
-        covar_file_name = Processing.make_covarfile(fam, pheno_subset2, subset2, Y)
+        covar_file_name = Processing.make_covarfile(fam, pheno_subset2, subset2, Y, Log)
         Y = []
         cols2 = []
     elif B == True:
@@ -303,7 +302,7 @@ if pca != None:
 
 x = 1
 top_ten = []
-sns.set_theme(style="white")
+
 pd.set_option('use_inf_as_na', True)
 pd.options.mode.chained_assignment = None
 
@@ -325,7 +324,8 @@ else:
     for i in columns:
 
         prefix = subset2
-        prefix2 = f'{i}_{prefix}'
+        prefix2 = f'{i}_{os.path.split(prefix)[1]}'
+
         if i == "":
             prefix2 = prefix
             i = "results"
@@ -397,9 +397,9 @@ path3 = os.path.join(path, "files", folder)
 make_dir(path3)
 
 Log.print_log("Moving files..")
-for files in os.listdir():
-    if files.startswith((f'sub{pc_prefix}', subset2)):
-        shutil.move(files, os.path.join(path3, files))
+for files in os.listdir(dir_temp):
+    if files.startswith((f'sub{pc_prefix}', os.path.split(subset2)[1])):
+        shutil.move(os.path.join(dir_temp, files), os.path.join(path3, files))
 if model == "-gk":
     path2 = os.path.join(path, "rel_matrix", f'rel_matrix_{timestamp2}')
     make_dir(path2)
