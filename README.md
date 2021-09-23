@@ -298,6 +298,10 @@ set <int> to '0' to disable line
 remove the SNP labels in the manhattan plot  
 reduces runtime if analysis results in many significant SNPs
 
+* `-nq` / `--noqc`  
+deactivate Quality Control plots  
+reduces runtime
+
 * `-fs`/ `--fontsize` <int>  
 set the fontsize of plots.  
 Default value: 26
@@ -341,6 +345,9 @@ output/
     │       └── GEMMA log file (.log.txt)
     ├── logs
     │   └── analysis log file (.txt)
+    ├── QC
+    │   ├── phenotype QC plot (.png)
+    │   └── genotype QC plots (.png)
     ├── vcf2gwas log file (.txt)
     └── summary
         ├── summarized top SNPs (.csv)

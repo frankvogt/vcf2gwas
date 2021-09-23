@@ -36,6 +36,7 @@ The phenotype file `example.csv` is made up of the `avrRpm1` phenotype from the 
     * [Change font size in all plots](#change-font-size-in-all-plots)
     * [Keep temporary files](#keep-temporary-files)
 * [Output](#output)
+    * [Quality Control](#quality-control)
     * [Plots](#plots)
     * [Summaries](#summaries)
 
@@ -260,7 +261,7 @@ By default, vcf2gwas will reduce the phenotype dimensionality to 2 PCs. To chang
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -P 3
 ```
 
-Now, vcf2gwas will reduce the phenotype dimensionality to 3 instead of 2.
+Now, vcf2gwas will reduce the phenotype dimensionality to 3 instead of 2. vcf2gwas will also plot the variance explained of the principal components, so that the user can estimate the amount of sufficient PCs.
 
 #### UMAP
 
@@ -331,6 +332,15 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -r
 ## Output
 
 The following part shows some of the output plots and summaries produced by the analysis of the example files using the linear mixed model and standard options.
+
+### Quality Control
+
+vcf2gwas will produce quality control plots (saved in the `QC` directory) for the phenotype data as well as the genotype data:  
+
+* For every analyzed phenotype, its distribution will be plotted.
+* For every chromosome of the genotype data, the raw variant density and, if available, the depth of coverage, mapping quality and QD (Qual normalized by Depth) will be plotted.
+
+To reduce the runtime, quality control can be deactivated with the option `-nq/--noqc`.  
 
 ### Plots
 
