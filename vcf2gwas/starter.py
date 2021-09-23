@@ -640,7 +640,7 @@ elif switch == True:
 if geno_pca_switch == True:
     for folder in os.listdir(path5):
         if folder.endswith(timestamp2):
-            shutil.move(covar2, os.path.join(path5, folder, f'{snp_prefix}_PCA.csv'))
+            shutil.copy(covar2, os.path.join(path5, folder, f'{snp_prefix}_PCA.csv'))
 
 
 # move umap/pca files
