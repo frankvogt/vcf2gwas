@@ -5,6 +5,7 @@ requirements = [
     'pandas==1.2*',
     'matplotlib==3.4*',
     'seaborn==0.11*',
+    'scikit-allel==1.3*',
     'scikit-learn==0.24*',
     'psutil==5.8*',
     'adjusttext==0.7*',
@@ -16,7 +17,7 @@ requirements = [
 
 setup(
     name='vcf2gwas',
-    version='0.6.9',
+    version='0.7.0',
     description="Python API for comprehensive GWAS analysis using GEMMA",
     license="GNUv3",
     author="Frank Vogt",
