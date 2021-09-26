@@ -1,0 +1,1 @@
+"hail_notebook.py" was created with Visual Studio Core (Version 1.6) and if run there will work as a Jupiter notebook.
