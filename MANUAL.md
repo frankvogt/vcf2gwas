@@ -338,7 +338,7 @@ The following part shows some of the output plots and summaries produced by the 
 vcf2gwas will produce quality control plots (saved in the `QC` directory) for the phenotype data as well as the genotype data:  
 
 * For every analyzed phenotype, its distribution will be plotted.
-* For every chromosome of the genotype data, the raw variant density and, if available, the depth of coverage, mapping quality and QD (Qual normalized by Depth) will be plotted.
+* For every chromosome of the genotype data, the raw variant density and, if available, DP (depth of coverage), MQ (mapping quality) and QD (Qual normalized by Depth) will be plotted.
 
 To reduce the runtime, quality control can be deactivated with the option `-nq/--noqc`.  
 
