@@ -2142,12 +2142,15 @@ class Summary:
                         ]
                         values.columns = multicols                       
                     #save file
-                    if n > 0:
-                        values.to_csv(os.path.join(path, f'{gene_file_name}_compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv'), index=False)
-                        Log.print_log(f'Top SNPs compared to genes and saved as "{gene_file_name}_compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv" in {path}')
+                    if values.empty:
+                        Log.print_log("Info: No SNPs could be compared to genes, please check the species or gene file selection")
                     else:
-                        values.to_csv(os.path.join(path, f'compared_summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv'), index=False)
-                        Log.print_log(f'Top SNPs compared to genes and saved as "compared_summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv" in {path}')
+                        if n > 0:
+                            values.to_csv(os.path.join(path, f'{gene_file_name}_compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv'), index=False)
+                            Log.print_log(f'Top SNPs compared to genes and saved as "{gene_file_name}_compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv" in {path}')
+                        else:
+                            values.to_csv(os.path.join(path, f'compared_summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv'), index=False)
+                            Log.print_log(f'Top SNPs compared to genes and saved as "compared_summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv" in {path}')
                 else:
                     Log.print_log(f'Could not parse contents of {gene_file}.\nPlease provide the file in the right format.')
             c += 1
