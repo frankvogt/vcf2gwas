@@ -284,8 +284,18 @@ if model == None:
 if model not in ["-gk", "-eigen"]:
     if A == False and B == False:
         if umap_switch == False and pca_switch == False:
-            if X == None and Y == None:
-                sys.exit(Log.print_log("Error: No phenotypes (or covariates) specified for GEMMA analysis"))
+            if geno_pca_switch == False:
+                if X == None and Y == None:
+                    sys.exit(Log.print_log("Error: No phenotypes and covariates specified for GEMMA analysis"))
+    elif A == False:
+        if umap_switch == False and pca_switch == False:
+            if X == None:
+                sys.exit(Log.print_log("Error: No phenotypes specified for GEMMA analysis"))
+    elif covar2 != None:
+        if B == False:
+            if geno_pca_switch == False:
+                if Y == None:
+                    sys.exit(Log.print_log("Error: No covariates specified for GEMMA analysis"))
 
 pheno_list = []
 X_list = []
@@ -342,11 +352,12 @@ if pheno_files != None:
         if set(X).issubset([i+1 for i in list(range(l))]) == False:
             sys.exit(Log.print_log("Error: The selected phenotype data does not exist in the phenotype file"))
         if covar2 != None:
-            if geno_pca_switch == False:
-                df_covar = Processing.load_pheno(covar2)
-                l_covar = len(df_covar.columns)
-                if set(Y).issubset([i+1 for i in list(range(l_covar))]) == False:
-                    sys.exit(Log.print_log("Error: The selected covariate data does not exist in the covariate file"))
+            if Y != None:
+                if geno_pca_switch == False:
+                    df_covar = Processing.load_pheno(covar2)
+                    l_covar = len(df_covar.columns)
+                    if set(Y).issubset([i+1 for i in list(range(l_covar))]) == False:
+                        sys.exit(Log.print_log("Error: The selected covariate data does not exist in the covariate file"))
 
         if umap_switch == True:
             if l < umap_n:
