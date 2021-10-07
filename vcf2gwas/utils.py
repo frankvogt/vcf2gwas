@@ -369,12 +369,13 @@ class Logger:
     def summary(
         self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, 
         pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
-        out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc
+        out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
+        input_str
     ):
         """Description:
         prints summary of input variables and methods"""
 
-        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = ""
+        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = al = ""
 
         model_dict = {
             "lm" : "linear model",
@@ -400,6 +401,7 @@ class Logger:
         }
 
 
+        al = f'\n{input_str}'
         v = f'\n{out_dir}'
         w = f'\n{analysis_num}'
         if X_names != "":
@@ -489,7 +491,7 @@ class Logger:
                 u = f'\n  --PCA {pca_n}'
 
         self.logger.info(
-            f'\nSummary:\n\nOutput directory:{v}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{o}{p}'
+            f'\nSummary:\n\nOutput directory:{v}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nCommand:{al}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{o}{p}'
         )
 
 

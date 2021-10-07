@@ -522,6 +522,7 @@ args = sys.argv[1:]
 # for testing
 if args == []:
     args = argvals
+input_str = f'vcf2gwas {listtostring(args)}'
 args = Starter.delete_string(args, ['-v', '--vcf', '-T', '--threads', '-M', '--memory'])
 args.insert(0, snp_file2)
 args.insert(0, "--vcf")
@@ -711,7 +712,8 @@ sig_level = Starter.get_sig_level()
 Log.summary(
     snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, 
     pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
-    out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc
+    out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
+    input_str
 )
 
 log_path1 = os.path.join(path, "logs", "temp")
