@@ -161,20 +161,20 @@ Below are all supported species, their abbreviations as well as the used referen
 
 |Species|Abbreviation|Scientific name|Reference|Source|
 |---|---|---|---|---|
-|anopheles|AG|anopheles gambiae|AgamP4.51|[link](http://ftp.ensemblgenomes.org/pub/metazoa/release-51/gff3/anopheles_gambiae/)|
-|arabidopsis|AT|arabidopsis thaliana|TAIR10.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/arabidopsis_thaliana/)|
-|c elegans|CE|caenorhabditis elegans|WBcel235|[link](http://ftp.ensembl.org/pub/release-104/gff3/caenorhabditis_elegans/)|
-|drosophila|DM|drosophila melanogaster|BDGP6.32|[link](http://ftp.ensembl.org/pub/release-104/gff3/drosophila_melanogaster/)|
-|zebrafish|DR|danio rerio|GRCz11|[link](http://ftp.ensembl.org/pub/release-104/gff3/danio_rerio/)|
-|chicken|GG|gallus gallus|GRCg6a|[link](http://ftp.ensembl.org/pub/release-104/gff3/gallus_gallus/)|
-|human|HS|homo sapiens|GRCh38.p13|[link](http://ftp.ensembl.org/pub/release-104/gff3/homo_sapiens/)|
-|mouse|MM|mus musculus|GRCm39|[link](http://ftp.ensembl.org/pub/release-104/gff3/mus_musculus/)|
-|rice|OS|oryza sativa|IRGSP-1.0.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/oryza_sativa/)|
-|rat|RN|rattus norvegicus|Rnor_6.0|[link](http://ftp.ensembl.org/pub/release-104/gff3/rattus_norvegicus/)|
-|yeast|SC|saccharomyces cerevisiae|R64-1-1|[link](http://ftp.ensembl.org/pub/release-104/gff3/saccharomyces_cerevisiae/)|
-|tomato|SL|solanum lycopersicum|SL3.0.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/solanum_lycopersicum/)|
-|grape|VV|vitis vinifera|12X.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/vitis_vinifera/)|
-|maize|ZM|zea mays|Zm-B73-REFERENCE-NAM-5.0.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/zea_mays/)|
+|Anopheles|AG|anopheles gambiae|AgamP4.51|[link](http://ftp.ensemblgenomes.org/pub/metazoa/release-51/gff3/anopheles_gambiae/)|
+|Arabidopsis|AT|arabidopsis thaliana|TAIR10.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/arabidopsis_thaliana/)|
+|C. elegans|CE|caenorhabditis elegans|WBcel235|[link](http://ftp.ensembl.org/pub/release-104/gff3/caenorhabditis_elegans/)|
+|Fruit fly|DM|drosophila melanogaster|BDGP6.32|[link](http://ftp.ensembl.org/pub/release-104/gff3/drosophila_melanogaster/)|
+|Zebrafish|DR|danio rerio|GRCz11|[link](http://ftp.ensembl.org/pub/release-104/gff3/danio_rerio/)|
+|Chicken|GG|gallus gallus|GRCg6a|[link](http://ftp.ensembl.org/pub/release-104/gff3/gallus_gallus/)|
+|Human|HS|homo sapiens|GRCh38.p13|[link](http://ftp.ensembl.org/pub/release-104/gff3/homo_sapiens/)|
+|Mouse|MM|mus musculus|GRCm39|[link](http://ftp.ensembl.org/pub/release-104/gff3/mus_musculus/)|
+|Rice|OS|oryza sativa|IRGSP-1.0.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/oryza_sativa/)|
+|Rat|RN|rattus norvegicus|Rnor_6.0|[link](http://ftp.ensembl.org/pub/release-104/gff3/rattus_norvegicus/)|
+|Yeast|SC|saccharomyces cerevisiae|R64-1-1|[link](http://ftp.ensembl.org/pub/release-104/gff3/saccharomyces_cerevisiae/)|
+|Tomato|SL|solanum lycopersicum|SL3.0.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/solanum_lycopersicum/)|
+|Grape|VV|vitis vinifera|12X.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/vitis_vinifera/)|
+|Maize|ZM|zea mays|Zm-B73-REFERENCE-NAM-5.0.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/zea_mays/)|
 
 Futhermore, vcf2gwas supports adding a 'gene-file' (either a GFF3 formatted `.gff` or comma-separated `.csv` file) containing the position as well as additional information of genes to the analysis by using the `-gf/--genefile` option:
 
