@@ -111,6 +111,7 @@ gene_thresh = P.set_gene_thresh()
 multi = P.set_multi()
 sigval = P.set_sigval()
 nolabel = P.set_nolabel()
+noplot = P.set_noplot()
 burn = str(P.set_burn())
 sampling = str(P.set_sampling())
 snpmax = str(P.set_snpmax())
@@ -369,11 +370,11 @@ else:
     ############################## Processing and plotting ##############################
 
     Log.print_log("Analyzing GEMMA results\n")
-    for (top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel) in zip(
+    for (top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot) in zip(
         itertools.repeat(top_ten), itertools.repeat(Log), itertools.repeat(model), itertools.repeat(n), prefix2_list, path_list, 
-        itertools.repeat(n_top), i_list, itertools.repeat(sigval), itertools.repeat(nolabel)
+        itertools.repeat(n_top), i_list, itertools.repeat(sigval), itertools.repeat(nolabel), itertools.repeat(noplot)
         ):
-        Post_analysis.run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel)
+        Post_analysis.run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot)
     Log.print_log("Analysis of GEMMA results completed successfully\n")
 
 ############################## Summary and Clean up ##############################

@@ -38,7 +38,7 @@ def getArgs(argv=None):
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Command-line interface for vcf2gwas.\n \nExample usage: vcf2gwas -v <VCF file> -pf <phenotype file> -ap -lmm', epilog="For a detailed description of all options, please refer to the manual.")
 
     parser.add_argument(
-        '--version', action='version', version='%(prog)s 0.7.2'
+        '--version', action='version', version='%(prog)s 0.7.3'
     )
     parser.add_argument(
         "-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename"
@@ -140,6 +140,7 @@ def getArgs(argv=None):
     parser.add_argument("-m", "--multi", action="store_true", help="performs multivariate linear mixed model analysis with specified phenotypes \nonly active in combination with '-lmm' option")
     parser.add_argument("-nl", "--nolabel", action="store_true", help="remove the SNP labels in the manhattan plot \nreduces runtime if analysis results in many significant SNPs")
     parser.add_argument("-nq", "--noqc", action="store_true", help="deactivate Quality Control plots \nreduces runtime")
+    parser.add_argument("-np", "--noplot", action="store_true", help="deactivate Manhattan and QQ-plots \nreduces runtime")
     parser.add_argument("-sd", "--seed", action="store_true", help="perform UMAP with random seed \nreduces reproducibility")
     parser.add_argument("-r", "--retain", action="store_true", help="keep all temporary intermediate files \ne.g. subsetted and filtered VCF and .csv files")
     
@@ -219,6 +220,9 @@ class Parser:
 
     def set_noqc(self):
         return self.args.noqc
+
+    def set_noplot(self):
+        return self.args.noplot
 
     def set_fontsize(self):
         return self.args.fontsize

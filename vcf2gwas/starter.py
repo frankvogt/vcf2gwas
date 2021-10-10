@@ -236,6 +236,7 @@ seed = P.set_seed()
 sigval = P.set_sigval()
 nolabel = P.set_nolabel()
 noqc = P.set_noqc()
+noplot = P.set_noplot()
 burn = P.set_burn()
 sampling = P.set_sampling()
 snpmax = P.set_snpmax()
@@ -575,10 +576,6 @@ Starter.check_return_codes(Log)
 
 #################### summary and clean-up ####################
 
-#if dir_check == False:
-#    shutil.rmtree(temp_dir, ignore_errors=True)
-#else:
-#    os.remove(snp_file2)
 snp_file2 = snp_file2_org
 
 if model == None:
@@ -713,7 +710,7 @@ Log.summary(
     snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, 
     pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
     out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
-    input_str
+    input_str, noplot
 )
 
 log_path1 = os.path.join(path, "logs", "temp")

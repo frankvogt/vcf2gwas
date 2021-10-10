@@ -370,12 +370,12 @@ class Logger:
         self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, 
         pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
         out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
-        input_str
+        input_str, noplot
     ):
         """Description:
         prints summary of input variables and methods"""
 
-        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = al = ""
+        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = al = am = ""
 
         model_dict = {
             "lm" : "linear model",
@@ -481,6 +481,8 @@ class Logger:
             y = '\n  --nolabel'
         if noqc == True:
             ak = '\n  --noqc'
+        if noplot == True:
+            am = '\n  --noplot'
         if umap_n != None:
             t = '\n  --UMAP'
             if umap_n != 2:
@@ -491,7 +493,7 @@ class Logger:
                 u = f'\n  --PCA {pca_n}'
 
         self.logger.info(
-            f'\nSummary:\n\nOutput directory:{v}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nCommand:{al}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{o}{p}'
+            f'\nSummary:\n\nOutput directory:{v}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nCommand:{al}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{am}{o}{p}'
         )
 
 
@@ -1549,7 +1551,7 @@ class Post_analysis:
         df.columns = multcols
         df.to_csv(os.path.join(path, f'top_SNPs{pc_prefix}_{snp_prefix}.csv'), sep=',')
 
-    def run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel):
+    def run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot):
         """Description:
         runs post-processing dependent on input"""
 
@@ -1565,9 +1567,11 @@ class Post_analysis:
                 df2 = Lin_models.get_p_values(df, p, prefix2, path)
                 Log.print_log(f'Variants with the best {p} score saved in {os.path.join(path, "best_p-values")}')
 
-                df3 = Lin_models.format_data(prefix2, "assoc", p, path)
-                n = Lin_models.manh_plot(df3, Log, prefix2, p, path, sigval, x, nolabel, refSNP="rs")
-                Lin_models.qq_plot(df, p, prefix2, path, Log)
+                n = 0
+                if noplot == False:
+                    df3 = Lin_models.format_data(prefix2, "assoc", p, path)
+                    n = Lin_models.manh_plot(df3, Log, prefix2, p, path, sigval, x, nolabel, refSNP="rs")
+                    Lin_models.qq_plot(df, p, prefix2, path, Log)
 
             Lin_models.make_top_list(df2, top_ten, n_top, n)
 
@@ -1602,13 +1606,15 @@ class Post_analysis:
             df3 = Bslmm.get_pip(df2, prefix2, path)
             Log.print_log(f'Variants with high Posterior Inclusion Probability (PIP) (== gamma) saved in {os.path.join(path, "high_PIP")}')
 
-            # plot variants PIPs across linkage groups/chromosomes
-            df4 = Bslmm.format_data(prefix2, "param", "gamma", path)
-            n1 = Bslmm.manh_plot(df4, Log, prefix2, "gamma", path, sigval, x, nolabel, refSNP="rs")
-            # plot effect sizes
-            df5 = Bslmm.format_data(prefix2, "param", "eff", path)
-            n2 = Bslmm.manh_plot(df5, Log, prefix2, "eff", path, sigval, x, nolabel, refSNP="rs")
-            n = max([n1, n2])
+            n = 0
+            if noplot == False:
+                # plot variants PIPs across linkage groups/chromosomes
+                df4 = Bslmm.format_data(prefix2, "param", "gamma", path)
+                n1 = Bslmm.manh_plot(df4, Log, prefix2, "gamma", path, sigval, x, nolabel, refSNP="rs")
+                # plot effect sizes
+                df5 = Bslmm.format_data(prefix2, "param", "eff", path)
+                n2 = Bslmm.manh_plot(df5, Log, prefix2, "eff", path, sigval, x, nolabel, refSNP="rs")
+                n = max([n1, n2])
 
             Bslmm.make_top_list(df3, top_ten, n_top, n)
         
