@@ -314,7 +314,7 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -nl
 To deactivate the manhattan and QQ-plots completely, employ the `-np/--noplot` option.
 
 ```
-vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -nl
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -np
 ```
 
 **Note**: This can be beneficial when using custom vcf files missing e.g. variant positions, or to reduce overall runtime.
