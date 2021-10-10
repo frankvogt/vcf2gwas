@@ -1,9 +1,9 @@
-# vcf2gwas manual
+# *vcf2gwas* manual
 
 ## About
 
-This manual is meant to clarify the most important options and possibilities when running vcf2gwas.  
-To obtain example files for running vcf2gwas, run:
+This manual is meant to clarify the most important options and possibilities when running *vcf2gwas*.  
+To obtain example files for running *vcf2gwas*, run:
 
 ```
 vcf2gwas -v test
