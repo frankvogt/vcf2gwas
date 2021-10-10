@@ -42,7 +42,7 @@ The phenotype file `example.csv` is made up of the `avrRpm1` phenotype from the 
 
 ## GEMMA models
 
-This sections demonstrates the usage of vcf2gwas when running the different analysis models of GEMMA.  
+This sections demonstrates the usage of *vcf2gwas* when running the different analysis models of GEMMA.  
 
 To read more in detail about the different models GEMMA is able to run, please refer to their [manual](https://github.com/genetics-statistics/GEMMA/blob/master/doc/manual.pdf).
 
@@ -97,12 +97,12 @@ To change to amount of burn-in steps, sampling steps and maximum value for 'gamm
 
 ## File related options
 
-vcf2gwas is capable of analyzing multiple phenotypes from one or multiple phenotypes at once. 
+*vcf2gwas* is capable of analyzing multiple phenotypes from one or multiple phenotypes at once. 
 Depending on the available cores and memory of the machine running the analysis and the number of phenotypes to be analyzed, the phenotype file will be split up during the analysis to ensure maximum efficiency by analyzing phenotypes in parallel.
 
 ### Selecting multiple phenotype files
 
-vcf2gwas is able to take in multiple phenotype files by employing the `-pf/--pfile` option for each file:
+*vcf2gwas* is able to take in multiple phenotype files by employing the `-pf/--pfile` option for each file:
 
 ```
 vcf2gwas -v [filename] -pf [filename1] -pf [filename2] -p [int] -lmm
@@ -151,7 +151,7 @@ Similarly to the phenotype options, multiple covariates can be selected (either 
 
 ### Comparing results to specific genes
 
-Comparing the GWAS results to specific genes of interest can be a tedious task. To facilitate this process, vcf2gwas comes with GFF gene files already built-in for the most common species. Comparison to a species can be selected by employing the `-gf/--genefile` option and the abbreviation for the species:
+Comparing the GWAS results to specific genes of interest can be a tedious task. To facilitate this process, *vcf2gwas* comes with GFF gene files already built-in for the most common species. Comparison to a species can be selected by employing the `-gf/--genefile` option and the abbreviation for the species:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -gf [abbreviation]
@@ -176,29 +176,29 @@ Below are all supported species, their abbreviations as well as the used referen
 |Grape|VV|vitis vinifera|12X.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/vitis_vinifera/)|
 |Maize|ZM|zea mays|Zm-B73-REFERENCE-NAM-5.0.51|[link](http://ftp.ensemblgenomes.org/pub/plants/release-51/gff3/zea_mays/)|
 
-Futhermore, vcf2gwas supports adding a 'gene-file' (either a GFF3 formatted `.gff` or comma-separated `.csv` file) containing the position as well as additional information of genes to the analysis by using the `-gf/--genefile` option:
+Futhermore, *vcf2gwas* supports adding a 'gene-file' (either a GFF3 formatted `.gff` or comma-separated `.csv` file) containing the position as well as additional information of genes to the analysis by using the `-gf/--genefile` option:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -gf [filename]
 ```
 If the file is in the `.csv` format, the file needs at least three columns containing information about chromosome, gene start position and gene stop position. These columns have to be named 'chr', 'start' and 'stop'.  
 
-vcf2gwas recognizes chromosomes in the following formats (here the first chromosome): `Chr1`, `chr1`, `1`.  
-If the chromosomes in the `VCF` file are of a different format, it is necessary that the chromosome information in the gene file is formatted in the same way, otherwise vcf2gwas won't recognize the information correctly.  
+*vcf2gwas* recognizes chromosomes in the following formats (here the first chromosome): `Chr1`, `chr1`, `1`.  
+If the chromosomes in the `VCF` file are of a different format, it is necessary that the chromosome information in the gene file is formatted in the same way, otherwise *vcf2gwas* won't recognize the information correctly.  
 
-vcf2gwas will summarize the n best SNPs (specified with `-t/--topsnp`) of every analyzed phenotype and compare them to the genes in the file by calculating the distance between each SNP and gene upstream as well as downstream. These results can be filtered by saving only those SNPs with a distance to a gene lower than a specific threshold (set with `-gt/--genethresh`).  
+*vcf2gwas* will summarize the n best SNPs (specified with `-t/--topsnp`) of every analyzed phenotype and compare them to the genes in the file by calculating the distance between each SNP and gene upstream as well as downstream. These results can be filtered by saving only those SNPs with a distance to a gene lower than a specific threshold (set with `-gt/--genethresh`).  
 
 **Note**: Since for each SNP only the gene with the closest start/end upstream and downstream is shown, this feature only serves to give a hint of possibly associated genes. Closer inspection by the user is strongly recommended.
 
 ### Adding a relatedness matrix
 
-Although vcf2gwas will by default calculate a relatedness matrix depending on the chosen model, one may want to add a different one instead to the analysis. This is possible by employing the `-k/--relmatrix` option:
+Although *vcf2gwas* will by default calculate a relatedness matrix depending on the chosen model, one may want to add a different one instead to the analysis. This is possible by employing the `-k/--relmatrix` option:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -k [filename]
 ```
 
-To use vcf2gwas to just calculate a relatedness matrix from the VCF file, run the `-gk` option:
+To use *vcf2gwas* to just calculate a relatedness matrix from the VCF file, run the `-gk` option:
 
 ```
 vcf2gwas -v [filename] -gk 
@@ -214,7 +214,7 @@ Of course the `-eigen` option can also be used when supplying your own relatedne
 
 ### Analyzing a subset of chromosomes
 
-By default vcf2gwas analyzes all chromosomes available in the `VCF` file. If one wants to analyze only a subset of the chromosomes, employ the `-chr/--chromosome` option:
+By default *vcf2gwas* analyzes all chromosomes available in the `VCF` file. If one wants to analyze only a subset of the chromosomes, employ the `-chr/--chromosome` option:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -chr [num1] -chr [num2]
@@ -224,7 +224,7 @@ Here, only the two specified chromosomes chromosomes will be used for the analys
 
 ### Changing the output directory
 
-By default, vcf2gwas will save the output in the current working directory. To change to a unique output directory, use the `-o/--output` option to specify a path:
+By default, *vcf2gwas* will save the output in the current working directory. To change to a unique output directory, use the `-o/--output` option to specify a path:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -o dir/example/
@@ -232,51 +232,51 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -o dir/example/
 
 ## Miscellaneous options
 
-In this section other useful options of vcf2gwas will be elucidated.
+In this section other useful options of *vcf2gwas* will be elucidated.
 
 ### Limiting memory and core usage
 
-By default vcf2gwas will use half of the available memory and all logical cores minus one. It can be important to limit usage of these resources especially when running the analysis on a machine shared with others.  
+By default *vcf2gwas* will use half of the available memory and all logical cores minus one. It can be important to limit usage of these resources especially when running the analysis on a machine shared with others.  
 To set the memory (in MB) and core usage employ the `-M/--memory` and `-T/--threads` option, respectively:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -M 8000 -T 6
 ```
 
-Now, vcf2gwas uses 8 GB of memory and 6 cores to carry out the analysis.  
+Now, *vcf2gwas* uses 8 GB of memory and 6 cores to carry out the analysis.  
 It is recommended to not set the memory to less than 1 GB.
 
 ### Using dimensionality reduction of phenotypes for analysis
 
 When analyzing many phenotypes it can be escpecially beneficial to reduce the phenotypic dimensions. This allows the user to analyze any underlying structure in their phenotypic data by using the output of the dimensionality reduction as phenotypes for GEMMA.  
-vcf2gwas offers to often-used methods to reduce the dimensions: principal component analysis ([PCA](https://en.wikipedia.org/wiki/Principal_component_analysis)) and Uniform Manifold Approximation and Projection ([UMAP](https://arxiv.org/abs/1802.03426)).  
+*vcf2gwas* offers two often-used methods to reduce the dimensions: principal component analysis ([PCA](https://en.wikipedia.org/wiki/Principal_component_analysis)) and Uniform Manifold Approximation and Projection ([UMAP](https://arxiv.org/abs/1802.03426)).  
 Both can be used either separately or simultaneously in the analysis.
 
 #### PCA
 
 To perform PCA on the phenotype data and use the principal components as phenotypes for the analysis, use the `-P/--PCA` option.  
-By default, vcf2gwas will reduce the phenotype dimensionality to 2 PCs. To change this value to any value between 2 and 10, append the value to the option:
+By default, *vcf2gwas* will reduce the phenotype dimensionality to 2 PCs. To change this value to any value between 2 and 10, append the value to the option:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -P 3
 ```
 
-Now, vcf2gwas will reduce the phenotype dimensionality to 3 instead of 2. vcf2gwas will also plot the variance explained of the principal components, so that the user can estimate the amount of sufficient PCs.
+Now, *vcf2gwas* will reduce the phenotype dimensionality to 3 instead of 2. *vcf2gwas* will also plot the variance explained of the principal components, so that the user can estimate the amount of sufficient PCs.
 
 #### UMAP
 
 To perform UMAP reduction on the phenotype data and use the embeddings as phenotypes for the analysis, use the `-U/--UMAP` option.  
-By default, vcf2gwas will reduce the phenotype dimensionality to 2 embeddings. To change this value to any value between 1 and 5, append the value to the option:
+By default, *vcf2gwas* will reduce the phenotype dimensionality to 2 embeddings. To change this value to any value between 1 and 5, append the value to the option:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -U 3
 ```
 
-Now, vcf2gwas will reduce the phenotype dimensionality to 3 instead of 2.
+Now, *vcf2gwas* will reduce the phenotype dimensionality to 3 instead of 2.
 
 ### Using PCA of genotypes instead of standard relatedness matrix
 
-vcf2gwas uses GEMMAs standard method of kinship calculation for the linear mixed model, which produces a relatedness matrix. Instead of using this standard method, the relatedness matrix can optionally be calculated via PCA by utilizing the `-KC/--kcpca` option.  
+*vcf2gwas* uses GEMMAs standard method of kinship calculation for the linear mixed model, which produces a relatedness matrix. Instead of using this standard method, the relatedness matrix can optionally be calculated via PCA by utilizing the `-KC/--kcpca` option.  
 The SNP data from the VCF file will be pruned by linkage disequilibrium with a default r-squared threshold of 0.5. To change the threshold, append the value to the option:
 
 ```
@@ -285,7 +285,7 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -KC 0.8
 
 ### Filter out SNPs
 
-By default, vcf2gwas will filter out SNPs with a minimum allele frequency of 0.01. To change this threshold use the `-q/--minaf` option:
+By default, *vcf2gwas* will filter out SNPs with a minimum allele frequency of 0.01. To change this threshold use the `-q/--minaf` option:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -q 0.02
@@ -321,7 +321,7 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -np
 
 ### Change font size in all plots
 
-Since the resulting plots may be used in various contexts, the font size of the plots produced by vcf2gwas can be changed by using the `-fs/--fontsize` option.
+Since the resulting plots may be used in various contexts, the font size of the plots produced by *vcf2gwas* can be changed by using the `-fs/--fontsize` option.
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -fs 20
@@ -343,7 +343,7 @@ The following part shows some of the output plots and summaries produced by the 
 
 ### Quality Control
 
-vcf2gwas will produce quality control plots (saved in the `QC` directory) for the phenotype data as well as the genotype data:  
+*vcf2gwas* will produce quality control plots (saved in the `QC` directory) for the phenotype data as well as the genotype data:  
 
 * For every analyzed phenotype, its distribution will be plotted.
 * For every chromosome of the genotype data, the raw variant density and, if available, DP (depth of coverage), MQ (mapping quality) and QD (Qual normalized by Depth) will be plotted.
@@ -360,7 +360,7 @@ QQ-plot comparing the expected and observed probability distributions:
 
 ### Summaries
 
-Amongst other things, vcf2gwas will sort the SNPs of every analyzed phenotype, save the specified amount of top SNPs for each phenotype, summarize these SNPs of all phenotypes to check if certain SNPs occur more than once and optionally compare these SNPs to the genes supplied by the gene file. Below is the [output](https://github.com/frankvogt/vcf2gwas/blob/main/files/compared_summarized_top_SNPs_complete_example.csv) shown of such a gene comparison when supplying a [gene file](https://github.com/frankvogt/vcf2gwas/blob/main/files/NLR.csv) containing information about NLR genes in *A. thaliana*:
+Amongst other things, *vcf2gwas* will sort the SNPs of every analyzed phenotype, save the specified amount of top SNPs for each phenotype, summarize these SNPs of all phenotypes to check if certain SNPs occur more than once and optionally compare these SNPs to the genes supplied by the gene file. Below is the [output](https://github.com/frankvogt/vcf2gwas/blob/main/files/compared_summarized_top_SNPs_complete_example.csv) shown of such a gene comparison when supplying a [gene file](https://github.com/frankvogt/vcf2gwas/blob/main/files/NLR.csv) containing information about NLR genes in *A. thaliana*:
 
 ||||Upstream gene|Upstream gene|Upstream gene|Upstream gene||Downstream gene|Downstream gene|Downstream gene|Downstream gene|
 |---|---|---|---|---|---|---|---|---|---|---|---|
