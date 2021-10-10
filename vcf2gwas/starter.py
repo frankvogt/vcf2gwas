@@ -249,10 +249,10 @@ burn = P.set_burn()
 sampling = P.set_sampling()
 snpmax = P.set_snpmax()
 
-Log.print_log("Arguments parsed successfully\n")
+Log.print_log("\nArguments parsed successfully")
 
 # file preparation (and get remaining variables)
-Log.print_log("Preparing files\n")
+Log.print_log("\nPreparing files\n")
 
 memory = P.set_memory()
 memory_org = memory
