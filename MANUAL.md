@@ -93,7 +93,7 @@ Run a bayesian sparse linear mixed model analysis with any phenotype in the phen
 vcf2gwas -v [filename] -pf [filename] -p [int] -bslmm
 ```
 
-To change to amount of burn-in steps, sampling steps and maximum value for 'gamma' from their defualt values (100,000, 1,000,000 and 300, respectively), use the `-w/--burn`, `-s/--sampling` and `-smax/--snpmax` options, respectively.
+To change to amount of burn-in steps, sampling steps and maximum value for 'gamma' from their default values (100,000, 1,000,000 and 300, respectively), use the `-w/--burn`, `-s/--sampling` and `-smax/--snpmax` options, respectively.
 
 ## File related options
 
