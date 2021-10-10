@@ -43,7 +43,7 @@ Some of the benefits of this pipeline include:
 <img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_manh.png" alt="Manhattan-plot" width="50%"/><img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_qq.png" alt="QQ-plot" width="50%"/>
 <br/>
 If you use *vcf2gwas* in your research please cite us:
-<a href="https://www.biorxiv.org/content/10.1101/2021.06.01.446586v1">*vcf2gwas* - Python API for comprehensive GWAS analysis using GEMMA</a>
+<a href="https://www.biorxiv.org/content/10.1101/2021.06.01.446586v1">vcf2gwas - Python API for comprehensive GWAS analysis using GEMMA</a>
 
 ### Built with
 
@@ -359,7 +359,7 @@ output/
             └── phenotype top SNPs (.csv)
 ```
 
-The names of the folders in quotes as well as the file names will vary based on the selected options and the file and phenotype names.
+The names of the directories in quotes as well as the file names will vary based on the selected options and the file and phenotype names.
 
 ## License
 
