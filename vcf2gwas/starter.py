@@ -213,6 +213,14 @@ if pheno == covar and x_test != []:
 # get more variables
 n_top = P.set_n_top()
 chr = P.set_chr()
+
+Log.print_log("\nIndexing VCF file..")
+timer = time.perf_counter()
+Converter.index_vcf(snp_file2)
+timer_end = time.perf_counter()
+timer_total = round(timer_end - timer, 2)
+Log.print_log(f'VCF file successfully indexed (Duration: {runtime_format(timer_total)})')
+
 chr2, chr_num = Converter.check_chrom(snp_file2, chr)
 chr_list = chr2
 chr3 = listtostring(chr2, ", ")
@@ -482,13 +490,6 @@ make_dir(temp_dir)
 #dir_check = make_dir(temp_dir)
 snp_file2_org = snp_file2
 snp_file2 = os.path.join(temp_dir, snp_file)
-
-Log.print_log("\nIndexing VCF file..")
-timer = time.perf_counter()
-Converter.index_vcf(snp_file2_org)
-timer_end = time.perf_counter()
-timer_total = round(timer_end - timer, 2)
-Log.print_log(f'VCF file successfully indexed (Duration: {runtime_format(timer_total)})')
 
 chrom, chrom_list = Converter.set_chrom(snp_file2_org, switch=False)
 if noqc == False:
