@@ -12,7 +12,7 @@
     * [Installation](#installation)
 * [Usage](#usage)
     * [Input Files](#input-files)
-    * [Running vcf2gwas](#running-vcf2gwas)
+    * [Running *vcf2gwas*](#running-vcf2gwas)
     * [Available Options](#available-options)
     * [Output](#output)
 * [Contributing](#contributing)
@@ -25,7 +25,7 @@
 
 Performing a genome-wide association study (GWAS) on a dataset can be a laborious task, especially when analysing multiple phenotypes. VCF and input files have to be processed and prepared in the right way depending on the way the analysis is performed and afterwards various operations need to be carried out.
 
-vcf2gwas is a Python-built API for GEMMA, PLINK and bcftools performing GWAS directly from a VCF file as well as multiple post-analysis operations.  
+*vcf2gwas* is a Python-built API for GEMMA, PLINK and bcftools performing GWAS directly from a VCF file as well as multiple post-analysis operations.  
 Some of the benefits of this pipeline include:
 
 * VCF file does not need to be converted or edited by the user
@@ -36,18 +36,18 @@ Some of the benefits of this pipeline include:
     * Manhattan plots, Q-Q plots and diagnostic plots (dependent on GEMMA's model)
     * Summaries of the SNPs 
     * Comparison to genes
-* vcf2gwas is able to analyze several input files with different sets of individuals and multiple phenotypes in a efficient manner due to parallelization, saving the user a lot of time compared to standard GWAS procedure
+* *vcf2gwas* is able to analyze several input files with different sets of individuals and multiple phenotypes in a efficient manner due to parallelization, saving the user a lot of time compared to standard GWAS procedure
 * Results are reproducible on any compatible machine
 * Figures are publication-ready <br/>
 * Example plots are: <br/>
 <img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_manh.png" alt="Manhattan-plot" width="50%"/><img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_qq.png" alt="QQ-plot" width="50%"/>
 <br/>
-If you use vcf2gwas in your research please cite us:
-<a href="https://www.biorxiv.org/content/10.1101/2021.06.01.446586v1">vcf2gwas - Python API for comprehensive GWAS analysis using GEMMA</a>
+If you use *vcf2gwas* in your research please cite us:
+<a href="https://www.biorxiv.org/content/10.1101/2021.06.01.446586v1">*vcf2gwas* - Python API for comprehensive GWAS analysis using GEMMA</a>
 
 ### Built with
 
-vcf2gwas was built using [Python](https://www.python.org/), [bcftools](http://samtools.github.io/bcftools/bcftools.html), [PLINK](https://www.cog-genomics.org/plink/) and [GEMMA](https://github.com/genetics-statistics/GEMMA).  
+*vcf2gwas* was built using [Python](https://www.python.org/), [bcftools](http://samtools.github.io/bcftools/bcftools.html), [PLINK](https://www.cog-genomics.org/plink/) and [GEMMA](https://github.com/genetics-statistics/GEMMA).  
 
 [GEMMA](https://github.com/genetics-statistics/GEMMA) is the software implementing the Genome-wide Efficient Mixed Model Association algorithm for a standard linear mixed model and some of its close relatives for GWAS. It fits either a [univariate linear mixed model](https://doi.org/10.1038/ng.2310), a [multivariate linear mixed model](https://doi.org/10.1038/nmeth.2848) or a [Bayesian sparse linear mixed model](https://doi.org/10.1371/journal.pgen.1003264).
 
@@ -55,8 +55,8 @@ The exact versions of [Python](https://www.python.org/), [bcftools](http://samto
 
 ## Getting Started
 
-These instructions will provide an easy way to get vcf2gwas running on your local machine.  
-vcf2gwas works on macOS and Linux systems.
+These instructions will provide an easy way to get *vcf2gwas* running on your local machine.  
+*vcf2gwas* works on macOS and Linux systems.
 
 ### Prerequisites
 
@@ -77,7 +77,7 @@ Next, activate the environment by typing:
 conda activate myenv
 ```
 
-Now, the vcf2gwas package can be installed:
+Now, the *vcf2gwas* package can be installed:
 
 ```
 conda install vcf2gwas -c conda-forge -c bioconda -c fvogt257 
@@ -102,15 +102,15 @@ The items below will explain the required format of the input files, the basic u
 
 ### Input Files
 
-There are multiple files that can be provided as input for vcf2gwas, below you can find an overview over these files.  
-For more information about the example files provided with vcf2gwas, please refer to the [manual](https://github.com/frankvogt/vcf2gwas/blob/main/MANUAL.md).
+There are multiple files that can be provided as input for *vcf2gwas*, below you can find an overview over these files.  
+For more information about the example files provided with *vcf2gwas*, please refer to the [manual](https://github.com/frankvogt/vcf2gwas/blob/main/MANUAL.md).
 
 #### VCF file:
-A VCF file containing the SNP data of the individuals to be examined is required to run vcf2gwas. This file does not need to be altered in any way and can be in either `.vcf` or `.vcf.gz` format.
+A VCF file containing the SNP data of the individuals to be examined is required to run *vcf2gwas*. This file does not need to be altered in any way and can be in either `.vcf` or `.vcf.gz` format.
 
 #### Phenotype file(s):
 One or multiple phenotype files can be used to provide the phenotype data for GEMMA. These files need to be in the comma separated `.csv` format.  
-In the first column one has to put the IDs of the individuals. These IDs must match the individuals' IDs of the VCF file, since mismatched IDs will be removed from analysis.  The remaining columns resemble the phenotypes with the phenotype description as the column name. vcf2gwas will recognize either "-9" or "NA" as missing values and the phenotypes can be either continuous or binary.  
+In the first column one has to put the IDs of the individuals. These IDs must match the individuals' IDs of the VCF file, since mismatched IDs will be removed from analysis.  The remaining columns resemble the phenotypes with the phenotype description as the column name. *vcf2gwas* will recognize either "-9" or "NA" as missing values and the phenotypes can be either continuous or binary.  
 Example files to run GEMMA can be found in the input folder (VCF file + corresponding phenotype file with one phenotype). Below is an excerpt of the exemplary phenotype file `example.csv`:
 
 ||avrRpm|
@@ -126,10 +126,10 @@ Example files to run GEMMA can be found in the input folder (VCF file + correspo
 The covariate file has to be formatted in the same way as the phenotype file, with individual IDs in the first column and the covariates in the remaining columns with their respective names as column names.
 
 #### Gene file:
-vcf2gwas has GFF files for the most common species built-in. To compare the results, use the species abbreviation with the `-gf` / `--genefile` option (see [File affiliated options](#file-affiliated-options)). For more information about the available species, their abbreviations and the reference file used, please refer to the [manual](https://github.com/frankvogt/vcf2gwas/blob/main/MANUAL.md).  
+*vcf2gwas* has GFF files for the most common species built-in. To compare the results, use the species abbreviation with the `-gf` / `--genefile` option (see [File affiliated options](#file-affiliated-options)). For more information about the available species, their abbreviations and the reference file used, please refer to the [manual](https://github.com/frankvogt/vcf2gwas/blob/main/MANUAL.md).  
 To compare the results of the GWAS analysis with specific genes, a gene file can be provided as input. The gene file has to be either a GFF3 formatted `.gff` file or a comma separated `.csv` file.  
 If in the `.csv` format, the file needs at least three columns containing information about chromosome, gene start position and gene stop position. These columns have to be named 'chr', 'start' and 'stop'.  
-Furthermore it is necessary that the chromosome information is in the same format as the chromosome information in the VCF file, otherwise vcf2gwas won't recognize the information correctly.  
+Furthermore it is necessary that the chromosome information is in the same format as the chromosome information in the VCF file, otherwise *vcf2gwas* won't recognize the information correctly.  
 Optional columns providing additional information have to be called 'ID', 'name' and 'comment'. Below is an excerpt of an exemplary gene file in the `.csv` format:
 
 |chr|start|stop|ID|name|comment|
@@ -140,18 +140,18 @@ Optional columns providing additional information have to be called 'ID', 'name'
 
 #### Relatedness matrix:
 
-To perform GWAS, GEMMA needs a relatedness matrix, which vcf2gwas will calculate by default. Nonetheless one can provide a relatedness matrix manually.
+To perform GWAS, GEMMA needs a relatedness matrix, which *vcf2gwas* will calculate by default. Nonetheless one can provide a relatedness matrix manually.
 
-### Running vcf2gwas
+### Running *vcf2gwas*
 
-Once the virtual environment is activated, vcf2gwas can be run on the command-line by specifying the input files and the statistical model chosen for GEMMA. Below is an exemplary command for running a linear mixed model analysis on all phenotypes in `example.csv` using genotype information from `example.vcf.gz`, both in the [input](https://github.com/frankvogt/vcf2gwas/tree/main/vcf2gwas/input) directory.  
+Once the virtual environment is activated, *vcf2gwas* can be run on the command-line by specifying the input files and the statistical model chosen for GEMMA. Below is an exemplary command for running a linear mixed model analysis on all phenotypes in `example.csv` using genotype information from `example.vcf.gz`, both in the [input](https://github.com/frankvogt/vcf2gwas/tree/main/vcf2gwas/input) directory.  
 
 ```
 vcf2gwas -v example.vcf.gz -pf example.csv -ap -lmm
 ```
 
 The available options will be elucidated in the next section.  
-In the [manual](https://github.com/frankvogt/vcf2gwas/blob/main/MANUAL.md), detailed instructions on how to run vcf2gwas and its available options can be viewed.
+In the [manual](https://github.com/frankvogt/vcf2gwas/blob/main/MANUAL.md), detailed instructions on how to run *vcf2gwas* and its available options can be viewed.
 
 ### Available Options:
 #### File affiliated options: 
@@ -321,7 +321,7 @@ e.g. subsetted and filtered VCF and .csv files
 
 ### Output
 
-vcf2gwas will create an output folder with a hierarchical structure consisting of multiple folders containing plots, summaries, GEMMA output files, log files and so on, depending on the selected options.  
+*vcf2gwas* will create an output folder with a hierarchical structure consisting of multiple folders containing plots, summaries, GEMMA output files, log files and so on, depending on the selected options.  
 Below are the QQ-plot and manhattan-plot that are produced when running the test command mentioned in [Installation](#installation):  
 <!--[Manhattan-plot](https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_manh.png), [QQ-plot](https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_qq.png)  -->
 <img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_manh.png" alt="Manhattan-plot" width="50%"/><img src="https://github.com/frankvogt/vcf2gwas/blob/main/files/lm_qq.png" alt="QQ-plot" width="50%"/>  
