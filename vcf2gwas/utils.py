@@ -1600,11 +1600,11 @@ class Post_analysis:
             # Get variants with sparse effect size on phenotypes
             Bslmm.get_eff(df2, prefix2, path)
             #df3 = Bslmm.get_eff(df2, prefix2, path)
-            Log.print_log(f'Variants with the highest sparse effects saved in {os.path.join(path, "highest_effects")}')
+            Log.print_log(f'Variants with highest sparse effects saved in {os.path.join(path, "highest_effects")}')
             # Get variants with high Posterior Inclusion Probability (PIP) == gamma
             #Bslmm.get_pip(df2, prefix2, path)
             df3 = Bslmm.get_pip(df2, prefix2, path)
-            Log.print_log(f'Variants with high Posterior Inclusion Probability (PIP) (== gamma) saved in {os.path.join(path, "high_PIP")}')
+            Log.print_log(f'Variants with highest Posterior Inclusion Probability (PIP) (== gamma) saved in {os.path.join(path, "high_PIP")}')
 
             n = 0
             if noplot == False:
