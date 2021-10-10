@@ -311,9 +311,17 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -nl
 
 **Note**: This can be beneficial to reduce the overall runtime when the analysis results in many significant SNPs.  
 
+To deactivate the manhattan and QQ-plots completely, employ the `-np/--noplot` option.
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -nl
+```
+
+**Note**: This can be beneficial when using custom vcf files missing e.g. variant positions, or to reduce overall runtime.
+
 ### Change font size in all plots
 
-Since the resulting plots may be used in various contexts, the font size of the plots produced by vcf2gwas can be changed by using the `-fs/--fontsize option.
+Since the resulting plots may be used in various contexts, the font size of the plots produced by vcf2gwas can be changed by using the `-fs/--fontsize` option.
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -fs 20
