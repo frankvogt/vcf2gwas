@@ -302,6 +302,10 @@ reduces runtime if analysis results in many significant SNPs
 deactivate Quality Control plots  
 reduces runtime
 
+* `-np` / `--noplot`  
+deactivate Manhattan and QQ-plots  
+reduces runtime
+
 * `-fs`/ `--fontsize` <int>  
 set the fontsize of plots.  
 Default value: 26
