@@ -264,6 +264,7 @@ if memory < 1000:
     sys.exit(Log.print_log("Error: Not enough memory available (at least 1000 MB required)"))
 
 threads = P.set_threads()
+os.environ['NUMEXPR_MAX_THREADS'] = str(threads)
 threads_org = threads
 cpu = mp.cpu_count()-1
 if cpu == 0:

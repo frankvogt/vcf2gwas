@@ -49,6 +49,9 @@ P = Parser(argvals)
 out_dir = P.set_out_dir()
 out_dir2 = os.path.join(out_dir, "output")
 dir_temp = "_vcf2gwas_temp"
+memory = P.set_memory()
+threads = P.set_threads()
+os.environ['NUMEXPR_MAX_THREADS'] = str(threads)
 
 # set variables
 pheno_file = P.set_pheno()
@@ -102,8 +105,6 @@ A = P.set_A()
 B = P.set_B()
 pca = P.set_pca()
 keep = P.set_keep()
-memory = P.set_memory()
-threads = P.set_threads()
 
 n_top = P.set_n_top()
 #gene_file = P.set_gene_file()

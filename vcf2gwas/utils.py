@@ -1535,7 +1535,7 @@ class Post_analysis:
         if x > n:
             n = x
         new_df = df.head(n)
-        new_df2 = new_df.dropna(axis=0, how="any")
+        new_df.dropna(axis=0, how="any", inplace=True)
         for i in ["chr", "rs", "ps"]:
             col = new_df[i].astype(str).tolist()
             top_list.append(col)
@@ -1863,6 +1863,11 @@ class Summary:
             values = pd.DataFrame(l.T)
             values[1] = values[1].apply(pd.to_numeric)
             values[1] = values[1].astype(int)
+            try:
+                values[2] = values[2].apply(pd.to_numeric)
+                values[2] = values[2].astype(int)
+            except:
+                pass
             values.columns = ["SNP_ID", "SNP_pos", "chr"]
             if values.empty == True:
                     Log.print_log(str("No SNPs in the summarized files!"))
@@ -1882,7 +1887,11 @@ class Summary:
                 values_list.append(values2)
                 values = values.where(values["count"]>1)
                 values = values.dropna()
-                values[["SNP_pos", "count"]] = values[["SNP_pos", "count"]].astype(int)       
+                values[["SNP_pos", "count"]] = values[["SNP_pos", "count"]].astype(int)
+                try:
+                    values["chr"] = values["chr"].astype(int)   
+                except:
+                    pass
                 try:
                     # plot SNP counts
                     y = values["count"]
