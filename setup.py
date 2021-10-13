@@ -17,7 +17,7 @@ requirements = [
 
 setup(
     name='vcf2gwas',
-    version='0.7.5',
+    version='0.7.6',
     description="Python API for comprehensive GWAS analysis using GEMMA",
     license="GNUv3",
     author="Frank Vogt",
