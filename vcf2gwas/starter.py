@@ -293,35 +293,6 @@ if model not in ["-gk", "-eigen"]:
                 if Y == None:
                     sys.exit(Log.print_log("Error: No covariates specified for GEMMA analysis"))
 
-if snp_file.endswith(".vcf"):
-    Log.print_log("\nCompressing VCF file..")
-    timer = time.perf_counter()
-    snp_file2 = Converter.compress_snp_file(snp_file2)
-    timer_end = time.perf_counter()
-    timer_total = round(timer_end - timer, 2)
-    snp_file = f'{snp_file}.gz'
-    Log.print_log(f'VCF file successfully compressed (Duration: {runtime_format(timer_total)})')
-
-try:
-    snp_prefix = snp_file.removesuffix(".vcf.gz")
-except Exception:
-    snp_prefix = snp_file.removesuffix(".gz")
-
-#index VCF
-Log.print_log("\nIndexing VCF file..")
-timer = time.perf_counter()
-Converter.index_vcf(snp_file2)
-timer_end = time.perf_counter()
-timer_total = round(timer_end - timer, 2)
-Log.print_log(f'VCF file successfully indexed (Duration: {runtime_format(timer_total)})')
-
-chr2, chr_num = Converter.check_chrom(snp_file2, chr)
-chr_list = chr2
-chr3 = listtostring(chr2, ", ")
-chr2 = listtostring(chr2, ",")
-if chr == None:
-    chr2 = None
-
 pheno_list = []
 X_list = []
 threads_list = []
@@ -485,6 +456,35 @@ if memory2 == 0:
     sys.exit(Log.print_log("Error: Memory not sufficient to carry out analysis!"))
 
 #################### compressing, indexing and filtering VCF file ####################
+
+if snp_file.endswith(".vcf"):
+    Log.print_log("\nCompressing VCF file..")
+    timer = time.perf_counter()
+    snp_file2 = Converter.compress_snp_file(snp_file2)
+    timer_end = time.perf_counter()
+    timer_total = round(timer_end - timer, 2)
+    snp_file = f'{snp_file}.gz'
+    Log.print_log(f'VCF file successfully compressed (Duration: {runtime_format(timer_total)})')
+
+try:
+    snp_prefix = snp_file.removesuffix(".vcf.gz")
+except Exception:
+    snp_prefix = snp_file.removesuffix(".gz")
+
+#index VCF
+Log.print_log("\nIndexing VCF file..")
+timer = time.perf_counter()
+Converter.index_vcf(snp_file2)
+timer_end = time.perf_counter()
+timer_total = round(timer_end - timer, 2)
+Log.print_log(f'VCF file successfully indexed (Duration: {runtime_format(timer_total)})')
+
+chr2, chr_num = Converter.check_chrom(snp_file2, chr)
+chr_list = chr2
+chr3 = listtostring(chr2, ", ")
+chr2 = listtostring(chr2, ",")
+if chr == None:
+    chr2 = None
 
 snp_file_path = os.path.split(snp_file2)[0]
 temp_dir = os.path.join(dir_temp, "VCF")

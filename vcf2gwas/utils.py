@@ -1159,7 +1159,7 @@ class Converter:
             if chr_set.issubset(ls_set) == True:
                 pass
             else:
-                sys.exit("Error: please provide the chromosome in the same format as in the VCF file")
+                sys.exit("Error: please provide the chromosomes in the same format as in the VCF file")
         else:
             chr = sorted(ls_set)
             chr_num = len(ls_set)
