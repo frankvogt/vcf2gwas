@@ -158,7 +158,7 @@ else:
     diff2 = Processing.make_diff(list2, list1)
     pheno_subset1 = Processing.make_uniform(list1, list2, diff1a, diff2, pheno, subset, snp_file2, pheno_file, "phenotype", Log)
     length1 = len(pheno_subset1.columns)
-    Log.print_log(f'Removed {len(diff2)} out of {len(list2)} individuals, {(len(list2)-len(diff2))} remaining')
+    Log.print_log(f'Removed {len(diff2)} out of {len(list2)} individuals, {len(list2)-len(diff2)} remaining')
 
 if covar_file == None:
     Log.print_log("No covariate file specified")
@@ -175,20 +175,25 @@ else:
     else:
         pheno_subset2 = Processing.make_uniform(list1, list3, diff1b, diff3, covar, subset, snp_file2, covar_file, "covariate", Log)
     length2 = len(pheno_subset2.columns)
-    Log.print_log(f'Removed {len(diff3)} out of {len(list3)} individuals, {(len(list3)-len(diff3))} remaining')
+    Log.print_log(f'Removed {len(diff3)} out of {len(list3)} individuals, {len(list3)-len(diff3)} remaining')
 
 if model in ("-gk", "-eigen"):
     if pheno_file == None and covar_file == None:
         shutil.copy(snp_file2, f'{subset}.vcf.gz')
 
-Log.print_log(f'In total, removed {(len(diff1a)+len(diff1b))} out of {len(list1)} individuals, {(len(list1)-(len(diff1a)+len(diff1b)))} remaining')
-Log.print_log("Files successfully adjusted\n")
+diff1c = list(set(diff1a) & set(diff1b))
+diff_num = len(diff1a)+len(diff1b)-len(diff1c)
 
-if (len(list1)-(len(diff1a)+len(diff1b))) == 0:
+if len(list1)-diff_num == 0:
     if keep == False:
         Converter.remove_files(subset, pheno_file, subset2, snp_file2)
     Log.print_log("Error: No individuals left! Check if IDs in VCF and phenotype file are of the same format")
     sys.exit(1)
+
+#PRINT len(list1)-diff_num TO FILE
+
+Log.print_log(f'In total, removed {diff_num} out of {len(list1)} individuals, {len(list1)-diff_num} remaining')
+Log.print_log("Files successfully adjusted\n")
 
 ############################## Filter, make ped and bed ##############################
 
