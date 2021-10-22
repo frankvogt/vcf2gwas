@@ -19,7 +19,9 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from numpy import log10
+import itertools
+from numpy import log10, rint
+from numpy.core.fromnumeric import repeat
 from vcf2gwas.parsing import Parser
 import warnings
 
@@ -370,12 +372,12 @@ class Logger:
         self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, 
         pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
         out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
-        input_str, noplot
+        input_str, noplot, ind_count, gemma_count
     ):
         """Description:
         prints summary of input variables and methods"""
 
-        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = al = am = ""
+        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = al = am = an = ao =""
 
         model_dict = {
             "lm" : "linear model",
@@ -411,6 +413,8 @@ class Logger:
         ad = snp_total
         ae = snp_sig
         af = sig_level
+        an = ind_count
+        ao = gemma_count
         a = f'\n- VCF file: "{snp_file}"'
         if pheno_file != None:
             b = f'\n- Phenotype file(s): "{pheno_file}"'
@@ -493,7 +497,7 @@ class Logger:
                 u = f'\n  --PCA {pca_n}'
 
         self.logger.info(
-            f'\nSummary:\n\nOutput directory:{v}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nCommand:{al}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{am}{o}{p}'
+            f'\nSummary:\n\nOutput directory:{v}\n\nIndividuals analyzed:\nCleared for analysis: {an}\nAnalyzed by GEMMA: {ao}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nCommand:{al}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{am}{o}{p}'
         )
 
 
@@ -773,17 +777,19 @@ class Starter:
         file2 = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_sig.txt"), "r")
         try:
             lines = file.readlines()
-            lines2 = file2.readlines()
             file.close()
-            file2.close()
             lines = [int(i.rstrip()) for i in lines]
-            lines2 = [int(i.rstrip()) for i in lines2]
             x1 = min(lines)
             x2 = max(lines)
+        except:
+            x1 = x2 = 0
+        try:
+            lines2 = file2.readlines()
+            file2.close()
+            lines2 = [int(i.rstrip()) for i in lines2]
             n1 = min(lines2)
             n2 = max(lines2)
         except:
-            x1 = x2 = 0
             n1 = n2 = 0
         if x1 == x2:
             x = x1
@@ -797,13 +803,16 @@ class Starter:
         os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_sig.txt"))
         return x, n 
 
-    def get_sig_level():
+    def get_count(name):
 
-        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_sig_level.txt"), "r")
+        file = open(os.path.join("_vcf2gwas_temp", name), "r")
         try:
             lines = file.readlines()
             file.close()
-            lines = [i.rstrip() for i in lines]
+            try:
+                lines = [int(i.rstrip()) for i in lines]
+            except:
+                lines = [i.rstrip() for i in lines]
             x1 = min(lines)
             x2 = max(lines)
         except:
@@ -814,7 +823,7 @@ class Starter:
                 x = "-"
         else:
             x = listtostring([x1, x2], " - ")
-        os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_sig_level.txt"))
+        os.remove(os.path.join("_vcf2gwas_temp", name))
         return x
 
 
@@ -1241,6 +1250,24 @@ class Gemma:
         file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"), 'a')
         file.write(str(code))
         file.close()
+
+    def write_gemma_ind(path, prefix):
+        file = open(os.path.join(path, f'{prefix}.log.txt'), "r")
+        lines = file.readlines()
+        file.close()
+        lines = [i.rstrip() for i in lines]
+
+        for l in lines:
+            if l.startswith("## number of analyzed individuals"):
+                n = [int(s) for s in l.split() if s.isdigit()]
+                n = listtostring(n)
+        
+        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_ind_gemma.txt"), 'a')
+        file.write(f'{n}\n')
+        file.close()
+        file = open(os.path.join(path, f'Summary_{prefix}.txt'), 'a')
+        file.write(f'Individuals used for analysis by GEMMA: {n}\n')
+        file.close()
     
     def rel_matrix(prefix, Log, covar_file_name, model='-gk', n='1'):
         """Description:
@@ -1260,6 +1287,7 @@ class Gemma:
             filename = f'{prefix}.cXX.txt'
         if n == '2':
             filename = None
+        Gemma.write_gemma_ind("", prefix)
         Log.print_log("Relatedness matrix created successfully")
         return filename
 
@@ -1276,6 +1304,7 @@ class Gemma:
         if process.returncode != 0:
             Log.print_log(f'Error: GEMMA was not able to complete the analysis')
             sys.exit(1)
+        Gemma.write_gemma_ind(path, prefix2)
         Log.print_log("Linear model calculated successfully")
 
     def eigen(prefix, filename, model, Log):
@@ -1288,6 +1317,7 @@ class Gemma:
         if process.returncode != 0:
             Log.print_log(f'Error: GEMMA was not able to complete the analysis')
             sys.exit(1)
+        Gemma.write_gemma_ind("", prefix)
         Log.print_log("Eigen-decomposition of relatedness matrix successful")
 
     def lmm(pca, prefix, prefix2, filename, filename2, model, n, N, path, Log, covar_file_name):
@@ -1309,6 +1339,7 @@ class Gemma:
         if process.returncode != 0:
             Log.print_log(f'Error code: \n{process.returncode} \nPossibly not enough memory available to process files.')
             sys.exit(1)
+        Gemma.write_gemma_ind(path, prefix2)
         Log.print_log("Linear mixed model calculated successfully")
 
     def bslmm(prefix, prefix2, model, n, N, path, Log, burn, sampling, snpmax):
@@ -1321,6 +1352,7 @@ class Gemma:
         if process.returncode != 0:
             Log.print_log(f'Error: GEMMA was not able to complete the analysis')
             sys.exit(1)
+        Gemma.write_gemma_ind(path, prefix2)
         Log.print_log("Bayesian sparse linear mixed model calculated successfully")
 
     def run_gemma(prefix, prefix2, model, n, N, path, Log, filename, filename2, pca, covar_file_name, i, burn, sampling, snpmax):
@@ -1403,6 +1435,7 @@ class Post_analysis:
         data = df[0]
         data_grouped = df[1]
         n = 0
+        sig_level = 0
         if data.empty == True:
             Log.print_log("GEMMA couldn't calculate any meaningful values!")
         else:
@@ -1431,7 +1464,6 @@ class Post_analysis:
             np.random.seed(0)
 
             # Bonferroni correction
-            sig_level = 0
             if sigval != None:
                 sig_level = sigval
             if sigval == None and x != 0:
@@ -1459,12 +1491,17 @@ class Post_analysis:
             timer_total = round(timer_end - timer, 2)
             Log.print_log(f'Manhattan plot saved as "{pcol}_manh_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
 
-        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_total.txt"), 'a')
-        file.write(f'{x}\n')
         file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_sig.txt"), 'a')
         file.write(f'{n}\n')
+        file.close()
+        file = open(os.path.join(path, f'Summary_{prefix}.txt'), 'a')
+        file.write(f'Significant SNPs: {n}\n')
+        file.close()
         file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_sig_level.txt"), 'a')
         file.write(f'{np.format_float_scientific(sig_level, precision=2)}\n')
+        file.close()
+        file = open(os.path.join(path, f'Summary_{prefix}.txt'), 'a')
+        file.write(f'Significance level: {np.format_float_scientific(sig_level, precision=2)}\n')
         file.close()
 
         return n
@@ -1528,30 +1565,33 @@ class Post_analysis:
             timer_total = round(timer_end - timer, 2)
             Log.print_log(f'QQ-plot saved as "{pcol}_qq_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
 
-    def make_top_list(df, top_list, n, x):
+    def make_top_list(df, top_list1, top_list2, top_list3, n, x, pcol):
         """Description:
         returns list of the top n SNPs with highest p-value"""
 
+        n1 = n
         if x > n:
-            n = x
-        new_df = df.head(n)
-        new_df.dropna(axis=0, how="any", inplace=True)
-        for i in ["chr", "rs", "ps"]:
-            col = new_df[i].astype(str).tolist()
-            top_list.append(col)
+            n1 = x
+        for a, l in zip([n, x, n1], [top_list1, top_list2, top_list3]):
+            new_df = df.head(a)
+            new_df.dropna(axis=0, how="any", inplace=True)
+            for i in ["chr", "rs", "ps", pcol]:
+                col = new_df[i].astype(str).tolist()
+                l.append(col)
 
-    def print_top_list(l, cols, path, pc_prefix, snp_prefix):
+    def print_top_list(l1, l2, l3, cols, path, pc_prefix, snp_prefix):
         """Description:
         saves dataframe with top SNPs as file"""
 
-        df = pd.DataFrame(l)
-        df = df.T
-        iterables = [cols, ["chr", "SNP_ID", "SNP_pos"]]
-        multcols = pd.MultiIndex.from_product(iterables)
-        df.columns = multcols
-        df.to_csv(os.path.join(path, f'top_SNPs{pc_prefix}_{snp_prefix}.csv'), sep=',')
+        for l, s in zip([l1, l2, l3], ["top_SNPs", "sig_SNPs", "merge_SNPs"]):
+            df = pd.DataFrame(l)
+            df = df.T
+            iterables = [cols, ["chr", "SNP_ID", "SNP_pos", "p_value"]]
+            multcols = pd.MultiIndex.from_product(iterables)
+            df.columns = multcols
+            df.to_csv(os.path.join(path, f'{s}{pc_prefix}_{snp_prefix}.csv'), sep=',')
 
-    def run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot):
+    def run_postprocessing(top_ten, top_sig, top_all, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot):
         """Description:
         runs post-processing dependent on input"""
 
@@ -1564,6 +1604,14 @@ class Post_analysis:
             for p in pcol:
                 df = Lin_models.load_df(prefix2, "assoc", path)
                 x = len(df.index)
+
+                file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_total.txt"), 'a')
+                file.write(f'{x}\n')
+                file.close()
+                file = open(os.path.join(path, f'Summary_{prefix2}.txt'), 'a')
+                file.write(f'Total SNPs analyzed by GEMMA: {x}\n')
+                file.close()
+
                 df2 = Lin_models.get_p_values(df, p, prefix2, path)
                 Log.print_log(f'Variants with the best {p} score saved in {os.path.join(path, "best_p-values")}')
 
@@ -1572,8 +1620,9 @@ class Post_analysis:
                     df3 = Lin_models.format_data(prefix2, "assoc", p, path)
                     n = Lin_models.manh_plot(df3, Log, prefix2, p, path, sigval, x, nolabel, refSNP="rs")
                     Lin_models.qq_plot(df, p, prefix2, path, Log)
+                p_col = p
 
-            Lin_models.make_top_list(df2, top_ten, n_top, n)
+            Lin_models.make_top_list(df2, top_ten, top_sig, top_all, n_top, n, p_col)
 
         elif model == "-bslmm":
             # procedure based on steps outlined in: 
@@ -1597,6 +1646,12 @@ class Post_analysis:
             # load parameters
             df2 = Bslmm.load_df(prefix2, "param", path)
             x = len(df.index)
+            file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_total.txt"), 'a')
+            file.write(f'{x}\n')
+            file.close()
+            file = open(os.path.join(path, f'Summary_{prefix2}.txt'), 'a')
+            file.write(f'Total SNPs analyzed by GEMMA: {x}\n')
+            file.close()
             # Get variants with sparse effect size on phenotypes
             Bslmm.get_eff(df2, prefix2, path)
             #df3 = Bslmm.get_eff(df2, prefix2, path)
@@ -1616,7 +1671,7 @@ class Post_analysis:
                 n2 = Bslmm.manh_plot(df5, Log, prefix2, "eff", path, sigval, x, nolabel, refSNP="rs")
                 n = max([n1, n2])
 
-            Bslmm.make_top_list(df3, top_ten, n_top, n)
+            Bslmm.make_top_list(df3, top_ten, top_sig, top_all, n_top, n, "gamma")
         
         else:
             Log.print_log("No post-processing necessary!")
@@ -1651,13 +1706,14 @@ class Lin_models(Post_analysis):
         #write files
         file_path = os.path.join(path, "best_p-values")
         make_dir(file_path)
-        top1.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top1.csv'))
-        top01.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top01.csv'))
-        top001.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top001.csv'))
+        top1.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top1%.csv'))
+        top01.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top01%.csv'))
+        top001.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top001%.csv'))
         if df3.empty == True:
             df2["rs"] = "NaN"
             df2["chr"] = "NaN"
             df2["ps"] = "NaN"
+            df2[pcol] = "NaN"
         return df2
 
 class Bslmm(Post_analysis):
@@ -1756,11 +1812,14 @@ class Bslmm(Post_analysis):
         df.to_csv(os.path.join(path, f'{prefix}.param.txt'), sep='\t', index=False)
         file_path = os.path.join(path, "highest_effects")
         make_dir(file_path)
-        top1.to_csv(os.path.join(file_path, f'{prefix}_top1eff.csv'))
-        top01.to_csv(os.path.join(file_path, f'{prefix}_top01eff.csv'))
-        top001.to_csv(os.path.join(file_path, f'{prefix}_top001eff.csv'))
+        top1.to_csv(os.path.join(file_path, f'{prefix}_top1%eff.csv'))
+        top01.to_csv(os.path.join(file_path, f'{prefix}_top01%eff.csv'))
+        top001.to_csv(os.path.join(file_path, f'{prefix}_top001%eff.csv'))
         if df6.empty == True:
             df5["rs"] = "NaN"
+            df5["chr"] = "NaN"
+            df5["ps"] = "NaN"
+            df5["eff"] = "NaN"
         return df5
 
     def get_pip(df, prefix, path):
@@ -1783,12 +1842,15 @@ class Bslmm(Post_analysis):
         #write files
         file_path = os.path.join(path, "high_PIP")
         make_dir(file_path)
-        pip01.to_csv(os.path.join(file_path, f'{prefix}_pip01.csv'))
-        pip10.to_csv(os.path.join(file_path, f'{prefix}_pip10.csv'))
-        pip25.to_csv(os.path.join(file_path, f'{prefix}_pip25.csv'))
-        pip50.to_csv(os.path.join(file_path, f'{prefix}_pip50.csv'))
+        pip01.to_csv(os.path.join(file_path, f'{prefix}_pip1%.csv'))
+        pip10.to_csv(os.path.join(file_path, f'{prefix}_pip10%.csv'))
+        pip25.to_csv(os.path.join(file_path, f'{prefix}_pip25%.csv'))
+        pip50.to_csv(os.path.join(file_path, f'{prefix}_pip50%.csv'))
         if df8.empty == True:
             df7["rs"] = "NaN"
+            df7["chr"] = "NaN"
+            df7["ps"] = "NaN"
+            df7["gamma"] = "NaN"
         return df7
 
 
@@ -1800,138 +1862,169 @@ class Summary:
         """Description:
         reads all top_SNPs files and summarizes them"""
 
-        Log.print_log("Summarizing top SNPs..")
+        Log.print_log("Summarizing SNPs..")
         # read files as dataframes and set as variables
+        str_list = [[], [], []]
         filenames = []
-        dfnames = []
-        x = 0
-        for prefix in prefix_list:
-            for file in os.listdir(path):
-                if file == f'top_SNPs{prefix}_{snp_prefix}.csv':
-                    x = x + 1 
-                    filename = os.path.join(path, file)
-                    globals()[f'df{x}'] = pd.read_csv(filename, header=[0,1], index_col=0, sep=',')
-                    temp = list(eval(f'df{x}').columns.get_level_values(1))
-                    globals()[f'df{x}'].loc[(n)] = temp
-                    dfnames.append(f'df{x}')
-        if dfnames == []:
-            Log.print_log("Couldn't find files to summarize!")
-            values = None
-        else:
-            # concat the dataframes
-            if len(dfnames) == 1:
-                dfx = df1
+        for s, t in zip(["top_SNPs", "sig_SNPs", "merge_SNPs"], ["Top SNPs", "Significant SNPs", "Merged (top + significant) SNPs"]):
+            dfnames = []
+            x = 0
+            for prefix in prefix_list:
+                for file in os.listdir(path):
+                    if file == f'{s}{prefix}_{snp_prefix}.csv':
+                        x += 1 
+                        filename = os.path.join(path, file)
+                        try:
+                            globals()[f'df{x}'] = pd.read_csv(filename, header=[0,1], index_col=0, sep=',')
+                            temp = list(eval(f'df{x}').columns.get_level_values(1))
+                            globals()[f'df{x}'].loc[len(globals()[f'df{x}'])] = temp
+                            dfnames.append(f'df{x}')
+                        except:
+                            Log.print_log(f'No SNPs in {file}')
+            if dfnames == []:
+                Log.print_log("No files to summarize!")
+                values = None
             else:
-                for i in range(len(dfnames)-1):
-                    a = i+1
-                    b = i+2
-                    globals()[f'df{b}'] = pd.concat([eval(f'df{a}'),eval(f'df{b}')])
-                    dfx = eval(f'df{b}')
-            # make lists from snp, pos and chr columns and remove nan
-            cols = dfx.columns
-            num = int(len(cols))
-            x1 = np.arange(0, num, 3)
-            x2 = np.arange(1, (num + 1), 3)
-            x3 = np.arange(2, (num + 2), 3)
-            l2 = []
-            l3 = []
-            l4 = []
-            for i in x1:
-                temp = dfx.iloc[:,i].astype(str).tolist()
-                l2.extend(temp)
-            for i in x2:
-                temp = dfx.iloc[:,i].astype(str).tolist()
-                l3.extend(temp)
-            for i in x3:
-                temp = dfx.iloc[:,i].astype(str).tolist()
-                l4.extend(temp)
-            l2 = [i for i in l2 if i != "nan"]
-            l3 = [i for i in l3 if i != "nan"]
-            l4 = [i for i in l4 if i != "nan"]
-            for i in [l2,l3,l4]:
-                if "chr" in i:
-                    l2_corr = i
-                    l2_corr = [x for x in i if x != "chr"]
-                if "SNP_ID" in i:
-                    l3_corr = i
-                    l3_corr = [x for x in i if x != "SNP_ID"]
-                if "SNP_pos" in i:
-                    l4_corr = i
-                    l4_corr = [x for x in i if x != "SNP_pos"]
-            # concat the lists into an array, convert to dataframe, set types and columns names
-            l = np.array([l3_corr,l4_corr,l2_corr], dtype=object)
-            values = pd.DataFrame(l.T)
-            values[1] = values[1].apply(pd.to_numeric)
-            values[1] = values[1].astype(int)
-            try:
-                values[2] = values[2].apply(pd.to_numeric)
-                values[2] = values[2].astype(int)
-            except:
-                pass
-            values.columns = ["SNP_ID", "SNP_pos", "chr"]
-            if values.empty == True:
-                    Log.print_log(str("No SNPs in the summarized files!"))
-            values_list = []
-            # remove unwanted SNPs
-            if len(x1) == 1 and len(dfnames) == 1:
-                values = values.dropna()
-                values_list.append(values)
-            else:
-                # count occurrences of SNPs and filter
-                values = values.value_counts()
-                values = pd.DataFrame(values)
-                values = values.reset_index()
-                values.columns = ["SNP_ID", "SNP_pos", "chr", "count"]
-                # remove unwanted SNPs
-                values2 = values.dropna()
-                values_list.append(values2)
-                values = values.where(values["count"]>1)
-                values = values.dropna()
-                values[["SNP_pos", "count"]] = values[["SNP_pos", "count"]].astype(int)
+                # concat the dataframes
+                if len(dfnames) == 1:
+                    dfx = df1
+                else:
+                    for i in range(len(dfnames)-1):
+                        a = i+1
+                        b = i+2
+                        globals()[f'df{b}'] = pd.concat([eval(f'df{a}'),eval(f'df{b}')])
+                        dfx = eval(f'df{b}')
+                # make lists from snp, pos and chr columns and remove nan
+                cols = dfx.columns
+                num = int(len(cols))
+                x1 = np.arange(0, num, 4)
+                x2 = np.arange(1, (num + 1), 4)
+                x3 = np.arange(2, (num + 2), 4)
+                x4 = np.arange(3, (num + 3), 4)
+                l2 = []
+                l3 = []
+                l4 = []
+                l5 = []
+                for i in x1:
+                    temp = dfx.iloc[:,i].astype(str).tolist()
+                    l2.extend(temp)
+                for i in x2:
+                    temp = dfx.iloc[:,i].astype(str).tolist()
+                    l3.extend(temp)
+                for i in x3:
+                    temp = dfx.iloc[:,i].astype(str).tolist()
+                    l4.extend(temp)
+                for i in x4:
+                    temp = dfx.iloc[:,i].astype(str).tolist()
+                    l5.extend(temp)
+                l2 = [i for i in l2 if i != "nan"]
+                l3 = [i for i in l3 if i != "nan"]
+                l4 = [i for i in l4 if i != "nan"]
+                l5 = [i for i in l5 if i != "nan"]
+                for i in [l2,l3,l4,l5]:
+                    if "chr" in i:
+                        l2_corr = i
+                        l2_corr = [x for x in i if x != "chr"]
+                    if "SNP_ID" in i:
+                        l3_corr = i
+                        l3_corr = [x for x in i if x != "SNP_ID"]
+                    if "SNP_pos" in i:
+                        l4_corr = i
+                        l4_corr = [x for x in i if x != "SNP_pos"]
+                    if "p_value" in i:
+                        l5_corr = i
+                        l5_corr = [x for x in i if x != "p_value"]
+                # concat the lists into an array, convert to dataframe, set types and columns names
+                l = np.array([l3_corr,l4_corr,l2_corr,l5_corr], dtype=object)
+                values = pd.DataFrame(l.T)
                 try:
-                    values["chr"] = values["chr"].astype(int)   
+                    values[1] = values[1].apply(pd.to_numeric)
+                    values[1] = values[1].astype(int)
+                except:
+                    Log.print_log("Error: Non-numerical values of SNP positions")
+                    sys.exit(1)
+                try:
+                    values[2] = values[2].apply(pd.to_numeric)
+                    values[2] = values[2].astype(int)
                 except:
                     pass
                 try:
-                    # plot SNP counts
-                    y = values["count"]
-                    fig = plt.figure(figsize=(16,12))
-                    sns.scatterplot(data=values, x="SNP_ID", y="count", s=(fontsize*2))
-                    sns.despine(offset=10)
-                    plt.xticks(rotation=45, fontsize=fontsize4, fontweight="bold")
-                    plt.xlabel("SNP ID", fontsize=fontsize, fontweight="bold")
-                    plt.yticks(np.arange(0, max(y)+2, 1), fontsize=fontsize2, fontweight="bold")
-                    plt.ylabel("Occurrence of SNP", fontsize=fontsize, fontweight="bold")
-                    plt.savefig(os.path.join(path2, f'summarized_top_SNPs{pc_prefix}_{snp_prefix}.png'))
-                    plt.close()
+                    values[3] = values[3].apply(pd.to_numeric)
+                except:
+                    Log.print_log("Error: Non-numerical values of p-values")
+                    sys.exit(1)
+                values.columns = ["SNP_ID", "SNP_pos", "chr", "p_value"]
+                values.dropna(inplace=True)
+                if values.empty == True:
+                        Log.print_log(str("No SNPs in the summarized files!"))
+                values_list = []
+                # remove unwanted SNPs
+                if len(x1) == 1 and len(dfnames) == 1:
                     values_list.append(values)
-                except Exception as e:
-                    Log.print_log("No SNP occurred more than once")
-            # make list of phenoytpes where SNPs occurred and add as column
-            addstring = ["_complete", ""]
-            c = 0
-            for values in values_list:
-                names = []
-                for i in values.index:
-                    xy = values.iloc[i,0]
-                    dfx2 = dfx.where(dfx.isin([xy]))
-                    name = dfx2.dropna(axis=1, how="all")
-                    name = name.columns.get_level_values(0).astype(str).to_list()
-                    name = listtostring(name, ', ')
-                    names.append(name)
-                values["phenotypes"] = names
-                #save as file
-                if len(dfnames) == 1:
-                    filename = f'summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv'
-                    values.to_csv(os.path.join(path2, filename) , index=False, sep=',')
-                    Log.print_log(f'Top SNPs summarized and saved as "{filename}" in {path2}')
                 else:
-                    filename = f'summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv'
-                    values.to_csv(os.path.join(path2, filename), index=False, sep=',')
-                    Log.print_log(f'Top SNPs summarized and saved as "{filename}" in {path2}')
-                c += 1
-                filenames.append(os.path.join(path2, filename))
-        return filenames
+                    # count occurrences of SNPs and filter
+                    values["count"] = values["SNP_ID"].map(values["SNP_ID"].value_counts())
+                    values.drop_duplicates(subset="SNP_ID", inplace=True)
+                    values.loc[values["count"] > 1, "p_value"] = np.nan
+                    values2 = values.dropna(how="all")
+                    values2.reset_index(drop=True, inplace=True)
+                    values_list.append(values2)
+                    # remove SNPs which occur only once
+                    values = values.where(values["count"]>1)
+                    values.dropna(how="all", inplace=True)
+                    values.reset_index(drop=True, inplace=True)
+                    try:
+                        values[["SNP_pos", "count"]] = values[["SNP_pos", "count"]].astype(int)
+                    except:
+                        Log.print_log("Error: Couldn't format values as integer")
+                        sys.exit(1)
+                    try:
+                        values["chr"] = values["chr"].astype(int)   
+                    except:
+                        pass
+                    try:
+                        # plot SNP counts
+                        y = values["count"]
+                        fig = plt.figure(figsize=(16,12))
+                        sns.scatterplot(data=values, x="SNP_ID", y="count", s=(fontsize*2))
+                        sns.despine(offset=10)
+                        plt.xticks(rotation=45, fontsize=fontsize4, fontweight="bold")
+                        plt.xlabel("SNP ID", fontsize=fontsize, fontweight="bold")
+                        plt.yticks(np.arange(0, max(y)+2, 1), fontsize=fontsize2, fontweight="bold")
+                        plt.ylabel("Occurrence of SNP", fontsize=fontsize, fontweight="bold")
+                        plt.savefig(os.path.join(path2, f'summarized_{s}{pc_prefix}_{snp_prefix}.png'))
+                        plt.close()
+                        values_list.append(values)
+                    except Exception as e:
+                        Log.print_log("No SNP occurred more than once")
+                # make list of phenoytpes where SNPs occurred and add as column
+                addstring = ["_complete", ""]
+                c = 0
+                for value in values_list:
+                    names = []
+                    for i in value.index:
+                        xy = value.iloc[i,0]
+                        dfx2 = dfx.where(dfx.isin([xy]))
+                        name = dfx2.dropna(axis=1, how="all")
+                        name = name.columns.get_level_values(0).astype(str).to_list()
+                        name = listtostring(name, ', ')
+                        names.append(name)
+                    value["phenotypes"] = names
+                    #save as file
+                    if len(dfnames) == 1:
+                        filename = f'summarized_{s}{addstring[c]}{pc_prefix}_{snp_prefix}.csv'
+                        value.to_csv(os.path.join(path2, filename) , index=False, sep=',')
+                        Log.print_log(f'{t} summarized and saved as "{filename}" in {path2}')
+                    else:
+                        filename = f'summarized_{s}{addstring[c]}_{snp_prefix}.csv'
+                        value.to_csv(os.path.join(path2, filename), index=False, sep=',')
+                        Log.print_log(f'{t} summarized and saved as "{filename}" in {path2}')
+                    filenames.append(os.path.join(path2, filename))
+                    str_list[0].append(s)
+                    str_list[1].append(t)
+                    str_list[2].append(addstring[c])
+                    c += 1
+        return filenames, str_list
 
     def gff_converter(f):
 
@@ -2012,23 +2105,20 @@ class Summary:
         df = df[df["chr"].isin(chr_set)]
         return df
 
-    def gene_compare(filenames, gene_file, gene_file_path, gene_thresh, path, pc_prefix, snp_prefix, chr_list, Log):
+    def gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path, pc_prefix, snp_prefix, chr_list, Log):
         """Description:
         takes dataframe of summarized SNPs, calculates distances to genes in gene input file and saves results in new file.
         Columns in gene file: start, stop, chr, name (optional), ID (optional), comment (optional)"""
         
-        Log.print_log("Comparing top SNPs to genes..")
-        addstring = ["_complete", ""]
-        c = 0        
-        for filename in filenames:
+        Log.print_log("\nComparing SNPs to genes..")
+        T = str_list[0]
+        S = str_list[1]
+        C = str_list[2]
+        for filename, t, s, c in zip(filenames, T, S, C):
             values = pd.read_csv(filename)
             if values.empty == True:
                 Log.print_log("No SNPs present to compare to genes")
             else:
-                n = 0
-                for file in os.listdir(path):
-                    if file == f'summarized_top_SNPs{pc_prefix}_{snp_prefix}.csv':
-                        n += 1
                 #read gene .csv file
                 if gene_file_path.endswith(".gff"):
                     df = Summary.gff_converter(gene_file_path)
@@ -2051,123 +2141,180 @@ class Summary:
                     df_new = df[["chr", "start", "stop"]]
                     df_new = df_new.dropna(subset=["start", "stop"])
                     df_new[["start", "stop"]] = df_new[["start", "stop"]].astype("int32")
-                    check = True
                 except Exception:
-                    check = False
-                if check == True:
-                    #loop through columns of gene file and calculate distances between SNPs and genes
-                    for x in values.index:
-                        df_new = df[["chr", "start", "stop"]]
-                        try:
-                            df_new["ID"] = df["ID"]
-                        except Exception:
-                            pass
-                        try:
-                            df_new["name"] = df["name"]
-                        except Exception:
-                            pass
-                        try:
-                            df_new["comment"] = df["comment"]
-                        except Exception:
-                            pass
-                        df_new["Chr"] = values.loc[x,"chr"]
-                        df_new[["chr", "Chr"]] = df_new[["chr", "Chr"]].astype("str")
-                        df_new["pos"] = values.loc[x,"SNP_pos"]
-                        df_new["SNP_ID"] = values.loc[x,"SNP_ID"]
-                        df_new = df_new.dropna(subset=["start", "stop"])
-                        df_new[["pos", "start", "stop"]] = df_new[["pos", "start", "stop"]].astype("int32")
-                        df_new = df_new[df_new.chr==df_new.Chr]
-                        df_new["POSleft"] = df_new["pos"] - df_new["stop"]
-                        df_new["POSright"] = df_new["start"] - df_new["pos"]
-                        df_new[["POSleft", "POSright"]] = df_new[["POSleft", "POSright"]].astype("int32")
-                        #filter results and append to lists
-                        min_value1 = df_new[(df_new["POSleft"] > 0) & (df_new["POSleft"] < gene_thresh)]
-                        min_value1 = min_value1[min_value1.POSleft == min_value1.POSleft.min()]
-                        try:
-                            gene_dist_left.append(min_value1.iloc[0]["POSleft"])
-                        except Exception:
-                            gene_dist_left.append(np.nan)
-                        try:
-                            gene_ID_left.append(min_value1.iloc[0]["ID"])
-                        except Exception:
-                            gene_ID_left.append(np.nan)
-                        try:
-                            gene_annot_left.append(min_value1.iloc[0]["name"])
-                        except Exception:
-                            gene_annot_left.append(np.nan)
-                        try:
-                            gene_comment_left.append(min_value1.iloc[0]["comment"])
-                        except Exception:
-                            gene_comment_left.append(np.nan)
-                        min_value2 = df_new[(df_new["POSright"] > 0) & (df_new["POSright"] < gene_thresh)]
-                        min_value2 = min_value2[min_value2.POSright == min_value2.POSright.min()]
-                        try:
-                            gene_dist_right.append(min_value2.iloc[0]["POSright"])
-                        except Exception:
-                            gene_dist_right.append(np.nan)
-                        try:
-                            gene_ID_right.append(min_value2.iloc[0]["ID"])
-                        except Exception:
-                            gene_ID_right.append(np.nan)
-                        try:
-                            gene_annot_right.append(min_value2.iloc[0]["name"])
-                        except Exception:
-                            gene_annot_right.append(np.nan)
-                        try:
-                            gene_comment_right.append(min_value2.iloc[0]["comment"])
-                        except Exception:
-                            gene_comment_right.append(np.nan)
-                    # add lists to dataframe
-                    pos_col = values["SNP_pos"].to_list()
-                    values = values.drop("SNP_pos", axis=1)
-                    values["gene_ID(up)"] = gene_ID_left
-                    values["gene_comment(up)"] = gene_comment_left
-                    values["gene_name(up)"] = gene_annot_left
-                    values["gene_distance(up)"] = gene_dist_left
-                    values["SNP_pos"] = pos_col
-                    values["gene_distance(down)"] = gene_dist_right
-                    values["gene_name(down)"] = gene_annot_right
-                    values["gene_comment(down)"] = gene_comment_right
-                    values["gene_ID(down)"] = gene_ID_right
-                    # sort and remove empty columns
-                    values = values.sort_values(by=["gene_distance(up)","gene_distance(down)"])
-                    values.dropna(subset=["gene_distance(up)", "gene_distance(down)"], how="all", inplace=True)
-                    values.dropna(axis=1, how="all", inplace=True)
+                    Log.print_log(f'Could not parse contents of {gene_file}.\nPlease provide the file in the right format.')
+                #loop through columns of gene file and calculate distances between SNPs and genes
+                for x in values.index:
+                    df_new = df[["chr", "start", "stop"]]
                     try:
-                        values["gene_distance(up)"] = values["gene_distance(up)"].astype("Int32")
+                        df_new["ID"] = df["ID"]
                     except Exception:
                         pass
                     try:
-                        values["gene_distance(down)"] = values["gene_distance(down)"].astype("Int32")
+                        df_new["name"] = df["name"]
                     except Exception:
                         pass
                     try:
-                        values["count"] = values["count"].astype("int32")
+                        df_new["comment"] = df["comment"]
                     except Exception:
                         pass
-                    #make multicolumns
-                    if len(values.columns) == 12:
+                    df_new["Chr"] = values.loc[x,"chr"]
+                    df_new[["chr", "Chr"]] = df_new[["chr", "Chr"]].astype("str")
+                    df_new["pos"] = values.loc[x,"SNP_pos"]
+                    df_new["SNP_ID"] = values.loc[x,"SNP_ID"]
+                    df_new = df_new.dropna(subset=["start", "stop"])
+                    df_new[["pos", "start", "stop"]] = df_new[["pos", "start", "stop"]].astype("int32")
+                    df_new = df_new[df_new.chr==df_new.Chr]
+                    #get minimum distances
+                    df_new["POSleft1"] = df_new["pos"] - df_new["stop"]
+                    df_new["POSleft2"] = df_new["pos"] - df_new["start"]
+                    if df_new.POSleft1[df_new.POSleft1>0].min() < df_new.POSleft2[df_new.POSleft2>0].min():
+                        posleft = "POSleft1"
+                    else:
+                        posleft = "POSleft2"
+                    df_new["POSright1"] = df_new["start"] - df_new["pos"]
+                    df_new["POSright2"] = df_new["stop"] - df_new["pos"]
+                    if df_new.POSright1[df_new.POSright1>0].min() < df_new.POSright2[df_new.POSright2>0].min():
+                        posright = "POSright1"
+                    else:
+                        posright = "POSright2"
+                    df_new[[posleft, posright]] = df_new[[posleft, posright]].astype("int32")
+                    #filter results and append to lists
+                    min_value1 = df_new[(df_new[posleft] > 0) & (df_new[posleft] < gene_thresh)]
+                    min_value1 = min_value1[min_value1[posleft] == min_value1[posleft].min()]
+                    try:
+                        gene_dist_left.append(min_value1.iloc[0][posleft])
+                    except Exception:
+                        gene_dist_left.append(np.nan)
+                    try:
+                        gene_ID_left.append(min_value1.iloc[0]["ID"])
+                    except Exception:
+                        gene_ID_left.append(np.nan)
+                    try:
+                        gene_annot_left.append(min_value1.iloc[0]["name"])
+                    except Exception:
+                        gene_annot_left.append(np.nan)
+                    try:
+                        gene_comment_left.append(min_value1.iloc[0]["comment"])
+                    except Exception:
+                        gene_comment_left.append(np.nan)
+                    min_value2 = df_new[(df_new[posright] > 0) & (df_new[posright] < gene_thresh)]
+                    min_value2 = min_value2[min_value2[posright] == min_value2[posright].min()]
+                    try:
+                        gene_dist_right.append(min_value2.iloc[0][posright])
+                    except Exception:
+                        gene_dist_right.append(np.nan)
+                    try:
+                        gene_ID_right.append(min_value2.iloc[0]["ID"])
+                    except Exception:
+                        gene_ID_right.append(np.nan)
+                    try:
+                        gene_annot_right.append(min_value2.iloc[0]["name"])
+                    except Exception:
+                        gene_annot_right.append(np.nan)
+                    try:
+                        gene_comment_right.append(min_value2.iloc[0]["comment"])
+                    except Exception:
+                        gene_comment_right.append(np.nan)
+                # add lists to dataframe
+                pos_col = values["SNP_pos"].to_list()
+                values = values.drop("SNP_pos", axis=1)
+                pval_col = values["p_value"].to_list()
+                values = values.drop("p_value", axis=1)
+                values["p-value"] = pval_col
+                values["gene_ID(up)"] = gene_ID_left
+                values["gene_comment(up)"] = gene_comment_left
+                values["gene_name(up)"] = gene_annot_left
+                values["gene_distance(up)"] = gene_dist_left
+                values["SNP_pos"] = pos_col
+                values["gene_distance(down)"] = gene_dist_right
+                values["gene_name(down)"] = gene_annot_right
+                values["gene_comment(down)"] = gene_comment_right
+                values["gene_ID(down)"] = gene_ID_right
+                # sort and remove empty columns
+                values = values.sort_values(by=["gene_distance(up)","gene_distance(down)"])
+                values.dropna(subset=["gene_distance(up)", "gene_distance(down)"], how="all", inplace=True)
+                values.dropna(axis=1, how="all", inplace=True)
+                try:
+                    values["gene_distance(up)"] = values["gene_distance(up)"].astype("Int32")
+                except Exception:
+                    pass
+                try:
+                    values["gene_distance(down)"] = values["gene_distance(down)"].astype("Int32")
+                except Exception:
+                    pass
+                try:
+                    values["count"] = values["count"].astype("int32")
+                    switch = True
+                except Exception:
+                    switch = False
+                #make multicolumns
+                if len(values.columns) == 13:
+                    if switch == False:
                         multicols = [
-                            np.array(["", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
-                            np.array(["SNP ID", "Chr", "Phenotype", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
+                            np.array(["", "", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
+                            np.array(["SNP ID", "Chr", "Phenotype", "p-value", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
                         ]
-                        values.columns = multicols
-                    elif len(values.columns) == 13:
+                    else:
                         multicols = [
                             np.array(["", "", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
                             np.array(["SNP ID", "Chr", "Count", "Phenotype", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
-                        ]
-                        values.columns = multicols                       
-                    #save file
-                    if values.empty:
-                        Log.print_log("Info: No SNPs could be compared to genes, please check the species or gene file selection")
-                    else:
-                        if n > 0:
-                            values.to_csv(os.path.join(path, f'{gene_file_name}_compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv'), index=False)
-                            Log.print_log(f'Top SNPs compared to genes and saved as "{gene_file_name}_compared_summarized_top_SNPs{addstring[c]}{pc_prefix}_{snp_prefix}.csv" in {path}')
-                        else:
-                            values.to_csv(os.path.join(path, f'compared_summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv'), index=False)
-                            Log.print_log(f'Top SNPs compared to genes and saved as "compared_summarized_top_SNPs{addstring[c]}_{snp_prefix}.csv" in {path}')
+                        ]                        
+                    values.columns = multicols
+                elif len(values.columns) == 14:
+                    multicols = [
+                        np.array(["", "", "", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
+                        np.array(["SNP ID", "Chr", "Count", "Phenotype", "p-value", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
+                    ]
+                    values.columns = multicols                     
+                #save file
+                if values.empty:
+                    Log.print_log("Info: No SNPs could be compared to genes, please check the species or gene file selection")
                 else:
-                    Log.print_log(f'Could not parse contents of {gene_file}.\nPlease provide the file in the right format.')
-            c += 1
+                    values.to_csv(os.path.join(path, f'compared_summarized_{t}{c}_{snp_prefix}.csv'), index=False)
+                    Log.print_log(f'{s} compared to genes and saved as "compared_summarized_{t}{c}_{snp_prefix}.csv" in {path}')
+
+    def pheno_summary(filenames, str_list, path, phenos):
+
+        T = str_list[0]
+        S = str_list[1]
+        C = str_list[2]
+        df2_ind = False
+        l1 = []
+        l2 = []
+        name = ""
+        for filename, t, s, c in zip(filenames, T, S, C):
+            if t == "sig_SNPs" and c == "_complete":
+                df1 = pd.read_csv(filename)
+                name = filename
+                l1 = list(df1.phenotypes)
+                for file in os.listdir(path):
+                    if file.startswith(f'compared_summarized_{t}{c}'):
+                        df2 = pd.read_csv(os.path.join(path, file), header=[0,1])
+                        df2.columns = df2.columns.droplevel(0)
+                        l2 = list(df2.Phenotype)
+                        df2_ind = True
+        results1 = []
+        results2 = []
+        results3 = []
+        for p in phenos:
+            x1 = 0
+            x2 = 0
+            results1.append(p)
+            for l in l1:
+                if p in l:
+                    x1 += 1
+            results2.append(x1)
+            for l in l2:
+                if p in l:
+                    x2 += 1
+            results3.append(x2)
+
+        if name != "":
+            name_new = f'Summary_{os.path.split(name)[1]}'
+            df_new = pd.DataFrame([results1, results2]).T
+            df_new.columns = ["Phenotype", "Significant SNPs"]
+            if df2_ind == True:
+                df_new["Gene hits"] = results3
+                name_new = f'Summary_compared+{os.path.split(filename)[1]}'
+            df_new.to_csv(os.path.join(path, name_new) , index=False)

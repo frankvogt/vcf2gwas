@@ -47,7 +47,7 @@ out_dir2 = os.path.join(out_dir, "output")
 os.makedirs(out_dir2, exist_ok=True)
 
 timestamp = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
-timestamp2 = time.strftime("%Y%m%d_%H%M")
+timestamp2 = time.strftime("%Y%m%d_%H%M%S")
 start = time.perf_counter()
 
 dir_temp = "_vcf2gwas_temp"
@@ -62,6 +62,10 @@ file.close()
 file = open(os.path.join(dir_temp, "vcf2gwas_snpcount_sig.txt"), 'a')
 file.close()
 file = open(os.path.join(dir_temp, "vcf2gwas_sig_level.txt"), 'a')
+file.close()
+file = open(os.path.join(dir_temp, "vcf2gwas_ind_count.txt"), 'a')
+file.close()
+file = open(os.path.join(dir_temp, "vcf2gwas_ind_gemma.txt"), 'a')
 file.close()
 
 # get genotype file input
@@ -114,6 +118,8 @@ eigen = P.set_eigen()
 lmm = P.set_lmm()
 bslmm = P.set_bslmm()
 model = set_model(lm, gk, eigen, lmm, bslmm)
+if model == "-bslmm" and covar != None:
+    sys.exit("Error: GEMMA doesn't support adding Covariates when running BSLMM")
 if model in ["-gk", "-eigen"]:
     pheno_files = None
     covar = None
@@ -597,9 +603,9 @@ if model not in ("-gk", "-eigen", None):
     for pheno in pheno_list:
         pc_prefix3 = set_pc_prefix(pheno, covar, "_")
         prefix_list.append(pc_prefix3)
-    filenames = Summary.summarizer(path3, path2, pc_prefix3, snp_prefix, n_top, Log, prefix_list)
+    filenames, str_list = Summary.summarizer(path3, path2, pc_prefix3, snp_prefix, n_top, Log, prefix_list)
     if gene_file != None:
-        Summary.gene_compare(filenames, gene_file, gene_file_path, gene_thresh, path2, pc_prefix3, snp_prefix, chr_list, Log)
+        Summary.gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path2, pc_prefix3, snp_prefix, chr_list, Log)
 
 #move QC files
 if noqc == False:
@@ -607,7 +613,7 @@ if noqc == False:
         qc_path = os.path.join(path, "QC")
         make_dir(qc_path)
         shutil.move(qc_dir, qc_path)
-        Log.print_log(f'Quality control files moved to {qc_path}')
+        Log.print_log(f'\nQuality control files moved to {qc_path}')
 
 # move split up files (and reduce "files" folder)
 path5 = os.path.join(path, "files")
@@ -672,7 +678,7 @@ if umap_switch == True or pca_switch ==True:
                     if files.startswith(f'{pheno_file.removesuffix(".csv")}_{switch_names[x].lower()}'):
                         shutil.move(os.path.join(pheno_path, files), os.path.join(path4, files))
                 y += 1
-            Log.print_log(f'Moved {switch_names[x]} files to {path4}')
+            Log.print_log(f'\nMoved {switch_names[x]} files to {path4}')
         x += 1
 
 # remove temp covariate file
@@ -684,6 +690,7 @@ time_total = runtime_format(time_total)
 
 Log.print_log(f'\nClean up successful \n\nvcf2gwas has been successfully completed! \nRuntime: {time_total}\n')
 
+#get variables for summary
 if pheno_files != None:
     pheno_files = listtostring(pheno_files, ', ')
 X_names = Y_names = ""
@@ -696,6 +703,10 @@ if X != None:
         X1.append(f'{pca_n} principal components')
     if umap_switch == False and pca_switch == False:
         X, X_names = pheno_switcher2(pheno_files_temp, X_org, X)
+        try:
+            Summary.pheno_summary(filenames, str_list, path2, X_names)
+        except:
+            pass
         X_names = listtostring(X_names, ", ")
         X1 = X
     X = listtostring(X1, ', ')
@@ -708,12 +719,16 @@ if geno_pca_switch == True:
 
 # print summary and move log files
 snp_total, snp_sig = Starter.get_snpcounts()
-sig_level = Starter.get_sig_level()
+if noplot == True:
+    snp_sig = "-"
+sig_level = Starter.get_count("vcf2gwas_sig_level.txt")
+ind_count = Starter.get_count("vcf2gwas_ind_count.txt")
+gemma_count = Starter.get_count("vcf2gwas_ind_gemma.txt")
 Log.summary(
     snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, 
     pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
     out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
-    input_str, noplot
+    input_str, noplot, ind_count, gemma_count
 )
 
 log_path1 = os.path.join(path, "logs", "temp")

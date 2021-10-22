@@ -135,13 +135,16 @@ Log.print_log("Checking and adjusting files..")
 snp_prefix = snp_file.removesuffix(".vcf.gz")
 chrom, chrom_list = Converter.set_chrom(snp_file2)
 subset = f'sub{pc_prefix}_{snp_prefix}'
+subset_temp_1 = subset
 folder = f'files{pc_prefix}_{snp_prefix}'
 subset2 = os.path.join(dir_temp, f'mod_{subset}')
 subset = os.path.join(dir_temp, subset)
+subset_temp = subset
 
 # make list from genotype file
 Log.print_log("Checking individuals in VCF file..")
 list1 = Processing.process_snp_file(snp_file2)
+list1_org = list1
 
 # make list from phenotype and/or covariate file and remove overlap in all files
 diff1a = []
@@ -150,15 +153,23 @@ diff1b = []
 if pheno_file == None:
     Log.print_log("No phenotype file specified")
     pheno_subset1 = pd.DataFrame()
+    subset_temp = snp_file2
 else:
     Log.print_log("Checking individuals in phenotype file..")
+    if covar_file != None:
+        subset_temp_1 = f'temp_{subset_temp_1}'
+        subset_temp = os.path.join(dir_temp, subset_temp_1)
     pheno = Processing.load_pheno(pheno_file2)
     list2 = Processing.pheno_index(pheno)
     diff1a = Processing.make_diff(list1, list2)
     diff2 = Processing.make_diff(list2, list1)
-    pheno_subset1 = Processing.make_uniform(list1, list2, diff1a, diff2, pheno, subset, snp_file2, pheno_file, "phenotype", Log)
+    pheno_subset1 = Processing.make_uniform(list1, list2, diff1a, diff2, pheno, subset_temp, snp_file2, pheno_file, "phenotype", Log)
     length1 = len(pheno_subset1.columns)
-    Log.print_log(f'Removed {len(diff2)} out of {len(list2)} individuals, {len(list2)-len(diff2)} remaining')
+    if covar_file != None:
+        subset_temp_1 = f'{subset_temp_1}.vcf.gz'
+        subset_temp = os.path.join(dir_temp, subset_temp_1)
+    Log.print_log(f'Removed {len(diff1a)} out of {len(list1)} genotype individuals, {len(list1)-len(diff1a)} remaining \nRemoved {len(diff2)} out of {len(list2)} phenotype individuals, {len(list2)-len(diff2)} remaining')
+    list1 = [i for i in list1 if i not in diff1a]
 
 if covar_file == None:
     Log.print_log("No covariate file specified")
@@ -173,9 +184,9 @@ else:
         pheno_subset2 = Processing.rm_pheno(covar, diff3, covar_file)
         Log.print_log("Not all individuals in covariate and genotype file match")
     else:
-        pheno_subset2 = Processing.make_uniform(list1, list3, diff1b, diff3, covar, subset, snp_file2, covar_file, "covariate", Log)
+        pheno_subset2 = Processing.make_uniform(list1, list3, diff1b, diff3, covar, subset, subset_temp, covar_file, "covariate", Log)
     length2 = len(pheno_subset2.columns)
-    Log.print_log(f'Removed {len(diff3)} out of {len(list3)} individuals, {len(list3)-len(diff3)} remaining')
+    Log.print_log(f'Removed {len(diff1b)} out of {len(list1)} genotype individuals, {len(list1)-len(diff1b)} remaining \nRemoved {len(diff3)} out of {len(list3)} covariate individuals, {len(list3)-len(diff3)} remaining')
 
 if model in ("-gk", "-eigen"):
     if pheno_file == None and covar_file == None:
@@ -184,21 +195,23 @@ if model in ("-gk", "-eigen"):
 diff1c = list(set(diff1a) & set(diff1b))
 diff_num = len(diff1a)+len(diff1b)-len(diff1c)
 
-if len(list1)-diff_num == 0:
+if len(list1_org)-diff_num == 0:
     if keep == False:
         Converter.remove_files(subset, pheno_file, subset2, snp_file2)
     Log.print_log("Error: No individuals left! Check if IDs in VCF and phenotype file are of the same format")
     sys.exit(1)
 
 #PRINT len(list1)-diff_num TO FILE
+file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_ind_count.txt"), 'a')
+file.write(f'{len(list1_org)-diff_num}\n')
+file.close()
 
-Log.print_log(f'In total, removed {diff_num} out of {len(list1)} individuals, {len(list1)-diff_num} remaining')
+Log.print_log(f'In total, removed {diff_num} out of {len(list1_org)} genotype individuals, {len(list1_org)-diff_num} remaining')
 Log.print_log("Files successfully adjusted\n")
 
 ############################## Filter, make ped and bed ##############################
 
 Log.print_log("Filtering and converting files\n")
-
 #Log.print_log("Filtering SNPs..")
 #Converter.filter_snps(min_af, subset, subset2)
 #Log.print_log("SNPs successfully filtered")
@@ -309,6 +322,8 @@ if pca != None:
 
 x = 1
 top_ten = []
+top_sig = []
+top_all = []
 
 pd.set_option('use_inf_as_na', True)
 pd.options.mode.chained_assignment = None
@@ -351,6 +366,9 @@ else:
         if model not in ("-gk", "-eigen"):
             path = os.path.join(out_dir2, model2, i, f'{i}_{timestamp2}')
             make_dir(path)
+            file = open(os.path.join(path, f'Summary_{prefix2}.txt'), 'a')
+            file.write(f'Individuals cleared for analyis: {len(list1_org)-diff_num}\n')
+            file.close()
         
         prefix_list.append(prefix)
         prefix2_list.append(prefix2)
@@ -376,11 +394,11 @@ else:
     ############################## Processing and plotting ##############################
 
     Log.print_log("Analyzing GEMMA results\n")
-    for (top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot) in zip(
-        itertools.repeat(top_ten), itertools.repeat(Log), itertools.repeat(model), itertools.repeat(n), prefix2_list, path_list, 
+    for (top_ten, top_sig, top_all, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot) in zip(
+        itertools.repeat(top_ten), itertools.repeat(top_sig), itertools.repeat(top_all), itertools.repeat(Log), itertools.repeat(model), itertools.repeat(n), prefix2_list, path_list, 
         itertools.repeat(n_top), i_list, itertools.repeat(sigval), itertools.repeat(nolabel), itertools.repeat(noplot)
         ):
-        Post_analysis.run_postprocessing(top_ten, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot)
+        Post_analysis.run_postprocessing(top_ten, top_sig, top_all, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot)
     Log.print_log("Analysis of GEMMA results completed successfully\n")
 
 ############################## Summary and Clean up ##############################
@@ -396,7 +414,7 @@ if model not in ("-gk", "-eigen", None):
     #make_dir(os.path.join(path, "summary"))
     path2 = os.path.join(path, "summary", "temp","top_SNPs")
     make_dir(path2)
-    Post_analysis.print_top_list(top_ten, columns, path2, pc_prefix, snp_prefix)
+    Post_analysis.print_top_list(top_ten, top_sig, top_all, columns, path2, pc_prefix, snp_prefix)
     Log.print_log("Top SNPs saved")
 
 make_dir(os.path.join(path, "files"))
@@ -405,7 +423,7 @@ make_dir(path3)
 
 Log.print_log("Moving files..")
 for files in os.listdir(dir_temp):
-    if files.startswith((f'sub{pc_prefix}', os.path.split(subset2)[1])):
+    if files.startswith((os.path.split(subset)[1], os.path.split(subset2)[1])):
         shutil.move(os.path.join(dir_temp, files), os.path.join(path3, files))
 if model == "-gk":
     path2 = os.path.join(path, "rel_matrix", f'rel_matrix_{timestamp2}')
