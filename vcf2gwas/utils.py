@@ -1287,7 +1287,6 @@ class Gemma:
             filename = f'{prefix}.cXX.txt'
         if n == '2':
             filename = None
-        Gemma.write_gemma_ind("", prefix)
         Log.print_log("Relatedness matrix created successfully")
         return filename
 
@@ -1317,7 +1316,6 @@ class Gemma:
         if process.returncode != 0:
             Log.print_log(f'Error: GEMMA was not able to complete the analysis')
             sys.exit(1)
-        Gemma.write_gemma_ind("", prefix)
         Log.print_log("Eigen-decomposition of relatedness matrix successful")
 
     def lmm(pca, prefix, prefix2, filename, filename2, model, n, N, path, Log, covar_file_name):
