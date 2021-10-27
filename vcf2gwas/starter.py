@@ -300,7 +300,6 @@ if model not in ["-gk", "-eigen"]:
                     sys.exit(Log.print_log("Error: No covariates specified for GEMMA analysis"))
 
 pheno_list = []
-X_list = []
 threads_list = []
 l = None
 pheno_files2 = []
@@ -433,7 +432,7 @@ if pheno_files != None:
             rest = threads%l
             threads2 = threads//l
             memory2 = memory//l
-            Starter.split_phenofile1(X, X_list, df, pheno_file, pheno_list, pheno_path)
+            Starter.split_phenofile1(X, df, pheno_file, pheno_list, pheno_path)
             Log.print_log("Phenotype file split up successful")
 
         else:
@@ -446,7 +445,7 @@ if pheno_files != None:
             col_dict = {}
             rest2 = l%threads_temp
             threads3 = l//threads_temp
-            Starter.split_phenofile2(threads_temp, threads3, rest2, col_dict, X_list, df, pheno_file, pheno_list, pheno_path)
+            Starter.split_phenofile2(threads_temp, threads3, rest2, col_dict, X, df, pheno_file, pheno_list, pheno_path)
             Log.print_log("Phenotype file split up successful")
 
         x += 1
@@ -460,7 +459,7 @@ if memory2 < 1000:
     Log.print_log("Warning: Memory might not be sufficient to carry out analysis!")
 if memory2 == 0:
     sys.exit(Log.print_log("Error: Memory not sufficient to carry out analysis!"))
-
+#sys.exit()
 #################### compressing, indexing and filtering VCF file ####################
 
 if snp_file.endswith(".vcf"):
@@ -554,7 +553,7 @@ elif switch == True:
 elif l != 1:
     Starter.adjust_threads(pheno_list, threads2, rest, threads_list)
     args = Starter.delete_string(args, ['-p', '--pheno'])
-    Starter.edit_args2(pheno_list, args, args_list, threads_list, pheno, A, X_list, pheno_files_path)
+    Starter.edit_args2(pheno_list, args, args_list, threads_list, pheno, A, pheno_files_path)
     if umap_switch == True:
         Log.print_log(f'Info:\nAfter reducing dimensions of {pheno} via UMAP, it has been split up in {len(pheno_list)} parts in order to ensure maximum efficiency')
     else:

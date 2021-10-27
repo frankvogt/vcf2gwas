@@ -676,7 +676,7 @@ class Starter:
         embeddingDf.index.name = None
         embeddingDf.to_csv(os.path.join(pheno_path, pheno_file))
 
-    def split_phenofile1(X, X_list, df, pheno_file, pheno_list, pheno_path):
+    def split_phenofile1(X, df, pheno_file, pheno_list, pheno_path):
 
         ind = 1
         for i in X:
@@ -688,9 +688,10 @@ class Starter:
             df_new.to_csv(os.path.join(pheno_path, df_name))
             ind += 1
 
-    def split_phenofile2(threads, threads3, rest2, col_dict, X_list, df, pheno_file, pheno_list, pheno_path):
+    def split_phenofile2(threads, threads3, rest2, col_dict, X, df, pheno_file, pheno_list, pheno_path):
 
         for i in range(threads):
+
             x = 0
             cols = []
             for c in range(threads3):
@@ -700,7 +701,7 @@ class Starter:
                 cols.append(i+x)
             col_dict[i] = cols
 
-            df_new = df.iloc[:,col_dict[i]]
+            df_new = df.iloc[:,[X[i]-1 for i in col_dict[i]]]
             df_new.fillna("NA", inplace=True)
             df_name = pheno_file.removesuffix(".csv")
             df_name = f'{df_name}.part{i+1}.csv'
@@ -732,7 +733,7 @@ class Starter:
                 if A == False:
                     args_list[i].insert(8, "--allphenotypes")
 
-    def edit_args2(pheno_list, args, args_list, threads_list, pheno_file, A, X_list, pheno_path):
+    def edit_args2(pheno_list, args, args_list, threads_list, pheno_file, A, pheno_path):
         
         for i in range(len(pheno_list)):
             args2 = list(args)
@@ -1866,17 +1867,17 @@ class Summary:
         filenames = []
         for s, t in zip(["top_SNPs", "sig_SNPs", "merge_SNPs"], ["Top SNPs", "Significant SNPs", "Merged (top + significant) SNPs"]):
             dfnames = []
-            x = 0
+            x = 1
             for prefix in prefix_list:
                 for file in os.listdir(path):
-                    if file == f'{s}{prefix}_{snp_prefix}.csv':
-                        x += 1 
+                    if file == f'{s}{prefix}_{snp_prefix}.csv':  
                         filename = os.path.join(path, file)
                         try:
                             globals()[f'df{x}'] = pd.read_csv(filename, header=[0,1], index_col=0, sep=',')
                             temp = list(eval(f'df{x}').columns.get_level_values(1))
                             globals()[f'df{x}'].loc[len(globals()[f'df{x}'])] = temp
                             dfnames.append(f'df{x}')
+                            x += 1 
                         except:
                             Log.print_log(f'No SNPs in {file}')
             if dfnames == []:
@@ -1885,7 +1886,7 @@ class Summary:
             else:
                 # concat the dataframes
                 if len(dfnames) == 1:
-                    dfx = df1
+                    dfx = eval(dfnames[0])
                 else:
                     for i in range(len(dfnames)-1):
                         a = i+1
@@ -2022,6 +2023,9 @@ class Summary:
                     str_list[1].append(t)
                     str_list[2].append(addstring[c])
                     c += 1
+            for v in dfnames:
+                del globals()[v]
+            del dfnames
         return filenames, str_list
 
     def gff_converter(f):
