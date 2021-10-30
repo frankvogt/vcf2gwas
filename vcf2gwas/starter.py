@@ -607,7 +607,6 @@ if model not in ("-gk", "-eigen", None):
         prefix_list.append(pc_prefix3)
     filenames, str_list = Summary.summarizer(path3, path2, pc_prefix3, snp_prefix, n_top, Log, prefix_list)
     temp, file_dict = Summary.ind_summary(path2, filenames, str_list)
-    print(file_dict)
     filenames = temp[0]
     str_list = temp[1]
     if gene_file != None:
