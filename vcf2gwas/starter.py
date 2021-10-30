@@ -67,6 +67,9 @@ file = open(os.path.join(dir_temp, "vcf2gwas_ind_count.txt"), 'a')
 file.close()
 file = open(os.path.join(dir_temp, "vcf2gwas_ind_gemma.txt"), 'a')
 file.close()
+file = open(os.path.join(dir_temp, "vcf2gwas_summary_paths.txt"), 'a')
+file.close()
+
 
 # get genotype file input
 snp_file2 = P.set_geno()
@@ -555,9 +558,9 @@ elif l != 1:
     args = Starter.delete_string(args, ['-p', '--pheno'])
     Starter.edit_args2(pheno_list, args, args_list, threads_list, pheno, A, pheno_files_path)
     if umap_switch == True:
-        Log.print_log(f'Info:\nAfter reducing dimensions of {pheno} via UMAP, it has been split up in {len(pheno_list)} parts in order to ensure maximum efficiency')
+        Log.print_log(f'\nInfo:\nAfter reducing dimensions of {pheno} via UMAP, it has been split up in {len(pheno_list)} parts in order to ensure maximum efficiency')
     else:
-        Log.print_log(f'Info:\n{pheno} has been split up in {len(pheno_list)} parts in order to ensure maximum efficiency')
+        Log.print_log(f'\nInfo:\n{pheno} has been split up in {len(pheno_list)} parts in order to ensure maximum efficiency')
 else:
     Starter.edit_args3(args, threads, args_list)
 
@@ -603,8 +606,13 @@ if model not in ("-gk", "-eigen", None):
         pc_prefix3 = set_pc_prefix(pheno, covar, "_")
         prefix_list.append(pc_prefix3)
     filenames, str_list = Summary.summarizer(path3, path2, pc_prefix3, snp_prefix, n_top, Log, prefix_list)
+    temp, file_dict = Summary.ind_summary(path2, filenames, str_list)
+    print(file_dict)
+    filenames = temp[0]
+    str_list = temp[1]
     if gene_file != None:
-        Summary.gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path2, pc_prefix3, snp_prefix, chr_list, Log)
+        filenames2 = Summary.gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path2, snp_prefix, chr_list, Log)
+        Summary.pheno_compare_split(filenames2, file_dict)
 
 #move QC files
 if noqc == False:

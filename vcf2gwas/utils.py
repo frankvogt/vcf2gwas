@@ -20,7 +20,8 @@ along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import itertools
-from numpy import log10, rint
+from operator import index
+from numpy import intp, log10, rint
 from numpy.core.fromnumeric import repeat
 from vcf2gwas.parsing import Parser
 import warnings
@@ -108,6 +109,8 @@ sns.set_color_codes()
 ############################## Functions ##############################
 
 def flatten_list(l):
+    """Description:
+    flattens list and removes duplicates"""
 
     l = [item for sublist in l for item in sublist]
     l = list(dict.fromkeys(l))
@@ -1564,7 +1567,7 @@ class Post_analysis:
             timer_total = round(timer_end - timer, 2)
             Log.print_log(f'QQ-plot saved as "{pcol}_qq_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
 
-    def make_top_list(df, top_list1, top_list2, top_list3, n, x, pcol):
+    def make_top_list(df, top_list1, top_list2, top_list3, n, x, pcol, pheno, path, prefix):
         """Description:
         returns list of the top n SNPs with highest p-value"""
 
@@ -1572,11 +1575,25 @@ class Post_analysis:
         if x > n:
             n1 = x
         for a, l in zip([n, x, n1], [top_list1, top_list2, top_list3]):
-            new_df = df.head(a)
+            l_sig = []
+            new_df = df.copy()
+            new_df = new_df.head(a)
             new_df.dropna(axis=0, how="any", inplace=True)
             for i in ["chr", "rs", "ps", pcol]:
                 col = new_df[i].astype(str).tolist()
                 l.append(col)
+                if a == x:
+                    l_sig.append(col)
+            if a == x:
+                l_sig.append([str(pheno)]*len(col))
+                sig_df = pd.DataFrame(l_sig)
+                sig_df = sig_df.T
+                sig_df.columns = ["chr", "SNP_ID", "SNP_pos", "p_value", "phenotype"]
+                filename = os.path.join(path, f'sig_SNPs_{prefix}.csv')
+                sig_df.to_csv(filename, index=False)
+                file = open(os.path.join("_vcf2gwas_temp", f'vcf2gwas_summary_paths.txt'), 'a')
+                file.write(f'{filename}\n')
+                file.close()
 
     def print_top_list(l1, l2, l3, cols, path, pc_prefix, snp_prefix):
         """Description:
@@ -1621,7 +1638,7 @@ class Post_analysis:
                     Lin_models.qq_plot(df, p, prefix2, path, Log)
                 p_col = p
 
-            Lin_models.make_top_list(df2, top_ten, top_sig, top_all, n_top, n, p_col)
+            Lin_models.make_top_list(df2, top_ten, top_sig, top_all, n_top, n, p_col, i, path, prefix2)
 
         elif model == "-bslmm":
             # procedure based on steps outlined in: 
@@ -1670,7 +1687,7 @@ class Post_analysis:
                 n2 = Bslmm.manh_plot(df5, Log, prefix2, "eff", path, sigval, x, nolabel, refSNP="rs")
                 n = max([n1, n2])
 
-            Bslmm.make_top_list(df3, top_ten, top_sig, top_all, n_top, n, "gamma")
+            Bslmm.make_top_list(df3, top_ten, top_sig, top_all, n_top, n, "gamma", i, path, prefix2)
         
         else:
             Log.print_log("No post-processing necessary!")
@@ -2107,17 +2124,20 @@ class Summary:
         df = df[df["chr"].isin(chr_set)]
         return df
 
-    def gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path, pc_prefix, snp_prefix, chr_list, Log):
+    def gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path, snp_prefix, chr_list, Log):
         """Description:
         takes dataframe of summarized SNPs, calculates distances to genes in gene input file and saves results in new file.
         Columns in gene file: start, stop, chr, name (optional), ID (optional), comment (optional)"""
         
         Log.print_log("\nComparing SNPs to genes..")
+        files = []
         T = str_list[0]
         S = str_list[1]
         C = str_list[2]
         for filename, t, s, c in zip(filenames, T, S, C):
             values = pd.read_csv(filename)
+            if os.path.split(filename)[1] == "temp_summary.csv":
+                os.remove(filename)
             if values.empty == True:
                 Log.print_log("No SNPs present to compare to genes")
             else:
@@ -2273,8 +2293,12 @@ class Summary:
                 if values.empty:
                     Log.print_log("Info: No SNPs could be compared to genes, please check the species or gene file selection")
                 else:
-                    values.to_csv(os.path.join(path, f'compared_summarized_{t}{c}_{snp_prefix}.csv'), index=False)
-                    Log.print_log(f'{s} compared to genes and saved as "compared_summarized_{t}{c}_{snp_prefix}.csv" in {path}')
+                    name = os.path.join(path, f'compared_summarized_{t}{c}_{snp_prefix}.csv')
+                    values.to_csv(name, index=False)
+                    files.append(name)
+                    if s != "temp":
+                        Log.print_log(f'{s} compared to genes and saved as "compared_summarized_{t}{c}_{snp_prefix}.csv" in {path}')
+        return files
 
     def pheno_summary(filenames, str_list, path, phenos):
 
@@ -2320,3 +2344,58 @@ class Summary:
                 df_new["Gene hits"] = results3
                 name_new = f'Summary_compared+{os.path.split(filename)[1]}'
             df_new.to_csv(os.path.join(path, name_new) , index=False)
+
+    def ind_summary(path, filenames, str_list):
+        
+        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_summary_paths.txt"), "r")
+        lines = file.readlines()
+        file.close()
+        lines = [i.rstrip() for i in lines]
+        files = list(set(lines))
+
+        list1 = []
+        list2 = []
+        list3 = []
+        list4 = []
+        list5 = []
+        file_dict = {}
+
+        for f in files:
+            df = pd.read_csv(f)
+            list1.append(df["chr"].astype(str).tolist())
+            list2.append(df["SNP_ID"].astype(str).tolist())
+            list3.append(df["SNP_pos"].astype(str).tolist())
+            list4.append(df["p_value"].astype(str).tolist())
+            p_list = df["phenotype"].astype(str).tolist()
+            p_list_set = list(set(p_list))
+            file_dict[f] = p_list_set[0]
+            list5.append(p_list)
+
+        l_full = []
+        for l in [list2, list3, list1, list4, list5]:
+            l_new = [item for sublist in l for item in sublist]
+            l_full.append(l_new)
+        df_new = pd.DataFrame([l_full[0], l_full[1], l_full[2], l_full[3], l_full[4]]).T
+        df_new.columns = ["SNP_ID", "SNP_pos", "chr", "p_value", "phenotype"]
+        filename = os.path.join(path, "temp_summary.csv")
+        df_new.to_csv(filename, index=False)
+        filenames.append(filename)
+        str_list[0].append("temp")
+        str_list[1].append("temp")
+        str_list[2].append("")
+
+        return (filenames, str_list), file_dict
+
+    def pheno_compare_split(filenames, file_dict):
+
+        for file in filenames:
+            if os.path.split(file)[1].startswith("compared_summarized_temp"):
+                df = pd.read_csv(file, header=[0,1])
+                os.remove(file)
+                for key in file_dict:
+                    df_new = df.copy()
+                    df_new.drop(df_new[df_new.loc[:, pd.IndexSlice[:, "Phenotype"]].values != file_dict[key]].index, inplace=True)
+                    for n in df_new.columns.get_level_values(0):
+                        if n.startswith("Unnamed"):
+                            df_new.rename(columns={n : ""}, inplace=True)
+                    df_new.to_csv(key, index=False)
