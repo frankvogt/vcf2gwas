@@ -181,6 +181,13 @@ Futhermore, *vcf2gwas* supports adding a 'gene-file' (either a GFF3 formatted `.
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -gf [filename]
 ```
+
+One can also add multiple 'gene-files' or use the built-in files in combination with 'gene-files' to efficiently compare the results of the analysis with different subsets of genes.
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -gf [abbreviation] -gf [filename1] -gf [filename2]
+```
+
 If the file is in the `.csv` format, the file needs at least three columns containing information about chromosome, gene start position and gene stop position. These columns have to be named 'chr', 'start' and 'stop'.  
 
 *vcf2gwas* recognizes chromosomes in the following formats (here the first chromosome): `Chr1`, `chr1`, `1`.  
