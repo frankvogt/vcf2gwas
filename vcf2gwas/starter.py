@@ -50,6 +50,7 @@ timestamp = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
 timestamp2 = time.strftime("%Y%m%d_%H%M%S")
 start = time.perf_counter()
 
+shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
 dir_temp = "_vcf2gwas_temp"
 qc_dir = os.path.join(dir_temp, f'QC_{timestamp2}')
 make_dir(qc_dir)
@@ -125,6 +126,7 @@ if model == "-bslmm" and covar != None:
     sys.exit("Error: GEMMA doesn't support adding Covariates when running BSLMM")
 if model in ["-gk", "-eigen"]:
     pheno_files = None
+    pheno = None
     covar = None
     switch = False
 model2 = None
@@ -145,13 +147,18 @@ Log.print_log("Parsing arguments..")
 
 # get gene file input
 gene_file = P.set_gene_file()
-gene_file, species = Starter.get_gene_file(gene_file)
-gene_file_path = None
+species = None
 if gene_file != None:
-    gene_file_path = gene_file
-    gene_file = os.path.split(gene_file)[1]
+    gene_file = list(set(gene_file))
+    gene_file, species = Starter.get_gene_file(gene_file, Log)
+gene_file_path = []
+gene_file2 = []
+if gene_file != None:
+    for gf in gene_file:
+        gene_file_path.append(gf)
+        gene_file2.append(os.path.split(gf)[1])
+        gene_file = gene_file2
 gene_thresh = P.set_gene_thresh()
-
 # file checking
 Log.print_log(f'Genotype file: {snp_file}')
 if model in ["-lm", "-lmm", "-bslmm"] and pheno_files == None:
@@ -164,10 +171,11 @@ if covar != None:
     else:
         Log.print_log(f'Covariate file: {covar}')
 if gene_file != None:
-    if species == None:
-        Log.print_log(f'Gene comparison file: {gene_file}')
-    else:
-        Log.print_log(f'Gene comparison with: {species}')
+    for gf, s in zip(gene_file, species):
+        if s == "":
+            Log.print_log(f'Gene comparison file: {gf}')
+        else:
+            Log.print_log(f'Gene comparison with: {s}')
 
 pheno2 = None
 covar2 = None
@@ -185,6 +193,8 @@ if covar != None:
 
 # get phenotype / covariate selection input
 X = P.get_phenotypes()
+if model in ["-gk", "-eigen"]:
+    X = None
 X_org = X
 if pheno_files_temp != None and X != None:
     X = pheno_switcher(pheno_files_temp, X)
@@ -576,6 +586,13 @@ if covar != None:
         args_list2.append(args)
     args_list = args_list2
 
+if model in ["-gk", "-eigen"]:
+    args_list2 = []
+    for args in args_list:
+        args = Starter.delete_string(args, ['-pf', '--pfile', '-cf', '--cfile', '-p', '--pheno', '-c', '--covar'])
+        args_list2.append(args)
+    args_list = args_list2
+
 Log.print_log("\nFile preparations completed")
 
 #################### Run main.py for analysis ####################
@@ -609,8 +626,10 @@ if model not in ("-gk", "-eigen", None):
     temp, file_dict = Summary.ind_summary(path2, filenames, str_list)
     filenames = temp[0]
     str_list = temp[1]
+    filenames2 = []
+    name_list = []
     if gene_file != None:
-        filenames2 = Summary.gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path2, snp_prefix, chr_list, Log)
+        filenames2, name_list = Summary.gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path2, snp_prefix, chr_list, Log)
         Summary.pheno_compare_split(filenames2, file_dict)
 
 #move QC files
@@ -653,7 +672,7 @@ if switch == False:
         for folder in os.listdir(path5):
             if model in ["-gk", "-eigen"]:
                 if f'files_{snp_prefix}' == folder:
-                    os.rename(os.path.join(path5, folder), os.path.join(path5, f'{folder}_{timestamp2}'))
+                    shutil.move(os.path.join(path5, folder), os.path.join(path5, f'{folder}_{timestamp2}'))
             elif pheno_temp[0] == folder:
                 os.rename(os.path.join(path5, folder), os.path.join(path5, f'{folder}_{timestamp2}'))
 elif switch == True:
@@ -710,7 +729,7 @@ if X != None:
     if umap_switch == False and pca_switch == False:
         X, X_names = pheno_switcher2(pheno_files_temp, X_org, X)
         try:
-            Summary.pheno_summary(filenames, str_list, path2, X_names)
+            Summary.pheno_summary(filenames, filenames2, str_list, path2, X_names, name_list)
         except:
             pass
         X_names = listtostring(X_names, ", ")
@@ -739,6 +758,8 @@ Log.summary(
 
 log_path1 = os.path.join(path, "logs", "temp")
 log_path2 = os.path.join(path, "logs", f'logs{pc_prefix2}_{snp_prefix}_{timestamp2}')
+#if model in ["-gk", "-eigen"]:
+#    log_path2 = os.path.join(path, "logs", f'logs_{pc_prefix2}_{snp_prefix}_{timestamp2}')
 os.rename(log_path1, log_path2)
 
 if model != None:

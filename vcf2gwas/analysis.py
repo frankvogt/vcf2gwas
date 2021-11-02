@@ -107,7 +107,6 @@ pca = P.set_pca()
 keep = P.set_keep()
 
 n_top = P.set_n_top()
-#gene_file = P.set_gene_file()
 gene_thresh = P.set_gene_thresh()
 multi = P.set_multi()
 sigval = P.set_sigval()
@@ -137,6 +136,8 @@ chrom, chrom_list = Converter.set_chrom(snp_file2)
 subset = f'sub{pc_prefix}_{snp_prefix}'
 subset_temp_1 = subset
 folder = f'files{pc_prefix}_{snp_prefix}'
+#if model in ["-gk", "-eigen"]:
+#    folder = f'files_{pc_prefix}_{snp_prefix}'
 subset2 = os.path.join(dir_temp, f'mod_{subset}')
 subset = os.path.join(dir_temp, subset)
 subset_temp = subset

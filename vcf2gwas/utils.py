@@ -148,7 +148,8 @@ def check_files(snp_file2, gene_file, gene_file_path):
     if os.path.isfile(snp_file2) == False:
         sys.exit(print("Error: VCF file non existent"))
     if gene_file != None:
-        if os.path.isfile(gene_file_path) == False: sys.exit(print("Error: Gene comparison file non existent, please check if file path was specified correctly"))
+        for file in gene_file_path:
+            if os.path.isfile(file) == False: sys.exit(print("Error: Gene comparison file non existent, please check if file path was specified correctly"))
 
 def check_files2(pheno_file, pheno_file2):
     """Description:
@@ -515,7 +516,7 @@ class Starter:
         file.write(str(code))
         file.close()
 
-    def get_gene_file(gene_file):
+    def get_gene_file(gene_files, Log):
 
         gene_dict = {
             "HS" : "Homo sapiens",
@@ -551,13 +552,24 @@ class Starter:
             "VV" : "GFF_VV.csv"
         }
 
-        if gene_file in gene_dict:
-            species = gene_dict[gene_file]
-            gene_file = os.path.join(os.path.dirname(__file__), "GFF_files", gene_file_dict[gene_file])
-        else:
-            species = None
+        gene_files2 = []
+        species = []
+        species2 = []
+        for gene_file in gene_files:
+            if gene_file in gene_dict:
+                species.append(gene_dict[gene_file])
+                species2.append(gene_dict[gene_file])
+                gene_files2.append(os.path.join(os.path.dirname(__file__), "GFF_files", gene_file_dict[gene_file]))
+            else:
+                gene_files2.append(gene_file)
+                species2.append("")
+        if len(species) > 1:
+            if len(species) == len(set(species)):
+                Log.print_log("Error: Two different species chosen for gene comparison")
+                sys.exit(1)
+        gene_files2 = list(set(gene_files2))
 
-        return gene_file, species
+        return gene_files2, species2
 
     def check_vals(str, var, min, max, Log):
         if var == 0:
@@ -2124,225 +2136,259 @@ class Summary:
         df = df[df["chr"].isin(chr_set)]
         return df
 
-    def gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path, snp_prefix, chr_list, Log):
+    def gene_compare(filenames, str_list, gene_files, gene_file_paths, gene_thresh, path, snp_prefix, chr_list, Log):
         """Description:
         takes dataframe of summarized SNPs, calculates distances to genes in gene input file and saves results in new file.
         Columns in gene file: start, stop, chr, name (optional), ID (optional), comment (optional)"""
         
         Log.print_log("\nComparing SNPs to genes..")
+        name_list = []
         files = []
         T = str_list[0]
         S = str_list[1]
         C = str_list[2]
-        for filename, t, s, c in zip(filenames, T, S, C):
-            values = pd.read_csv(filename)
-            if os.path.split(filename)[1] == "temp_summary.csv":
-                os.remove(filename)
-            if values.empty == True:
-                Log.print_log("No SNPs present to compare to genes")
-            else:
-                #read gene .csv file
-                if gene_file_path.endswith(".gff"):
-                    df = Summary.gff_converter(gene_file_path)
-                    gene_file_name = gene_file.removesuffix(".gff")
+        for gene_file, gene_file_path in zip(gene_files, gene_file_paths):
+            for filename, t, s, c in zip(filenames, T, S, C):
+                values = pd.read_csv(filename)
+                if os.path.split(filename)[1] == "temp_summary.csv":
+                    if gene_file == gene_files[-1]:
+                        os.remove(filename)
+                if values.empty == True:
+                    Log.print_log("No SNPs present to compare to genes")
                 else:
-                    df = pd.read_csv(gene_file_path, sep=',')
-                    gene_file_name = gene_file.removesuffix(".csv")
-                df = Summary.chr_converter(df, chr_list)
-                #set list variables
-                gene_dist_left = []
-                gene_dist_right = []
-                gene_ID_left = []
-                gene_ID_right = []
-                gene_annot_left = []
-                gene_annot_right = []
-                gene_comment_left = []
-                gene_comment_right = []
-                #check file
-                try:
-                    df_new = df[["chr", "start", "stop"]]
-                    df_new = df_new.dropna(subset=["start", "stop"])
-                    df_new[["start", "stop"]] = df_new[["start", "stop"]].astype("int32")
-                except Exception:
-                    Log.print_log(f'Could not parse contents of {gene_file}.\nPlease provide the file in the right format.')
-                #loop through columns of gene file and calculate distances between SNPs and genes
-                for x in values.index:
-                    df_new = df[["chr", "start", "stop"]]
-                    try:
-                        df_new["ID"] = df["ID"]
-                    except Exception:
-                        pass
-                    try:
-                        df_new["name"] = df["name"]
-                    except Exception:
-                        pass
-                    try:
-                        df_new["comment"] = df["comment"]
-                    except Exception:
-                        pass
-                    df_new["Chr"] = values.loc[x,"chr"]
-                    df_new[["chr", "Chr"]] = df_new[["chr", "Chr"]].astype("str")
-                    df_new["pos"] = values.loc[x,"SNP_pos"]
-                    df_new["SNP_ID"] = values.loc[x,"SNP_ID"]
-                    df_new = df_new.dropna(subset=["start", "stop"])
-                    df_new[["pos", "start", "stop"]] = df_new[["pos", "start", "stop"]].astype("int32")
-                    df_new = df_new[df_new.chr==df_new.Chr]
-                    #get minimum distances
-                    df_new["POSleft1"] = df_new["pos"] - df_new["stop"]
-                    df_new["POSleft2"] = df_new["pos"] - df_new["start"]
-                    if df_new.POSleft1[df_new.POSleft1>0].min() < df_new.POSleft2[df_new.POSleft2>0].min():
-                        posleft = "POSleft1"
+                    #read gene .csv file
+                    if gene_file_path.endswith(".gff"):
+                        df = Summary.gff_converter(gene_file_path)
+                        gene_file_name = gene_file.removesuffix(".gff")
                     else:
-                        posleft = "POSleft2"
-                    df_new["POSright1"] = df_new["start"] - df_new["pos"]
-                    df_new["POSright2"] = df_new["stop"] - df_new["pos"]
-                    if df_new.POSright1[df_new.POSright1>0].min() < df_new.POSright2[df_new.POSright2>0].min():
-                        posright = "POSright1"
-                    else:
-                        posright = "POSright2"
-                    df_new[[posleft, posright]] = df_new[[posleft, posright]].astype("int32")
-                    #filter results and append to lists
-                    min_value1 = df_new[(df_new[posleft] > 0) & (df_new[posleft] < gene_thresh)]
-                    min_value1 = min_value1[min_value1[posleft] == min_value1[posleft].min()]
+                        df = pd.read_csv(gene_file_path, sep=',')
+                        gene_file_name = gene_file.removesuffix(".csv")
+                    path2 = os.path.join(path, gene_file_name)
+                    make_dir(path2)
                     try:
-                        gene_dist_left.append(min_value1.iloc[0][posleft])
-                    except Exception:
-                        gene_dist_left.append(np.nan)
+                        df = Summary.chr_converter(df, chr_list)
+                    except:
+                        Log.print_log(f'Error: Please make sure that "{gene_file}" is formatted correctly')
+                        continue
+                    #set list variables
+                    gene_dist_left = []
+                    gene_dist_right = []
+                    gene_ID_left = []
+                    gene_ID_right = []
+                    gene_annot_left = []
+                    gene_annot_right = []
+                    gene_comment_left = []
+                    gene_comment_right = []
+                    #check file
                     try:
-                        gene_ID_left.append(min_value1.iloc[0]["ID"])
+                        df_new = df[["chr", "start", "stop"]]
+                        df_new = df_new.dropna(subset=["start", "stop"])
+                        df_new[["start", "stop"]] = df_new[["start", "stop"]].astype("int32")
                     except Exception:
-                        gene_ID_left.append(np.nan)
+                        Log.print_log(f'Could not parse contents of "{gene_file}".\nPlease provide the file in the right format.')
+                        continue
+                    #loop through columns of gene file and calculate distances between SNPs and genes
+                    for x in values.index:
+                        df_new = df[["chr", "start", "stop"]]
+                        try:
+                            df_new["ID"] = df["ID"]
+                        except Exception:
+                            pass
+                        try:
+                            df_new["name"] = df["name"]
+                        except Exception:
+                            pass
+                        try:
+                            df_new["comment"] = df["comment"]
+                        except Exception:
+                            pass
+                        df_new["Chr"] = values.loc[x,"chr"]
+                        df_new[["chr", "Chr"]] = df_new[["chr", "Chr"]].astype("str")
+                        df_new["pos"] = values.loc[x,"SNP_pos"]
+                        df_new["SNP_ID"] = values.loc[x,"SNP_ID"]
+                        df_new = df_new.dropna(subset=["start", "stop"])
+                        df_new[["pos", "start", "stop"]] = df_new[["pos", "start", "stop"]].astype("int32")
+                        df_new = df_new[df_new.chr==df_new.Chr]
+                        #get minimum distances
+                        df_new["POSleft1"] = df_new["pos"] - df_new["stop"]
+                        df_new["POSleft2"] = df_new["pos"] - df_new["start"]
+                        if df_new.POSleft1[df_new.POSleft1>0].min() < df_new.POSleft2[df_new.POSleft2>0].min():
+                            posleft = "POSleft1"
+                        else:
+                            posleft = "POSleft2"
+                        df_new["POSright1"] = df_new["start"] - df_new["pos"]
+                        df_new["POSright2"] = df_new["stop"] - df_new["pos"]
+                        if df_new.POSright1[df_new.POSright1>0].min() < df_new.POSright2[df_new.POSright2>0].min():
+                            posright = "POSright1"
+                        else:
+                            posright = "POSright2"
+                        df_new[[posleft, posright]] = df_new[[posleft, posright]].astype("int32")
+                        #filter results and append to lists
+                        min_value1 = df_new[(df_new[posleft] > 0) & (df_new[posleft] < gene_thresh)]
+                        min_value1 = min_value1[min_value1[posleft] == min_value1[posleft].min()]
+                        try:
+                            gene_dist_left.append(min_value1.iloc[0][posleft])
+                        except Exception:
+                            gene_dist_left.append(np.nan)
+                        try:
+                            gene_ID_left.append(min_value1.iloc[0]["ID"])
+                        except Exception:
+                            gene_ID_left.append(np.nan)
+                        try:
+                            gene_annot_left.append(min_value1.iloc[0]["name"])
+                        except Exception:
+                            gene_annot_left.append(np.nan)
+                        try:
+                            gene_comment_left.append(min_value1.iloc[0]["comment"])
+                        except Exception:
+                            gene_comment_left.append(np.nan)
+                        min_value2 = df_new[(df_new[posright] > 0) & (df_new[posright] < gene_thresh)]
+                        min_value2 = min_value2[min_value2[posright] == min_value2[posright].min()]
+                        try:
+                            gene_dist_right.append(min_value2.iloc[0][posright])
+                        except Exception:
+                            gene_dist_right.append(np.nan)
+                        try:
+                            gene_ID_right.append(min_value2.iloc[0]["ID"])
+                        except Exception:
+                            gene_ID_right.append(np.nan)
+                        try:
+                            gene_annot_right.append(min_value2.iloc[0]["name"])
+                        except Exception:
+                            gene_annot_right.append(np.nan)
+                        try:
+                            gene_comment_right.append(min_value2.iloc[0]["comment"])
+                        except Exception:
+                            gene_comment_right.append(np.nan)
+                    # add lists to dataframe
+                    pos_col = values["SNP_pos"].to_list()
+                    values = values.drop("SNP_pos", axis=1)
+                    pval_col = values["p_value"].to_list()
+                    values = values.drop("p_value", axis=1)
+                    values["p-value"] = pval_col
+                    values["gene_ID(up)"] = gene_ID_left
+                    values["gene_comment(up)"] = gene_comment_left
+                    values["gene_name(up)"] = gene_annot_left
+                    values["gene_distance(up)"] = gene_dist_left
+                    values["SNP_pos"] = pos_col
+                    values["gene_distance(down)"] = gene_dist_right
+                    values["gene_name(down)"] = gene_annot_right
+                    values["gene_comment(down)"] = gene_comment_right
+                    values["gene_ID(down)"] = gene_ID_right
+                    # sort and remove empty columns
+                    values = values.sort_values(by=["gene_distance(up)","gene_distance(down)"])
+                    values.dropna(subset=["gene_distance(up)", "gene_distance(down)"], how="all", inplace=True)
                     try:
-                        gene_annot_left.append(min_value1.iloc[0]["name"])
+                        values["gene_distance(up)"] = values["gene_distance(up)"].astype("Int32")
                     except Exception:
-                        gene_annot_left.append(np.nan)
+                        pass
                     try:
-                        gene_comment_left.append(min_value1.iloc[0]["comment"])
+                        values["gene_distance(down)"] = values["gene_distance(down)"].astype("Int32")
                     except Exception:
-                        gene_comment_left.append(np.nan)
-                    min_value2 = df_new[(df_new[posright] > 0) & (df_new[posright] < gene_thresh)]
-                    min_value2 = min_value2[min_value2[posright] == min_value2[posright].min()]
+                        pass
                     try:
-                        gene_dist_right.append(min_value2.iloc[0][posright])
+                        values["count"] = values["count"].astype("int32")
+                        switch = True
                     except Exception:
-                        gene_dist_right.append(np.nan)
-                    try:
-                        gene_ID_right.append(min_value2.iloc[0]["ID"])
-                    except Exception:
-                        gene_ID_right.append(np.nan)
-                    try:
-                        gene_annot_right.append(min_value2.iloc[0]["name"])
-                    except Exception:
-                        gene_annot_right.append(np.nan)
-                    try:
-                        gene_comment_right.append(min_value2.iloc[0]["comment"])
-                    except Exception:
-                        gene_comment_right.append(np.nan)
-                # add lists to dataframe
-                pos_col = values["SNP_pos"].to_list()
-                values = values.drop("SNP_pos", axis=1)
-                pval_col = values["p_value"].to_list()
-                values = values.drop("p_value", axis=1)
-                values["p-value"] = pval_col
-                values["gene_ID(up)"] = gene_ID_left
-                values["gene_comment(up)"] = gene_comment_left
-                values["gene_name(up)"] = gene_annot_left
-                values["gene_distance(up)"] = gene_dist_left
-                values["SNP_pos"] = pos_col
-                values["gene_distance(down)"] = gene_dist_right
-                values["gene_name(down)"] = gene_annot_right
-                values["gene_comment(down)"] = gene_comment_right
-                values["gene_ID(down)"] = gene_ID_right
-                # sort and remove empty columns
-                values = values.sort_values(by=["gene_distance(up)","gene_distance(down)"])
-                values.dropna(subset=["gene_distance(up)", "gene_distance(down)"], how="all", inplace=True)
-                values.dropna(axis=1, how="all", inplace=True)
-                try:
-                    values["gene_distance(up)"] = values["gene_distance(up)"].astype("Int32")
-                except Exception:
-                    pass
-                try:
-                    values["gene_distance(down)"] = values["gene_distance(down)"].astype("Int32")
-                except Exception:
-                    pass
-                try:
-                    values["count"] = values["count"].astype("int32")
-                    switch = True
-                except Exception:
-                    switch = False
-                #make multicolumns
-                if len(values.columns) == 13:
-                    if switch == False:
+                        switch = False
+                    #make multicolumns
+                    if len(values.columns) == 13:
+                        if switch == False:
+                            multicols = [
+                                np.array(["", "", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
+                                np.array(["SNP ID", "Chr", "Phenotype", "p-value", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
+                            ]
+                        else:
+                            multicols = [
+                                np.array(["", "", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
+                                np.array(["SNP ID", "Chr", "Count", "Phenotype", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
+                            ]                        
+                        values.columns = multicols
+                    elif len(values.columns) == 14:
                         multicols = [
-                            np.array(["", "", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
-                            np.array(["SNP ID", "Chr", "Phenotype", "p-value", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
+                            np.array(["", "", "", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
+                            np.array(["SNP ID", "Chr", "Count", "Phenotype", "p-value", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
                         ]
+                        values.columns = multicols                     
+                    #save file
+                    if values.empty:
+                        Log.print_log("Info: No SNPs could be compared to genes, please check the species or gene file selection")
                     else:
-                        multicols = [
-                            np.array(["", "", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
-                            np.array(["SNP ID", "Chr", "Count", "Phenotype", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
-                        ]                        
-                    values.columns = multicols
-                elif len(values.columns) == 14:
-                    multicols = [
-                        np.array(["", "", "", "", "", "Upstream gene", "Upstream gene", "Upstream gene", "Upstream gene", "", "Downstream gene", "Downstream gene", "Downstream gene", "Downstream gene"]),
-                        np.array(["SNP ID", "Chr", "Count", "Phenotype", "p-value", "ID", "Comment", "Name", "Distance", "SNP position", "Distance", "Name", "Comment", "ID"])
-                    ]
-                    values.columns = multicols                     
-                #save file
-                if values.empty:
-                    Log.print_log("Info: No SNPs could be compared to genes, please check the species or gene file selection")
-                else:
-                    name = os.path.join(path, f'compared_summarized_{t}{c}_{snp_prefix}.csv')
-                    values.to_csv(name, index=False)
-                    files.append(name)
-                    if s != "temp":
-                        Log.print_log(f'{s} compared to genes and saved as "compared_summarized_{t}{c}_{snp_prefix}.csv" in {path}')
-        return files
+                        name = os.path.join(path2, f'compared_summarized_{t}{c}_{gene_file_name}_{snp_prefix}.csv')
+                        values.to_csv(name, index=False)
+                        files.append(name)
+                        name_list.append(gene_file_name)
+                        if s != "temp":
+                            Log.print_log(f'{s} compared to genes and saved as "compared_summarized_{t}{c}_{snp_prefix}.csv" in {path}')
+        return files, name_list
 
-    def pheno_summary(filenames, str_list, path, phenos):
-
-        T = str_list[0]
-        S = str_list[1]
-        C = str_list[2]
-        df2_ind = False
-        l1 = []
-        l2 = []
-        name = ""
-        for filename, t, s, c in zip(filenames, T, S, C):
-            if t == "sig_SNPs" and c == "_complete":
-                df1 = pd.read_csv(filename)
-                name = filename
-                l1 = list(df1.phenotypes)
-                for file in os.listdir(path):
-                    if file.startswith(f'compared_summarized_{t}{c}'):
-                        df2 = pd.read_csv(os.path.join(path, file), header=[0,1])
-                        df2.columns = df2.columns.droplevel(0)
-                        l2 = list(df2.Phenotype)
-                        df2_ind = True
+    def pheno_summary(filenames, filenames2, str_list, path, phenos, name_list):
+        
+        filenames2 = list(set(filenames2))
+        name_list = list(set(name_list))
+        name_list2 = []
         results1 = []
         results2 = []
         results3 = []
-        for p in phenos:
-            x1 = 0
-            x2 = 0
-            results1.append(p)
-            for l in l1:
-                if p in l:
-                    x1 += 1
-            results2.append(x1)
-            for l in l2:
-                if p in l:
-                    x2 += 1
-            results3.append(x2)
+        name = ""
+        filenames2 = [f for f in filenames2 if "sig_SNPs" in f]
+        filenames2 = [f for f in filenames2 if "_complete" in f]
+        if filenames2 == []:
+            filenames2.append("")
+        for filename2 in filenames2:
+            temp = [n for n in name_list if n in filename2]
+            name_list2.append(temp)
+            T = str_list[0]
+            S = str_list[1]
+            C = str_list[2]
+            df2_ind = False
+            l1 = []
+            l2 = []
+            for filename, t, s, c in zip(filenames, T, S, C):
+                if "temp_summary" in filename:
+                    try:
+                        os.remove(filename)
+                    except:
+                        pass
+                if t == "sig_SNPs" and c == "_complete":
+                    df1 = pd.read_csv(filename)
+                    name = filename
+                    l1 = list(df1.phenotypes)
+                    if filename2 != "":
+                        df2 = pd.read_csv(filename2, header=[0,1])
+                        df2.columns = df2.columns.droplevel(0)
+                        l2 = list(df2.Phenotype)
+                        df2_ind = True
+            results1 = []
+            results2 = []
+            results3_temp = []
+            for p in phenos:
+                x1 = 0
+                x2 = 0
+                results1.append(p)
+                for l in l1:
+                    if p in l:
+                        x1 += 1
+                results2.append(x1)
+                for l in l2:
+                    if p in l:
+                        x2 += 1
+                results3_temp.append(x2)
+            results3.append(results3_temp)
 
         if name != "":
             name_new = f'Summary_{os.path.split(name)[1]}'
             df_new = pd.DataFrame([results1, results2]).T
             df_new.columns = ["Phenotype", "Significant SNPs"]
             if df2_ind == True:
-                df_new["Gene hits"] = results3
-                name_new = f'Summary_compared+{os.path.split(filename)[1]}'
+                name_list2 = [item for sublist in name_list2 for item in sublist]
+                #if len(filenames2) > 1:
+                for lst, n_lst in zip(results3, name_list2):
+                    df_new[f'Gene hits ({n_lst})'] = lst
+                    name_new = f'Summary_compared+{os.path.split(filename)[1]}'
+                #else:
+                #    df_new[f'Gene hits ({name_list2[0]})'] = results3
+                #    name_new = f'Summary_compared+{os.path.split(filename)[1]}'                    
             df_new.to_csv(os.path.join(path, name_new) , index=False)
 
     def ind_summary(path, filenames, str_list):

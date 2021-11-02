@@ -38,7 +38,7 @@ def getArgs(argv=None):
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Command-line interface for vcf2gwas.\n \nExample usage: vcf2gwas -v <VCF file> -pf <phenotype file> -ap -lmm', epilog="For a detailed description of all options, please refer to the manual.")
 
     parser.add_argument(
-        '--version', action='version', version='%(prog)s 0.8.0'
+        '--version', action='version', version='%(prog)s 0.8.1'
     )
     parser.add_argument(
         "-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename"
@@ -60,7 +60,7 @@ def getArgs(argv=None):
         help="specify covariates used for analysis: \n type covariate name \nOR \n '1' selects first covariate from covariate file (second column),\n '2' the second covariate (third column) and so on"
     )
     parser.add_argument(
-        "-gf", "--genefile", metavar="<filename>", type=str, 
+        "-gf", "--genefile", metavar="<filename>", action="append", type=str, 
         help= "specify gene file name OR one of the abbreviations for common species \nresulting SNPs from analysis will be compared to these genes \n GFF3 formatted .gff file \nOR \n comma separated .csv file \n file must contain at least three columns: \n  -'chr' column containing chromosome value (same format as in VCF file \n  -'start' column containing start position of gene \n  -'stop' column containing stop position of gene \nfor further formatting information, please refer to the manual"
     )
     parser.add_argument(
