@@ -2414,7 +2414,10 @@ class Summary:
             list4.append(df["p_value"].astype(str).tolist())
             p_list = df["phenotype"].astype(str).tolist()
             p_list_set = list(set(p_list))
-            file_dict[f] = p_list_set[0]
+            try:
+                file_dict[f] = p_list_set[0]
+            except:
+                pass
             list5.append(p_list)
 
         l_full = []
