@@ -630,7 +630,7 @@ if model not in ("-gk", "-eigen", None):
     name_list = []
     if gene_file != None:
         filenames2, name_list = Summary.gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path2, snp_prefix, chr_list, Log)
-        Summary.pheno_compare_split(filenames2, file_dict)
+        Summary.pheno_compare_split(filenames2, file_dict, name_list)
 
 #move QC files
 if noqc == False:
