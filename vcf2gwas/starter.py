@@ -628,9 +628,12 @@ if model not in ("-gk", "-eigen", None):
     str_list = temp[1]
     filenames2 = []
     name_list = []
+    name_list2 = []
     if gene_file != None:
-        filenames2, name_list = Summary.gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path2, snp_prefix, chr_list, Log)
-        Summary.pheno_compare_split(filenames2, file_dict, name_list)
+        filenames2, temp = Summary.gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path2, snp_prefix, chr_list, Log)
+        name_list = temp[0]
+        name_list2 = temp[1]
+        Summary.pheno_compare_split(filenames2, file_dict, name_list, name_list2)
 
 #move QC files
 if noqc == False:
@@ -647,9 +650,6 @@ if switch == False:
     if len(pheno_list) > 1:
         for file in pheno_list:
             os.remove(os.path.join(pheno_files_path[0], file))
-        #if umap_switch == False and pca_switch == False:
-        #path5 = os.path.join(path, "files")
-        #pheno_temp = [f'{x.removesuffix(".csv")}_{snp_prefix}' for x in pheno_list]
         for folder in os.listdir(path5):
             if pheno_temp[0] == folder:
                 folder2 = folder.replace(".part1", "")
@@ -729,7 +729,7 @@ if X != None:
     if umap_switch == False and pca_switch == False:
         X, X_names = pheno_switcher2(pheno_files_temp, X_org, X)
         try:
-            Summary.pheno_summary(filenames, filenames2, str_list, path2, X_names, name_list)
+            Summary.pheno_summary(filenames, filenames2, str_list, path2, X_names, name_list, snp_prefix)
         except:
             pass
         X_names = listtostring(X_names, ", ")

@@ -436,10 +436,13 @@ class Logger:
                 d = f'\n- Covariates: principal components ({Y})'
                 e = "" 
         if gene_file != None:
-            if species == None:
-                q = f'\n- Gene comparison file: "{gene_file}"'
-            else:
-                q = f'\n- Gene comparison with: {species}'
+            q = []
+            for gf, s in zip(gene_file, species):
+                if s == "":
+                    q.append(f'\n- Gene comparison file: "{gf}"')
+                else:
+                    q.append(f'\n- Gene comparison with: {s}')
+            q = listtostring(q)
             if gene_thresh != 100000:
                 r = f'\n- Gene comparison threshold: {gene_thresh}'
         if model != None:
@@ -2164,6 +2167,7 @@ class Summary:
         
         Log.print_log("\nComparing SNPs to genes..")
         name_list = []
+        name_list2 = []
         files = []
         T = str_list[0]
         S = str_list[1]
@@ -2342,9 +2346,11 @@ class Summary:
                         name_list.append(gene_file_name)
                         if s != "temp":
                             Log.print_log(f'{s} compared to genes and saved as "compared_summarized_{t}{c}_{gene_file_name}_{snp_prefix}.csv" in {path}')
-        return files, name_list
+                        else:
+                            name_list2.append(name)
+        return files, (name_list, name_list2)
 
-    def pheno_summary(filenames, filenames2, str_list, path, phenos, name_list):
+    def pheno_summary(filenames, filenames2, str_list, path, phenos, name_list, snp_prefix):
         
         filenames2 = list(set(filenames2))
         name_list = list(set(name_list))
@@ -2358,8 +2364,9 @@ class Summary:
         if filenames2 == []:
             filenames2.append("")
         for filename2 in filenames2:
-            temp = [n for n in name_list if n in filename2]
+            temp = [n for n in name_list if f'complete_{n}_{snp_prefix}' in filename2]
             name_list2.append(temp)
+            print(name_list2)
             T = str_list[0]
             S = str_list[1]
             C = str_list[2]
@@ -2453,22 +2460,24 @@ class Summary:
 
         return (filenames, str_list), file_dict
 
-    def pheno_compare_split(filenames, file_dict, name_list):
+    def pheno_compare_split(filenames, file_dict, name_list, name_list2):
 
-        name_list = list(set(name_list))
-        for name in name_list:
+        name_list = list(dict.fromkeys(name_list).keys())
+        name_list2 = list(dict.fromkeys(name_list2).keys())
+        print(name_list)
+        print(name_list2)
+        for name, name2 in zip(name_list, name_list2):
             for file in filenames:
-                if os.path.split(file)[1].startswith("compared_summarized_temp"):
-                    if name in file:
-                        df = pd.read_csv(file, header=[0,1])
-                        os.remove(file)
-                        for key in file_dict:
-                            df_new = df.copy()
-                            df_new.drop(df_new[df_new.loc[:, pd.IndexSlice[:, "Phenotype"]].values != file_dict[key]].index, inplace=True)
-                            for n in df_new.columns.get_level_values(0):
-                                if n.startswith("Unnamed"):
-                                    df_new.rename(columns={n : ""}, inplace=True)
-                            file_name_path = os.path.split(key)[0]
-                            file_name = os.path.split(key)[1]
-                            file_name = f'compared_{name}_{file_name}'
-                            df_new.to_csv(os.path.join(file_name_path, file_name), index=False)
+                if file == name2:
+                    df = pd.read_csv(file, header=[0,1])
+                    os.remove(file)
+                    for key in file_dict:
+                        df_new = df.copy()
+                        df_new.drop(df_new[df_new.loc[:, pd.IndexSlice[:, "Phenotype"]].values != file_dict[key]].index, inplace=True)
+                        for n in df_new.columns.get_level_values(0):
+                            if n.startswith("Unnamed"):
+                                df_new.rename(columns={n : ""}, inplace=True)
+                        file_name_path = os.path.split(key)[0]
+                        file_name = os.path.split(key)[1]
+                        file_name = f'compared_{name}_{file_name}'
+                        df_new.to_csv(os.path.join(file_name_path, file_name), index=False)
