@@ -2366,7 +2366,6 @@ class Summary:
         for filename2 in filenames2:
             temp = [n for n in name_list if f'complete_{n}_{snp_prefix}' in filename2]
             name_list2.append(temp)
-            print(name_list2)
             T = str_list[0]
             S = str_list[1]
             C = str_list[2]
@@ -2464,8 +2463,6 @@ class Summary:
 
         name_list = list(dict.fromkeys(name_list).keys())
         name_list2 = list(dict.fromkeys(name_list2).keys())
-        print(name_list)
-        print(name_list2)
         for name, name2 in zip(name_list, name_list2):
             for file in filenames:
                 if file == name2:
