@@ -38,7 +38,7 @@ def getArgs(argv=None):
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Command-line interface for vcf2gwas.\n \nExample usage: vcf2gwas -v <VCF file> -pf <phenotype file> -ap -lmm', epilog="For a detailed description of all options, please refer to the manual.")
 
     parser.add_argument(
-        '--version', action='version', version='%(prog)s 0.8.1'
+        '--version', action='version', version='%(prog)s 0.8.2'
     )
     parser.add_argument(
         "-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename"
@@ -98,6 +98,10 @@ def getArgs(argv=None):
     parser.add_argument(
         "-U", "--UMAP", metavar="<int>", type=int, nargs="?", const=2, 
         help="perform UMAP on phenotypes and use resulting embeddings as phenotypes for GEMMA analysis \noptional: set amount of embeddings to be calculated (default: %(const)s) \nrecommended amount of embeddings: 1 - 5"
+    )
+    parser.add_argument(
+        "-um", "--umapmetric", metavar="<str>", type=str, default="euclidean", choices=["euclidean", "manhattan", "braycurtis", "cosine", "hamming", "jaccard", "hellinger"], 
+        help="choose the metric for UMAP to use compute the distances in high dimensional space \nDefault: %(default)s \nAvailable metrics: %(choices)s"
     )
     parser.add_argument(
         "-KC", "--kcpca", metavar="<float>", nargs='?', const=0.5, type=float, 
@@ -202,6 +206,9 @@ class Parser:
 
     def set_U(self):
         return self.args.UMAP
+
+    def set_umapmetric(self):
+        return self.args.umapmetric
 
     def set_sigval(self):
         return self.args.sigval

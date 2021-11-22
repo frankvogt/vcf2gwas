@@ -285,6 +285,7 @@ if umap_n != None:
     umap_switch = True
 else:
     umap_switch = False
+umapmetric = P.set_umapmetric()
 
 pca_n = P.set_P()
 if pca_n != None:
@@ -382,7 +383,7 @@ if pheno_files != None:
                 pheno_file3 = pheno_file3.removesuffix(".csv")
                 pheno_file3 = f'{pheno_file3}_umap.csv'
                 pheno_files2.append(pheno_file3)
-                Starter.umap_calc(df, pheno_file3, umap_n, seed, pheno_path, Log)
+                Starter.umap_calc(df, pheno_file3, umap_n, seed, pheno_path, umapmetric, Log)
                 Log.print_log(f'Saved as "{pheno_file3}" temporarily in {pheno_path}\nUMAP calculated successful\n')
         
         if pca_switch == True:
@@ -633,6 +634,7 @@ if model not in ("-gk", "-eigen", None):
         filenames2, temp = Summary.gene_compare(filenames, str_list, gene_file, gene_file_path, gene_thresh, path2, snp_prefix, chr_list, Log)
         name_list = temp[0]
         name_list2 = temp[1]
+        Summary.gene_occurrence(filenames2)
         Summary.pheno_compare_split(filenames2, file_dict, name_list, name_list2)
 
 #move QC files
@@ -735,6 +737,9 @@ if X != None:
         X_names = listtostring(X_names, ", ")
         X1 = X
     X = listtostring(X1, ', ')
+    for f in os.listdir(path2):
+        if "temp_summary" in f:
+            os.remove(os.path.join(path2, f))
 if Y != None:
     Y, Y_names = pheno_switcher2(covar_temp, Y_org, Y)
     Y_names = listtostring(Y_names, ", ")
@@ -751,7 +756,7 @@ ind_count = Starter.get_count("vcf2gwas_ind_count.txt")
 gemma_count = Starter.get_count("vcf2gwas_ind_gemma.txt")
 Log.summary(
     snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, 
-    pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
+    pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, umapmetric, pca_n, 
     out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
     input_str, noplot, ind_count, gemma_count
 )

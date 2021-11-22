@@ -37,6 +37,7 @@ import argparse
 import multiprocessing as mp
 import random
 import time
+from collections import Counter
 
 from psutil import virtual_memory
 try:
@@ -374,14 +375,14 @@ class Logger:
     
     def summary(
         self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, 
-        pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, pca_n, 
+        pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, umapmetric, pca_n, 
         out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
         input_str, noplot, ind_count, gemma_count
     ):
         """Description:
         prints summary of input variables and methods"""
 
-        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = al = am = an = ao =""
+        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = al = am = an = ao = ap = ""
 
         model_dict = {
             "lm" : "linear model",
@@ -498,13 +499,15 @@ class Logger:
             t = '\n  --UMAP'
             if umap_n != 2:
                 t = f'\n  --UMAP {umap_n}'
+            if umapmetric != "euclidean":
+                ap = f'\n  --umapmetric {umapmetric}'
         if pca_n != None:
             u = '\n  --PCA'
             if pca_n != 2:
                 u = f'\n  --PCA {pca_n}'
 
         self.logger.info(
-            f'\nSummary:\n\nOutput directory:{v}\n\nIndividuals analyzed:\nCleared for analysis: {an}\nAnalyzed by GEMMA: {ao}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nCommand:{al}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{am}{o}{p}'
+            f'\nSummary:\n\nOutput directory:{v}\n\nIndividuals analyzed:\nCleared for analysis: {an}\nAnalyzed by GEMMA: {ao}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nCommand:{al}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{ap}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{am}{o}{p}'
         )
 
 
@@ -616,7 +619,7 @@ class Starter:
         for i, point in a.iterrows():
             texts.append(plt.text(point['x'], point['y']+np.random.random()/100, str(point['val']), fontsize="medium", fontweight="bold"))
 
-    def umap_calc(df, pheno_file, n, seed, pheno_path, Log):
+    def umap_calc(df, pheno_file, n, seed, pheno_path, metric, Log):
         """Description:
         performs dimension reduction via UMAP"""
 
@@ -636,7 +639,7 @@ class Starter:
             emb_list.append(f'Emb{i+1}')
         
         #run umap 
-        reducer = umap.UMAP(random_state=rand, min_dist=0.1, n_components=n, n_neighbors=5, metric="manhattan")
+        reducer = umap.UMAP(random_state=rand, min_dist=0.1, n_components=n, n_neighbors=5, metric=metric)
         embedding = reducer.fit_transform(x)
         embeddingDf = pd.DataFrame(data = embedding, columns=emb_list )
         embeddingDf['host']=y
@@ -2478,3 +2481,32 @@ class Summary:
                         file_name = os.path.split(key)[1]
                         file_name = f'compared_{name}_{file_name}'
                         df_new.to_csv(os.path.join(file_name_path, file_name), index=False)
+
+    def gene_occurrence(filenames):
+
+        for name in filenames:
+
+            df = pd.read_csv(name, header = 1)
+            l1 = l2 = []
+            try:
+                l1 = df["ID"].dropna().to_list()
+            except:
+                pass
+            try:
+                l2 = df["ID.1"].dropna().to_list()
+            except:
+                pass
+            l3 = l1 + l2
+            l = list(set(l3))
+
+            x = Counter(l)
+            x2 = dict(sorted(x.items(), key=lambda item: item[1], reverse=True))
+
+            c1 = list(x2.keys())
+            c2 = list(x2.values())
+
+            df2 = pd.DataFrame([c1, c2]).T
+            df2.columns = ["ID", "occurrence"]
+            path = os.path.split(name)[0]
+            name_new = os.path.split(name)[1]
+            df2.to_csv(os.path.join(path, f'Overview_{name_new}'), index=False)
