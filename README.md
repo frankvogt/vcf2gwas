@@ -284,6 +284,11 @@ perform UMAP on phenotypes and use resulting embeddings as phenotypes for GEMMA 
 optional: set amount of embeddings to be calculated (default: 2)  
 recommended amount of embeddings: 1 - 5
 
+* `-um` / `--umapmetric` <str>  
+choose the metric for UMAP to use to compute the distances in high dimensional space  
+Default: euclidean  
+Available metrics: euclidean, manhattan, braycurtis, cosine, hamming, jaccard, hellinger
+
 * `-KC` / `--kcpca` <float> 
 Kinship calculation via principal component analysis instead of GEMMA's internal method  
 optional: r-squared threshold for LD pruning (default: 0.5)
