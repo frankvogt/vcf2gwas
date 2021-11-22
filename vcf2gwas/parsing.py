@@ -101,7 +101,7 @@ def getArgs(argv=None):
     )
     parser.add_argument(
         "-um", "--umapmetric", metavar="<str>", type=str, default="euclidean", choices=["euclidean", "manhattan", "braycurtis", "cosine", "hamming", "jaccard", "hellinger"], 
-        help="choose the metric for UMAP to use compute the distances in high dimensional space \nDefault: %(default)s \nAvailable metrics: %(choices)s"
+        help="choose the metric for UMAP to use to compute the distances in high dimensional space \nDefault: %(default)s \nAvailable metrics: %(choices)s"
     )
     parser.add_argument(
         "-KC", "--kcpca", metavar="<float>", nargs='?', const=0.5, type=float, 
