@@ -730,10 +730,10 @@ if X != None:
         X1.append(f'{pca_n} principal components')
     if umap_switch == False and pca_switch == False:
         X, X_names = pheno_switcher2(pheno_files_temp, X_org, X)
-        try:
-            Summary.pheno_summary(filenames, filenames2, str_list, path2, X_names, name_list, snp_prefix)
-        except:
-            pass
+        #try:
+        Summary.pheno_summary(filenames, filenames2, str_list, path2, X_names, name_list, snp_prefix)
+        #except Exception as e:
+        #    print(e)
         X_names = listtostring(X_names, ", ")
         X1 = X
     X = listtostring(X1, ', ')

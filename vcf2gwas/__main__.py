@@ -31,7 +31,7 @@ argvals = None
 
 def main(argvals=argvals):
     
-    print("\nvcf2gwas v0.8.2 \n")
+    print("\nvcf2gwas v0.8.3 \n")
     print("Initialising..\n")
     P = Parser(argvals)
     args = sys.argv[1:]

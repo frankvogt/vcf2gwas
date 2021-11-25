@@ -1924,9 +1924,11 @@ class Summary:
         for s, t in zip(["top_SNPs", "sig_SNPs", "merge_SNPs"], ["Top SNPs", "Significant SNPs", "Merged (top + significant) SNPs"]):
             dfnames = []
             x = 1
+            n = 0
             for prefix in prefix_list:
                 for file in os.listdir(path):
-                    if file == f'{s}{prefix}_{snp_prefix}.csv':  
+                    if file == f'{s}{prefix}_{snp_prefix}.csv':
+                        n += 1
                         filename = os.path.join(path, file)
                         try:
                             globals()[f'df{x}'] = pd.read_csv(filename, header=[0,1], index_col=0, sep=',')
@@ -2066,7 +2068,7 @@ class Summary:
                         names.append(name)
                     value["phenotypes"] = names
                     #save as file
-                    if len(dfnames) == 1:
+                    if n == 1:
                         filename = f'summarized_{s}{addstring[c]}{pc_prefix}_{snp_prefix}.csv'
                         value.to_csv(os.path.join(path2, filename) , index=False, sep=',')
                         Log.print_log(f'{t} summarized and saved as "{filename}" in {path2}')
@@ -2376,11 +2378,6 @@ class Summary:
             l1 = []
             l2 = []
             for filename, t, s, c in zip(filenames, T, S, C):
-                if "temp_summary" in filename:
-                    try:
-                        os.remove(filename)
-                    except:
-                        pass
                 if t == "sig_SNPs" and c == "_complete":
                     df1 = pd.read_csv(filename)
                     name = filename
@@ -2406,7 +2403,6 @@ class Summary:
                         x2 += 1
                 results3_temp.append(x2)
             results3.append(results3_temp)
-
         if name != "":
             name_new = f'Summary_{os.path.split(name)[1]}'
             df_new = pd.DataFrame([results1, results2]).T
@@ -2415,7 +2411,7 @@ class Summary:
                 name_list2 = [item for sublist in name_list2 for item in sublist]
                 for lst, n_lst in zip(results3, name_list2):
                     df_new[f'Gene hits ({n_lst})'] = lst
-                    name_new = f'Summary_compared+{os.path.split(filename)[1]}'                
+                    name_new = f'Summary_compared+{os.path.split(name)[1]}'       
             df_new.to_csv(os.path.join(path, name_new) , index=False)
 
     def ind_summary(path, filenames, str_list):
