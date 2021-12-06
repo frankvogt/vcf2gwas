@@ -138,6 +138,8 @@ vcf2gwas -v [filename] -pf [filename] -p [num1] -cf PCA -c 2 -lmm
 
 Now, 2 principal components will be extracted from the `VCF` file and used for the linear mixed model analysis.  
 
+To use principal components or UMAP embeddings of the phenotypic data as covariates for the analysis, see [Using dimensionality reduction of phenotypes for analysis](#using-dimensionality-reduction-of-phenotypes-for-analysis).  
+
 Alternatively, a covariate file formatted in the same way as the phenotype file can be added manually.
 Selecting covariates from a covariate file follows the same scheme as selecting phenotypes by using `-cf/--cfile` and `-c/--covar`:
 
@@ -279,7 +281,35 @@ By default, *vcf2gwas* will reduce the phenotype dimensionality to 2 embeddings.
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -U 3
 ```
 
-Now, *vcf2gwas* will reduce the phenotype dimensionality to 3 instead of 2.
+Now, *vcf2gwas* will reduce the phenotype dimensionality to 3 instead of 2.  
+
+By default, *vcf2gwas* uses euclidean metric for UMAP calculations. The metric can be changed with the `-um/--umapmetric` option:
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -U 3 -um manhattan
+```
+
+The manhattan metric is now used to calculate the UMAP embeddings.  
+The following is a list of the available metrics:  
+* euclidean
+* manhattan
+* braycurtis
+* cosine
+* hamming
+* jaccard
+* hellinger
+
+#### Using PCs or UMAP embeddings as covariates
+
+Another useful option is `-asc/--ascovariates`. It allows the user to utilize a variable amount principal components or UMAP embeddings of their phenotypic data as covariates in the analysis of said phenotypes:
+
+```
+vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -U 3 -asc
+```
+
+Here, the phenotypic dimensionality will be reduced to 3 UMAP embeddings which will be subsequently used as covariates for the analysis.  
+**Note**: This option takes only effect in conjuction with either the `-U/--UMAP` or `-P/--PCA` option, but not both simultaneously. 
+Furthermore, only one phenotype file can be added to the analysis to take advantage of this option.
 
 ### Using PCA of genotypes instead of standard relatedness matrix
 

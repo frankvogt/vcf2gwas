@@ -289,6 +289,10 @@ choose the metric for UMAP to use to compute the distances in high dimensional s
 Default: euclidean  
 Available metrics: euclidean, manhattan, braycurtis, cosine, hamming, jaccard, hellinger
 
+* `-asc` / `--ascovariate`
+Use dimensionality reduction of phenotype file via UMAP or PCA as covariates  
+Only works in conjunction with `-U` / `--UMAP` or `-P` / `--PCA`
+
 * `-KC` / `--kcpca` <float> 
 Kinship calculation via principal component analysis instead of GEMMA's internal method  
 optional: r-squared threshold for LD pruning (default: 0.5)
