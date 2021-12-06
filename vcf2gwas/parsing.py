@@ -24,6 +24,8 @@ import os
 import subprocess
 import multiprocessing as mp
 
+from pandas.io import parsers
+
 try:
     from psutil import virtual_memory
 except ModuleNotFoundError:
@@ -36,9 +38,10 @@ def getArgs(argv=None):
     Sets up Argument Parser and returns input arguments"""
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Command-line interface for vcf2gwas.\n \nExample usage: vcf2gwas -v <VCF file> -pf <phenotype file> -ap -lmm', epilog="For a detailed description of all options, please refer to the manual.")
-
+    
+    # Options with variable input
     parser.add_argument(
-        '--version', action='version', version='%(prog)s 0.8.3'
+        '--version', action='version', version='%(prog)s 0.8.4'
     )
     parser.add_argument(
         "-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename"
@@ -131,22 +134,67 @@ def getArgs(argv=None):
         "-o", "--output", metavar="<path>", type=str, default=os.getcwd(), 
         help="change the output directory \ndefault: %(default)s\ndirectory will be created if non-existent"
     )
-
+    
+    # GEMMA models
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-lm", type=int, choices=[1,2,3,4], nargs="?", const=1, help="Association Tests with a Linear Model \noptional: specify which frequentist test to use (default: %(const)s) \n 1: performs Wald test \n 2: performs likelihood ratio test \n 3: performs score test \n 4: performs all three tests")
-    group.add_argument("-gk", type=int, choices=[1,2], nargs="?", const=1, help="Estimate Relatedness Matrix from genotypes \noptional: specify which relatedness matrix to estimate (default: %(const)s) \n 1: calculates the centered relatedness matrix \n 2: calculates the standardized relatedness matrix")
-    group.add_argument("-eigen", action="store_true", help="Perform Eigen-Decomposition of the Relatedness Matrix ")
-    group.add_argument("-lmm", type=int, choices=[1,2,3,4], nargs="?", const=1, help="Association Tests with Univariate Linear Mixed Models \noptional: specify which frequentist test to use (default: %(const)s) \n 1: performs Wald test \n 2: performs likelihood ratio test \n 3: performs score test \n 4: performs all three tests \nTo perform Association Tests with Multivariate Linear Mixed Models, set '-multi' option")
-    group.add_argument("-bslmm", type=int, choices=[1,2,3], nargs="?", const=1, help="Fit a Bayesian Sparse Linear Mixed Model \noptional: specify which model to fit (default: %(const)s) \n 1: fits a standard linear BSLMM \n 2: fits a ridge regression/GBLUP \n 3: fits a probit BSLMM")
-
-    parser.add_argument("-ap", "--allphenotypes", action="store_true", help="all phenotypes will be used \nany phenotype selection with '-p' option will be overwritten")
-    parser.add_argument("-ac", "--allcovariates", action="store_true", help="all covariates will be used \nany covariate selection with '-c' option will be overwritten")
-    parser.add_argument("-m", "--multi", action="store_true", help="performs multivariate linear mixed model analysis with specified phenotypes \nonly active in combination with '-lmm' option")
-    parser.add_argument("-nl", "--nolabel", action="store_true", help="remove the SNP labels in the manhattan plot \nreduces runtime if analysis results in many significant SNPs")
-    parser.add_argument("-nq", "--noqc", action="store_true", help="deactivate Quality Control plots \nreduces runtime")
-    parser.add_argument("-np", "--noplot", action="store_true", help="deactivate Manhattan and QQ-plots \nreduces runtime")
-    parser.add_argument("-sd", "--seed", action="store_true", help="perform UMAP with random seed \nreduces reproducibility")
-    parser.add_argument("-r", "--retain", action="store_true", help="keep all temporary intermediate files \ne.g. subsetted and filtered VCF and .csv files")
+    group.add_argument(
+        "-lm", type=int, choices=[1,2,3,4], nargs="?", const=1, 
+        help="Association Tests with a Linear Model \noptional: specify which frequentist test to use (default: %(const)s) \n 1: performs Wald test \n 2: performs likelihood ratio test \n 3: performs score test \n 4: performs all three tests"
+    )
+    group.add_argument(
+        "-gk", type=int, choices=[1,2], nargs="?", const=1, 
+        help="Estimate Relatedness Matrix from genotypes \noptional: specify which relatedness matrix to estimate (default: %(const)s) \n 1: calculates the centered relatedness matrix \n 2: calculates the standardized relatedness matrix"
+    )
+    group.add_argument(
+        "-eigen", action="store_true", 
+        help="Perform Eigen-Decomposition of the Relatedness Matrix "
+    )
+    group.add_argument(
+        "-lmm", type=int, choices=[1,2,3,4], nargs="?", const=1, 
+        help="Association Tests with Univariate Linear Mixed Models \noptional: specify which frequentist test to use (default: %(const)s) \n 1: performs Wald test \n 2: performs likelihood ratio test \n 3: performs score test \n 4: performs all three tests \nTo perform Association Tests with Multivariate Linear Mixed Models, set '-multi' option"
+    )
+    group.add_argument(
+        "-bslmm", type=int, choices=[1,2,3], nargs="?", const=1, 
+        help="Fit a Bayesian Sparse Linear Mixed Model \noptional: specify which model to fit (default: %(const)s) \n 1: fits a standard linear BSLMM \n 2: fits a ridge regression/GBLUP \n 3: fits a probit BSLMM"
+    )
+    
+    # True / False options
+    parser.add_argument(
+        "-ap", "--allphenotypes", action="store_true", 
+        help="all phenotypes will be used \nany phenotype selection with '-p' option will be overwritten"
+    )
+    parser.add_argument(
+        "-ac", "--allcovariates", action="store_true", 
+        help="all covariates will be used \nany covariate selection with '-c' option will be overwritten"
+    )
+    parser.add_argument(
+        "-asc", "--ascovariate", action="store_true",
+        help="Use dimensionality reduction of phenotype file via UMAP or PCA as covariates \nOnly works in conjunction with -U/--UMAP or -P/--PCA"
+    )
+    parser.add_argument(
+        "-m", "--multi", action="store_true", 
+        help="performs multivariate linear mixed model analysis with specified phenotypes \nonly active in combination with '-lmm' option"
+    )
+    parser.add_argument(
+        "-nl", "--nolabel", action="store_true", 
+        help="remove the SNP labels in the manhattan plot \nreduces runtime if analysis results in many significant SNPs"
+    )
+    parser.add_argument(
+        "-nq", "--noqc", action="store_true", 
+        help="deactivate Quality Control plots \nreduces runtime"
+    )
+    parser.add_argument(
+        "-np", "--noplot", action="store_true", 
+        help="deactivate Manhattan and QQ-plots \nreduces runtime"
+    )
+    parser.add_argument(
+        "-sd", "--seed", action="store_true", 
+        help="perform UMAP with random seed \nreduces reproducibility"
+    )
+    parser.add_argument(
+        "-r", "--retain", action="store_true", 
+        help="keep all temporary intermediate files \ne.g. subsetted and filtered VCF and .csv files"
+    )
     
     return parser.parse_args(argv)
 
@@ -206,6 +254,9 @@ class Parser:
 
     def set_U(self):
         return self.args.UMAP
+
+    def set_ascovariate(self):
+        return self.args.ascovariate
 
     def set_umapmetric(self):
         return self.args.umapmetric

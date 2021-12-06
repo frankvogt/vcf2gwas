@@ -106,11 +106,33 @@ else:
     switch = False
 
 covar = P.set_covar()
+ascovariate = P.set_ascovariate()
+umap_n = P.set_U()
+pca_n = P.set_P()
 geno_pca_switch = False
-if covar != None:
+umap_switch2 = False
+pca_switch2 = False
+if umap_n == None and pca_n == None:
+    ascovariate = False
+if covar != None and ascovariate == True:
+    sys.exit("Error: Only one covariate file allowed, cannot use both -cf/--cfile and -asc/--ascovariate")
+elif covar != None:
     if covar.lower() == "pca":
         covar = os.path.join(dir_temp, "vcf2gwas_geno_pca.csv")
         geno_pca_switch = True
+elif ascovariate == True:
+    if switch == True:
+        sys.exit("Error: Only one phenotype file is allowed when employing -asc/--ascovariate")
+    elif umap_n != None and pca_n != None:
+        sys.exit("Error: Only one covariate file allowed, cannot use both -U/--UMAP and -P/--PCA in conjunction with -asc/--ascovariate")
+    elif umap_n != None:
+        umap_switch2 = True
+        pheno_files_ = pheno_files[0].removesuffix(".csv")
+        covar = os.path.join(pheno_files_path[0], f'{pheno_files_}_umap.csv')
+    elif pca_n != None:
+        pca_switch2 = True
+        pheno_files_ = pheno_files[0].removesuffix(".csv")
+        covar = os.path.join(pheno_files_path[0], f'{pheno_files_}_pca.csv')
 covar_temp = [covar]
 if covar != None:
     covar_file = covar
@@ -167,7 +189,11 @@ if pheno_files != None:
     Log.print_log(f'Phenotype file(s): {listtostring(pheno_files, ", ")}')
 if covar != None:
     if geno_pca_switch == True:
-        Log.print_log(f'Covariates: principal components')
+        Log.print_log(f'Covariates: principal components of genotype file')
+    elif umap_switch2 == True:
+        Log.print_log(f'Covariates: UMAP embeddings of phenotype file')
+    elif pca_switch2 == True:
+        Log.print_log(f'Covariates: principal components of phenotype file')
     else:
         Log.print_log(f'Covariate file: {covar}')
 if gene_file != None:
@@ -188,7 +214,7 @@ if pheno_files != None:
         x += 1
 if covar != None:
     covar2 = covar_file
-    if geno_pca_switch == False:
+    if geno_pca_switch == False and umap_switch2 == False and pca_switch2 == False:
         check_files3(covar, covar2)
 
 # get phenotype / covariate selection input
@@ -212,6 +238,8 @@ if covar_temp != None and Y != None:
     Y = pheno_switcher(covar_temp, Y)
 A = P.set_A()
 B = P.set_B()
+if umap_switch2 == True or pca_switch2 == True:
+    B = True
 if geno_pca_switch == True:
     B = True
 if A == True and X != None:
@@ -279,20 +307,18 @@ if cpu < threads:
 if threads == 0:
     sys.exit(Log.print_log("Error: No logical cores available!"))
 
-umap_n = P.set_U()
-if umap_n != None:
-    Starter.check_vals("UMAP", umap_n, 1, 5, Log)
-    umap_switch = True
-else:
-    umap_switch = False
+umap_switch = False
+if ascovariate == False:
+    if umap_n != None:
+        Starter.check_vals("UMAP", umap_n, 1, 5, Log)
+        umap_switch = True
 umapmetric = P.set_umapmetric()
 
-pca_n = P.set_P()
-if pca_n != None:
-    Starter.check_vals("PCA", pca_n, 2, 10, Log)
-    pca_switch = True
-else:
-    pca_switch = False
+pca_switch = False
+if ascovariate == False:
+    if pca_n != None:
+        Starter.check_vals("PCA", pca_n, 2, 10, Log)
+        pca_switch = True
 
 # check model / phenotype / genotype selection
 if model == None:
@@ -309,7 +335,7 @@ if model not in ["-gk", "-eigen"]:
                 sys.exit(Log.print_log("Error: No phenotypes specified for GEMMA analysis"))
     elif covar2 != None:
         if B == False:
-            if geno_pca_switch == False:
+            if geno_pca_switch == False and umap_switch2 == False and pca_switch2 == False:
                 if Y == None:
                     sys.exit(Log.print_log("Error: No covariates specified for GEMMA analysis"))
 
@@ -368,13 +394,13 @@ if pheno_files != None:
             sys.exit(Log.print_log("Error: The selected phenotype data does not exist in the phenotype file"))
         if covar2 != None:
             if Y != None:
-                if geno_pca_switch == False:
+                if geno_pca_switch == False and umap_switch2 == False and pca_switch2 == False:
                     df_covar = Processing.load_pheno(covar2)
                     l_covar = len(df_covar.columns)
                     if set(Y).issubset([i+1 for i in list(range(l_covar))]) == False:
                         sys.exit(Log.print_log("Error: The selected covariate data does not exist in the covariate file"))
 
-        if umap_switch == True:
+        if umap_switch == True or umap_switch2 == True:
             if l < umap_n:
                 sys.exit(Log.print_log(f'Error: not enough phenotypes in {pheno_file} to perform UMAP (at least {umap_n} required)'))
             else:
@@ -382,11 +408,12 @@ if pheno_files != None:
                 pheno_file3 = pheno_file
                 pheno_file3 = pheno_file3.removesuffix(".csv")
                 pheno_file3 = f'{pheno_file3}_umap.csv'
-                pheno_files2.append(pheno_file3)
+                if umap_switch == True:
+                    pheno_files2.append(pheno_file3)
                 Starter.umap_calc(df, pheno_file3, umap_n, seed, pheno_path, umapmetric, Log)
                 Log.print_log(f'Saved as "{pheno_file3}" temporarily in {pheno_path}\nUMAP calculated successful\n')
         
-        if pca_switch == True:
+        if pca_switch == True or pca_switch2 == True:
             if l < pca_n:
                 sys.exit(Log.print_log(f'Error: not enough phenotypes in {pheno_file} to perform PCA (at least {pca_n} required)'))
             else:
@@ -394,9 +421,18 @@ if pheno_files != None:
                 pheno_file4 = pheno_file
                 pheno_file4 = pheno_file4.removesuffix(".csv")
                 pheno_file4 = f'{pheno_file4}_pca.csv'
-                pheno_files2.append(pheno_file4)
+                if pca_switch == True:
+                    pheno_files2.append(pheno_file4)
                 Starter.pca_calc(df, pheno_file4, pca_n, pheno_path, Log)
                 Log.print_log(f'Saved as "{pheno_file4}" temporarily in {pheno_path}\nPCA calculated successful\n')
+
+        if umap_switch2 == True:
+            if l < umap_n:
+                sys.exit(Log.print_log(f'Error: not enough phenotypes in {pheno_file} to perform UMAP (at least {umap_n} required)'))
+
+        if pca_switch2 == True:
+            if l < pca_n:
+                sys.exit(Log.print_log(f'Error: not enough phenotypes in {pheno_file} to perform PCA (at least {pca_n} required)'))
 
         x += 1
 
@@ -689,23 +725,23 @@ if geno_pca_switch == True:
 
 
 # move umap/pca files
-if umap_switch == True or pca_switch ==True:
+if umap_switch == True or pca_switch ==True or umap_switch2 == True or pca_switch2 == True:
     switch_names = ["UMAP", "PCA"]
     x = 0
-    for switch in [umap_switch, pca_switch]:
+    for switch in [umap_switch, pca_switch, umap_switch2, pca_switch2]:
         if switch == True:
-            path4 = os.path.join(path, switch_names[x], f'{switch_names[x]}_{timestamp2}')
+            path4 = os.path.join(path, switch_names[x%2], f'{switch_names[x%2]}_{timestamp2}')
             make_dir(path4)
             y = 0 
             for pheno_file in pheno_files:
                 pheno_path = pheno_files_path[y]
-                if umap == True and pca_switch == True:
+                if umap_switch == True and pca_switch == True:
                     pheno_path = pheno_files_path[y//2]
                 for files in os.listdir(pheno_path):
-                    if files.startswith(f'{pheno_file.removesuffix(".csv")}_{switch_names[x].lower()}'):
+                    if files.startswith(f'{pheno_file.removesuffix(".csv")}_{switch_names[x%2].lower()}'):
                         shutil.move(os.path.join(pheno_path, files), os.path.join(path4, files))
                 y += 1
-            Log.print_log(f'\nMoved {switch_names[x]} files to {path4}')
+            Log.print_log(f'\nMoved {switch_names[x%2]} files to {path4}')
         x += 1
 
 # remove temp covariate file
@@ -746,6 +782,10 @@ if Y != None:
     Y = listtostring(Y, ', ')
 if geno_pca_switch == True:
     Y = len(covar_cols)
+if umap_switch2 == True:
+    Y = umap_n
+if pca_switch2 == True:
+    Y = pca_n
 
 # print summary and move log files
 snp_total, snp_sig = Starter.get_snpcounts()
@@ -758,7 +798,7 @@ Log.summary(
     snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, 
     pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, umapmetric, pca_n, 
     out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
-    input_str, noplot, ind_count, gemma_count
+    input_str, noplot, ind_count, gemma_count, umap_switch2, pca_switch2, ascovariate
 )
 
 log_path1 = os.path.join(path, "logs", "temp")

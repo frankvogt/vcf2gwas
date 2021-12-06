@@ -377,12 +377,12 @@ class Logger:
         self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, 
         pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, umapmetric, pca_n, 
         out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
-        input_str, noplot, ind_count, gemma_count
+        input_str, noplot, ind_count, gemma_count, umap_switch2, pca_switch2, ascovariate
     ):
         """Description:
         prints summary of input variables and methods"""
 
-        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = al = am = an = ao = ap = ""
+        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = al = am = an = ao = ap = aq = ""
 
         model_dict = {
             "lm" : "linear model",
@@ -436,6 +436,12 @@ class Logger:
             if geno_pca_switch == True:
                 d = f'\n- Covariates: principal components ({Y})'
                 e = "" 
+            if umap_switch2 == True:
+                d = f'\n- Covariates: UMAP embeddings of phenotype file ({Y})'
+                e = ""            
+            if pca_switch2 == True:
+                d = f'\n- Covariates: principal components of phenotype file ({Y})'
+                e = ""                    
         if gene_file != None:
             q = []
             for gf, s in zip(gene_file, species):
@@ -479,7 +485,7 @@ class Logger:
             m = '\n  --allphenotypes'
             c = f'\n  Phenotypes chosen: all phenotypes'
         if B == True:
-            if geno_pca_switch == False:
+            if geno_pca_switch == False and umap_switch2 == False and pca_switch2 == False:
                 n = '\n  --allcovariates'
                 e = f'\n  Covariates chosen: all covariates'
         if keep == True:
@@ -505,9 +511,11 @@ class Logger:
             u = '\n  --PCA'
             if pca_n != 2:
                 u = f'\n  --PCA {pca_n}'
+        if ascovariate == True:
+            aq = '\n  --ascovariate'
 
         self.logger.info(
-            f'\nSummary:\n\nOutput directory:{v}\n\nIndividuals analyzed:\nCleared for analysis: {an}\nAnalyzed by GEMMA: {ao}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nCommand:{al}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{ap}{u}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{am}{o}{p}'
+            f'\nSummary:\n\nOutput directory:{v}\n\nIndividuals analyzed:\nCleared for analysis: {an}\nAnalyzed by GEMMA: {ao}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nCommand:{al}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{ap}{u}{aq}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{am}{o}{p}'
         )
 
 
