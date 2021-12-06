@@ -257,9 +257,9 @@ It is recommended to not set the memory to less than 1 GB.
 
 ### Using dimensionality reduction of phenotypes for analysis
 
-When analyzing many phenotypes it can be escpecially beneficial to reduce the phenotypic dimensions. This allows the user to analyze any underlying structure in their phenotypic data by using the output of the dimensionality reduction as phenotypes for GEMMA.  
+When analyzing many phenotypes it can be escpecially beneficial to reduce the phenotypic dimensions. This allows the user to analyze or account for underlying structures in their phenotypic data by either using the output of the dimensionality reduction as phenotypes for GEMMA or adding them as covariates to the analysis.  
 *vcf2gwas* offers two often-used methods to reduce the dimensions: principal component analysis ([PCA](https://en.wikipedia.org/wiki/Principal_component_analysis)) and Uniform Manifold Approximation and Projection ([UMAP](https://arxiv.org/abs/1802.03426)).  
-Both can be used either separately or simultaneously in the analysis.
+When using the ouput as phenotypes, both methods can be used either separately or simultaneously in the analysis.
 
 #### PCA
 
