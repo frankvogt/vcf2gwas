@@ -56,10 +56,6 @@ def main(argvals=argvals):
             raise SyntaxError(msg)
 
     process = subprocess.run(args)
-
-    if process.returncode != 0:
-        shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
-
     return process.returncode
 
 if __name__ == '__main__':
@@ -67,6 +63,6 @@ if __name__ == '__main__':
         sys.exit(main())
     except KeyboardInterrupt as e:
         print("\nvcf2gwas interrupted")
+        print("Cleaning up temporary files\n")
+    finally:
         shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
-        print("Cleaned up temporary files\n")
-        sys.exit(1)
