@@ -24,7 +24,8 @@ import sys
 import os
 import subprocess
 
-from vcf2gwas.parsing import *
+#from vcf2gwas.parsing import *
+from parsing import *
 from vcf2gwas.install import main as installer
 
 argvals = None
@@ -57,6 +58,15 @@ def main(argvals=argvals):
 
     process = subprocess.run(args)
     return process.returncode
+
+def run_main():
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt as e:
+        print("\nvcf2gwas interrupted")
+        print("Cleaning up temporary files\n")
+    finally:
+        shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
 
 if __name__ == '__main__':
     try:
