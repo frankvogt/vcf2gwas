@@ -127,6 +127,32 @@ or select all phenotypes in the phenotype file at once utilizing the `-ap/--allp
 vcf2gwas -v [filename] -pf [filename] -ap -lmm
 ```
 
+### Transforming phenotype values
+
+vcf2gwas offers the option to transform the phenotype values in the phenotype file(s). The selected metric (default: 'wisconsin') is applied across rows.  
+To transform the phenotypes, employ the `-t/--transform` option and to change the metric to one of the other supported metrics, add it as an argument to the option:
+
+```
+vcf2gwas -v [filename] -pf [filename1] -p [int] -lmm -t hellinger
+```
+
+Now, vcf2gwas, transforms the phenotypes according to the hellinger metric.  
+The following metrics are available:
+* *total*: Divides each observation by row sum
+* *max*: Divides each observation by row max
+* *normalize*: Chord transformation, also euclidean normalization, making the length of each row 1
+* *range*: Converts the range of the data to 0 and 1
+* *standardize*: Standardizes each observation (i.e. z-score)
+* *hellinger*: Square-root of the total transformation
+* *log*: Returns ln(x+1)
+* *logp1*: Returns ln(x) + 1, if x > 0. Otherwise returns 0
+* *pa*: Converts data to binary absence (0) presence (1) data
+* *wisconsin*: First divides an observation by the max of the column, then the sum of the row. That is, it applies ‘max’ down columns then ‘total’ across rows
+
+These functions are taken from the [ecopy](https://ecopy.readthedocs.io/en/latest/index.html) package.
+
+**Note**: If desired, one can also use the [dimensionality reduction](#using-dimensionality-reduction-of-phenotypes-for-analysis) options in conjunction with the transformation. vcf2gwas will first transform the phenotypes and then reduce the dimensionality of the transformed phenotypes according to the chosen method and use these results as phenotypes.
+
 ### Adding covariates
 
 GEMMA supports adding covariates to the linear model and the linear mixed model analysis.  
@@ -195,7 +221,7 @@ If the file is in the `.csv` format, the file needs at least three columns conta
 *vcf2gwas* recognizes chromosomes in the following formats (here the first chromosome): `Chr1`, `chr1`, `1`.  
 If the chromosomes in the `VCF` file are of a different format, it is necessary that the chromosome information in the gene file is formatted in the same way, otherwise *vcf2gwas* won't recognize the information correctly.  
 
-*vcf2gwas* will summarize the n best SNPs (specified with `-t/--topsnp`) of every analyzed phenotype and compare them to the genes in the file by calculating the distance between each SNP and gene upstream as well as downstream. These results can be filtered by saving only those SNPs with a distance to a gene lower than a specific threshold (set with `-gt/--genethresh`).  
+*vcf2gwas* will summarize the n best SNPs (specified with `-ts/--topsnp`) of every analyzed phenotype and compare them to the genes in the file by calculating the distance between each SNP and gene upstream as well as downstream. These results can be filtered by saving only those SNPs with a distance to a gene lower than a specific threshold (set with `-gt/--genethresh`).  
 
 **Note**: Since for each SNP only the gene with the closest start/end upstream and downstream is shown, this feature only serves to give a hint of possibly associated genes. Closer inspection by the user is strongly recommended.
 
@@ -291,13 +317,13 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -U 3 -um manhattan
 
 The manhattan metric is now used to calculate the UMAP embeddings.  
 The following is a list of the available metrics:  
-* euclidean
-* manhattan
-* braycurtis
-* cosine
-* hamming
-* jaccard
-* hellinger
+* *euclidean*
+* *manhattan*
+* *braycurtis*
+* *cosine*
+* *hamming*
+* *jaccard*
+* *hellinger*
 
 #### Using PCs or UMAP embeddings as covariates
 

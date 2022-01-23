@@ -24,24 +24,25 @@ import os
 import subprocess
 import multiprocessing as mp
 
-from pandas.io import parsers
-
 try:
     from psutil import virtual_memory
 except ModuleNotFoundError:
     subprocess.run(["conda", "install", "-c", "anaconda", "psutil==5.8*"])
     from psutil import virtual_memory
 
+def set_version_number():
+    return "0.8.5"
 
 def getArgs(argv=None):
     """Description:
     Sets up Argument Parser and returns input arguments"""
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description='Command-line interface for vcf2gwas.\n \nExample usage: vcf2gwas -v <VCF file> -pf <phenotype file> -ap -lmm', epilog="For a detailed description of all options, please refer to the manual.")
-    
+    version = set_version_number()
+
     # Options with variable input
     parser.add_argument(
-        '--version', action='version', version='%(prog)s 0.8.4'
+        '--version', action='version', version='%(prog)s Version {}'.format(version)
     )
     parser.add_argument(
         "-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename"
@@ -52,7 +53,7 @@ def getArgs(argv=None):
     )
     parser.add_argument(
         "-cf", "--cfile", metavar="<filename>", type=str, 
-        help="To extract principal components from the VCF file, type 'PCA' \nOR \nspecify covariate filename \ncomma separated .csv file \nfirst column individuals, second column and onwards covariates"
+        help="To extract principal components from the VCF file, type 'PCA' \nOR \nspecify covariate filename \ncomma separated .csv file \nfirst column individuals, second column and onwards covariates"
     )
     parser.add_argument(
         "-p", "--pheno", metavar="<int/str>", action="append", type=str, 
@@ -79,7 +80,7 @@ def getArgs(argv=None):
         help="specify chromosomes for analysis \nby default, all chromosomes will be analyzed \ninput value has to be in the same format as the CHROM value in the VCF file"
     )
     parser.add_argument(
-        "-t", "--topsnp", metavar="<int>", type=int, default=15, 
+        "-ts", "--topsnp", metavar="<int>", type=int, default=15, 
         help="number of top SNPs of each phenotype to be summarized (default: %(default)s) \nafter analysis the specified amount of top SNPs from each phenotype will be considered"
     )
     parser.add_argument(
@@ -105,6 +106,10 @@ def getArgs(argv=None):
     parser.add_argument(
         "-um", "--umapmetric", metavar="<str>", type=str, default="euclidean", choices=["euclidean", "manhattan", "braycurtis", "cosine", "hamming", "jaccard", "hellinger"], 
         help="choose the metric for UMAP to use to compute the distances in high dimensional space \nDefault: %(default)s \nAvailable metrics: %(choices)s"
+    )
+    parser.add_argument(
+        "-t", "--transform", metavar="<str>", type=str, nargs="?", const="wisconsin", choices=['total', 'max', 'normalize', 'range', 'standardize', 'hellinger', 'log', 'logp1', 'pa', 'wisconsin'],
+        help="transform the input phenotype file \napplies the selected metric across rows \nDefault: %(const)s \nAvailable metrics: %(choices)s"
     )
     parser.add_argument(
         "-KC", "--kcpca", metavar="<float>", nargs='?', const=0.5, type=float, 
@@ -260,6 +265,9 @@ class Parser:
 
     def set_umapmetric(self):
         return self.args.umapmetric
+
+    def set_transform(self):
+        return self.args.transform
 
     def set_sigval(self):
         return self.args.sigval

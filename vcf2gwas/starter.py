@@ -19,18 +19,15 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from vcf2gwas.utils import Starter
-from parsing import *
-from utils import *
+from vcf2gwas.parsing import *
+from vcf2gwas.utils import *
 
-import subprocess
 import time
 import os
 import sys
 import math
 import concurrent.futures
 import multiprocessing as mp
-
 from psutil import virtual_memory
 import pandas as pd
 
@@ -43,12 +40,14 @@ argvals = None
 
 P = Parser(argvals)
 out_dir = P.set_out_dir()
-out_dir2 = os.path.join(out_dir, "output")
+out_dir2 = os.path.join(out_dir, "Output")
 os.makedirs(out_dir2, exist_ok=True)
 
 timestamp = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
 timestamp2 = time.strftime("%Y%m%d_%H%M%S")
 start = time.perf_counter()
+
+version = set_version_number()
 
 shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
 dir_temp = "_vcf2gwas_temp"
@@ -70,12 +69,15 @@ file = open(os.path.join(dir_temp, "vcf2gwas_ind_gemma.txt"), 'a')
 file.close()
 file = open(os.path.join(dir_temp, "vcf2gwas_summary_paths.txt"), 'a')
 file.close()
+file = open(os.path.join(dir_temp, "vcf2gwas_gemma_fail.txt"), 'a')
+file.close()
 
 
 # get genotype file input
 snp_file2 = P.set_geno()
 if snp_file2.endswith((".vcf", "vcf.gz")) == False:
-    sys.exit("Error: VCF file is neither in .vcf or .vcf.gz format")
+    msg = "VCF file is neither in .vcf or .vcf.gz format"
+    raise ValueError(msg)
 snp_file = os.path.split(snp_file2)[1]
 
 # get phenotype / covariate input
@@ -107,24 +109,33 @@ else:
 
 covar = P.set_covar()
 ascovariate = P.set_ascovariate()
+transform_metric = P.set_transform()
+transform_switch = False
+if transform_metric != None:
+    transform_switch = True
 umap_n = P.set_U()
 pca_n = P.set_P()
 geno_pca_switch = False
 umap_switch2 = False
 pca_switch2 = False
+if transform_switch == True:
+    ascovariate = False
 if umap_n == None and pca_n == None:
     ascovariate = False
 if covar != None and ascovariate == True:
-    sys.exit("Error: Only one covariate file allowed, cannot use both -cf/--cfile and -asc/--ascovariate")
+    msg = "Only one covariate file allowed, cannot use both -cf/--cfile and -asc/--ascovariate"
+    raise SyntaxError(msg)
 elif covar != None:
     if covar.lower() == "pca":
         covar = os.path.join(dir_temp, "vcf2gwas_geno_pca.csv")
         geno_pca_switch = True
 elif ascovariate == True:
     if switch == True:
-        sys.exit("Error: Only one phenotype file is allowed when employing -asc/--ascovariate")
+        msg = "Only one phenotype file is allowed when employing -asc/--ascovariate"
+        raise SyntaxError(msg)
     elif umap_n != None and pca_n != None:
-        sys.exit("Error: Only one covariate file allowed, cannot use both -U/--UMAP and -P/--PCA in conjunction with -asc/--ascovariate")
+        msg = "Only one covariate file allowed, cannot use both -U/--UMAP and -P/--PCA in conjunction with -asc/--ascovariate"
+        raise SyntaxError(msg)
     elif umap_n != None:
         umap_switch2 = True
         pheno_files_ = pheno_files[0].removesuffix(".csv")
@@ -133,7 +144,10 @@ elif ascovariate == True:
         pca_switch2 = True
         pheno_files_ = pheno_files[0].removesuffix(".csv")
         covar = os.path.join(pheno_files_path[0], f'{pheno_files_}_pca.csv')
-covar_temp = [covar]
+if covar == None:
+    covar_temp = covar
+else:
+    covar_temp = [covar]
 if covar != None:
     covar_file = covar
     covar = os.path.split(covar)[1]
@@ -145,15 +159,24 @@ lmm = P.set_lmm()
 bslmm = P.set_bslmm()
 model = set_model(lm, gk, eigen, lmm, bslmm)
 if model == "-bslmm" and covar != None:
-    sys.exit("Error: GEMMA doesn't support adding Covariates when running BSLMM")
+    msg = "GEMMA doesn't support adding Covariates when running BSLMM"
+    raise SyntaxError(msg)
 if model in ["-gk", "-eigen"]:
     pheno_files = None
     pheno = None
     covar = None
     switch = False
 model2 = None
+model2_temp = None
 if model != None:
-    model2 = model.removeprefix("-")
+    model2 = change_model_dir_names(model)
+    model2_temp = model.removeprefix("-")
+
+if model == None:
+    path = out_dir2
+else:
+    path = os.path.join(out_dir2, model2)
+make_dir(path)
 
 pc_prefix = set_pc_prefix(pheno, covar, ".")
 pc_prefix2 = set_pc_prefix(pheno, covar, "_")
@@ -161,8 +184,8 @@ if model in ["-gk", "-eigen"]:
     pc_prefix2 = set_pc_prefix(pheno, covar, "")
 
 # configure logger
-Log = Logger(pc_prefix, out_dir2)
-Log.just_log("\nvcf2gwas v0.5 \n")
+Log = Logger(pc_prefix, path)
+Log.just_log(f"\nvcf2gwas v{version} \n")
 Log.just_log("Initialising..\n")
 Log.print_log(f'Start time: {timestamp}\n')
 Log.print_log("Parsing arguments..")
@@ -184,7 +207,8 @@ gene_thresh = P.set_gene_thresh()
 # file checking
 Log.print_log(f'Genotype file: {snp_file}')
 if model in ["-lm", "-lmm", "-bslmm"] and pheno_files == None:
-    sys.exit("Error: No phenotype file specified")
+    msg = "No phenotype file specified"
+    raise_error(SyntaxError, msg, Log)
 if pheno_files != None:
     Log.print_log(f'Phenotype file(s): {listtostring(pheno_files, ", ")}')
 if covar != None:
@@ -244,10 +268,12 @@ if geno_pca_switch == True:
     B = True
 if A == True and X != None:
     X = None
-    Log.print_log("Warning: option 'allphenotypes' will overwrite your phenotype selection")
+    msg = "Option 'allphenotypes' will overwrite your phenotype selection"
+    raise_warning(SyntaxWarning, msg, Log)
 if B == True and Y != None:
     Y = None
-    Log.print_log("Warning: option 'allcovariates' will overwrite your covariate selection")
+    msg = "Option 'allcovariates' will overwrite your covariate selection"
+    raise_warning(SyntaxWarning, msg, Log)
 
 #check for duplicate selection
 x_test = []
@@ -255,7 +281,8 @@ if X != None and Y != None:
     x_test = set(X) & set(Y)
     x_test = list(x_test)
 if pheno == covar and x_test != []:
-    sys.exit(Log.print_log(f'Error: The same data was selected as phenotype and covariate (column {listtostring(x_test, ", ")} in "{pheno}"). This will cause issues during the analysis with GEMMA'))
+    msg = f'The same data was selected as phenotype and covariate (column {listtostring(x_test, ", ")} in "{pheno}"). This will cause issues during the analysis with GEMMA'
+    raise_error(ValueError, msg, Log)
 
 # get more variables
 n_top = P.set_n_top()
@@ -266,7 +293,8 @@ if filename != None:
     filename = os.path.split(filename)[1]
 else:
     if model == "-eigen":
-        sys.exit(Log.print_log("Error: Please specify a relatedness matrix file to carry out the eigen-decomposition"))
+        msg = "No relatedness matrix file specified to carry out the eigen-decomposition"
+        raise_error(SyntaxError, msg, Log)
 min_af = P.set_q()
 pca = P.set_pca()
 keep = P.set_keep()
@@ -294,7 +322,8 @@ if memory_total < memory:
     memory = memory_total
 memory2 = memory
 if memory < 1000:
-    sys.exit(Log.print_log("Error: Not enough memory available (at least 1000 MB required)"))
+    msg = "Not enough memory available (at least 1000 MB required)"
+    raise_error(MemoryError, msg, Log)
 
 threads = P.set_threads()
 os.environ['NUMEXPR_MAX_THREADS'] = str(threads)
@@ -305,7 +334,8 @@ if cpu == 0:
 if cpu < threads:
     threads = cpu
 if threads == 0:
-    sys.exit(Log.print_log("Error: No logical cores available!"))
+    msg = "No logical cores available!"
+    raise_error(ChildProcessError, msg, Log)
 
 umap_switch = False
 if ascovariate == False:
@@ -322,22 +352,26 @@ if ascovariate == False:
 
 # check model / phenotype / genotype selection
 if model == None:
-    sys.exit(Log.print_log("Error: No model specified for GEMMA analysis"))
+    msg = "No model specified for GEMMA analysis"
+    raise_error(SyntaxError, msg, Log)
 if model not in ["-gk", "-eigen"]:
-    if A == False and B == False:
-        if umap_switch == False and pca_switch == False:
-            if geno_pca_switch == False:
-                if X == None and Y == None:
-                    sys.exit(Log.print_log("Error: No phenotypes and covariates specified for GEMMA analysis"))
-    elif A == False:
+    if A == False:
         if umap_switch == False and pca_switch == False:
             if X == None:
-                sys.exit(Log.print_log("Error: No phenotypes specified for GEMMA analysis"))
+                msg = "No phenotypes specified for GEMMA analysis"
+                raise_error(SyntaxError, msg, Log)
     elif covar2 != None:
         if B == False:
             if geno_pca_switch == False and umap_switch2 == False and pca_switch2 == False:
                 if Y == None:
-                    sys.exit(Log.print_log("Error: No covariates specified for GEMMA analysis"))
+                    msg = "No covariates specified for GEMMA analysis"
+                    raise_error(SyntaxError, msg, Log)
+    if A == False and B == False:
+        if umap_switch == False and pca_switch == False:
+            if geno_pca_switch == False:
+                if X == None and Y == None:
+                    msg = "No phenotypes and covariates specified for GEMMA analysis"
+                    raise_error(SyntaxError, msg, Log)
 
 pheno_list = []
 threads_list = []
@@ -345,6 +379,7 @@ l = None
 pheno_files2 = []
 
 analysis_num = 0
+part_str = "part"
 
 if umap_switch == True:
     X = list(range(umap_n))
@@ -371,15 +406,19 @@ if pheno_files != None:
 
     if num > threads:
         if umap_switch == True and pca_switch == True:
-            sys.exit(Log.print_log("Error: Not enough logical cores available to analyze the input files when performing both UMAP and PCA"))
+            msg = "Not enough logical cores available to analyze the input files when performing both UMAP and PCA"
+            raise_error(ChildProcessError, msg, Log)
         else:
-            sys.exit(Log.print_log("Error: Not enough logical cores available to analyze all phenotype input files"))
+            msg = "Not enough logical cores available to analyze all phenotype input files"
+            raise_error(ChildProcessError, msg, Log)
 
     if num > memory/1e3:
         if umap_switch == True and pca_switch == True:
-            sys.exit(Log.print_log("Error: Not enough memory available to analyze the input files when performing both UMAP and PCA"))
+            msg = "Not enough memory available to analyze the input files when performing both UMAP and PCA"
+            raise_error(MemoryError, msg, Log)
         else:
-            sys.exit(Log.print_log("Error: Not enough memory available to analyze all phenotype input files"))
+            msg = "Not enough memory available to analyze all phenotype input files"
+            raise_error(MemoryError, msg, Log)
 
     x = 0
     for pheno_file in pheno_files:
@@ -390,19 +429,32 @@ if pheno_files != None:
         l = len(df.columns)
 
         #check if columns exist
-        if set(X).issubset([i+1 for i in list(range(l))]) == False:
-            sys.exit(Log.print_log("Error: The selected phenotype data does not exist in the phenotype file"))
+        if umap_switch and pca_switch == False:
+            if set(X).issubset([i+1 for i in list(range(l))]) == False:
+                msg = "The selected phenotype data does not exist in the phenotype file"
+                raise_error(ValueError, msg, Log)
         if covar2 != None:
             if Y != None:
                 if geno_pca_switch == False and umap_switch2 == False and pca_switch2 == False:
                     df_covar = Processing.load_pheno(covar2)
                     l_covar = len(df_covar.columns)
                     if set(Y).issubset([i+1 for i in list(range(l_covar))]) == False:
-                        sys.exit(Log.print_log("Error: The selected covariate data does not exist in the covariate file"))
+                        msg = "The selected covariate data does not exist in the covariate file"
+                        raise_error(ValueError, msg, Log)
+
+        if transform_switch == True:
+            Log.print_log(f"Performing {transform_metric} transformation on {pheno_file}..")
+            pheno_file_trans = pheno_file
+            pheno_file_trans = pheno_file_trans.removesuffix(".csv")
+            pheno_file_trans = f'{pheno_file_trans}_transformed.csv'
+            df = pheno_transformation.transform(df, pheno_file_trans, pheno_path, method=transform_metric)
+            Log.print_log(f'Saved as "{pheno_file_trans}" temporarily in {pheno_path}\nTransformation successful\n')
+            pheno_file = pheno_file_trans
 
         if umap_switch == True or umap_switch2 == True:
             if l < umap_n:
-                sys.exit(Log.print_log(f'Error: not enough phenotypes in {pheno_file} to perform UMAP (at least {umap_n} required)'))
+                msg = f'Not enough phenotypes in {pheno_file} to perform UMAP (at least {umap_n} required)'
+                raise_error(ValueError, msg, Log)
             else:
                 Log.print_log(f"Performing UMAP dimensionality reduction on {pheno_file}..")
                 pheno_file3 = pheno_file
@@ -415,7 +467,8 @@ if pheno_files != None:
         
         if pca_switch == True or pca_switch2 == True:
             if l < pca_n:
-                sys.exit(Log.print_log(f'Error: not enough phenotypes in {pheno_file} to perform PCA (at least {pca_n} required)'))
+                msg = f'Not enough phenotypes in {pheno_file} to perform PCA (at least {pca_n} required)'
+                raise_error(ValueError, msg, Log)
             else:
                 Log.print_log(f"Performing PCA dimensionality reduction on {pheno_file}..")
                 pheno_file4 = pheno_file
@@ -428,11 +481,13 @@ if pheno_files != None:
 
         if umap_switch2 == True:
             if l < umap_n:
-                sys.exit(Log.print_log(f'Error: not enough phenotypes in {pheno_file} to perform UMAP (at least {umap_n} required)'))
+                msg = f'Not enough phenotypes in {pheno_file} to perform UMAP (at least {umap_n} required)'
+                raise_error(ValueError, msg, Log)
 
         if pca_switch2 == True:
             if l < pca_n:
-                sys.exit(Log.print_log(f'Error: not enough phenotypes in {pheno_file} to perform PCA (at least {pca_n} required)'))
+                msg = f'Error: not enough phenotypes in {pheno_file} to perform PCA (at least {pca_n} required)'
+                raise_error(ValueError, msg, Log)
 
         x += 1
 
@@ -445,9 +500,11 @@ if pheno_files != None:
             pheno_path = pheno_files_path[x]
         pheno_file2 = os.path.join(pheno_path, pheno_file)
         df = Processing.load_pheno(pheno_file2)
+        part_str = Starter.get_part_str(pheno_file, part_str)
 
         if A == False and len(X) > len(df.columns):
-            Log.print_log(f"Warning:\nMore phenotypes selected than present in {pheno_file}!\nUsing all available phenotypes..")
+            msg = f'More phenotypes selected than present in {pheno_file}!\nUsing all available phenotypes..'
+            raise_warning(UserWarning, msg, Log)
             X = list(range(len(df.columns)))
             X = [i+1 for i in X]
             
@@ -466,7 +523,9 @@ if pheno_files != None:
                 QC.pheno_QC(df, X, qc_dir)
                 Log.print_log("Phenotype distribution(s) successfully plotted")
             except Exception as e:
-                sys.exit(Log.print_log(f'Error: {e}'))
+                msg = e
+                raise_error(RuntimeError, msg, Log)
+
             
         if switch == True:
             rest = threads%len(pheno_files2)
@@ -482,7 +541,7 @@ if pheno_files != None:
             rest = threads%l
             threads2 = threads//l
             memory2 = memory//l
-            Starter.split_phenofile1(X, df, pheno_file, pheno_list, pheno_path)
+            Starter.split_phenofile1(X, df, pheno_file, pheno_list, pheno_path, part_str)
             Log.print_log("Phenotype file split up successful")
 
         else:
@@ -495,7 +554,7 @@ if pheno_files != None:
             col_dict = {}
             rest2 = l%threads_temp
             threads3 = l//threads_temp
-            Starter.split_phenofile2(threads_temp, threads3, rest2, col_dict, X, df, pheno_file, pheno_list, pheno_path)
+            Starter.split_phenofile2(threads_temp, threads3, rest2, col_dict, X, df, pheno_file, pheno_list, pheno_path, part_str)
             Log.print_log("Phenotype file split up successful")
 
         x += 1
@@ -506,10 +565,12 @@ if umap_switch == True and pca_switch == True:
     analysis_num += (umap_n + pca_n)*(len(pheno_files2)//2)
 
 if memory2 < 1000:
-    Log.print_log("Warning: Memory might not be sufficient to carry out analysis!")
+    msg = "Memory might not be sufficient to carry out analysis!"
+    raise_warning(ResourceWarning, msg, Log)
 if memory2 == 0:
-    sys.exit(Log.print_log("Error: Memory not sufficient to carry out analysis!"))
-#sys.exit()
+    msg = "Memory not sufficient to carry out analysis!"
+    raise_error(MemoryError, msg, Log)
+
 #################### compressing, indexing and filtering VCF file ####################
 
 if snp_file.endswith(".vcf"):
@@ -574,7 +635,7 @@ if geno_pca_switch == True:
     timer_total = round(timer_end - timer, 2)
     Log.print_log(f'PCA successful (Duration: {runtime_format(timer_total)})')
 
-#################### Prepare commands for main.py ####################
+#################### Prepare commands for analysis.py ####################
 
 args_list = []
 args = sys.argv[1:]
@@ -583,6 +644,8 @@ if args == []:
     args = argvals
 input_str = f'vcf2gwas {listtostring(args)}'
 args = Starter.delete_string(args, ['-v', '--vcf', '-T', '--threads', '-M', '--memory'])
+if covar == None:
+    args = Starter.delete_string(args, ['-cf', '--cfile', '-c', '--covar'])
 args.insert(0, snp_file2)
 args.insert(0, "--vcf")
 args.insert(0, 'python3.9')
@@ -630,9 +693,12 @@ if model in ["-gk", "-eigen"]:
         args_list2.append(args)
     args_list = args_list2
 
+log_path2 = os.path.join(path, "Logs", f'logs{pc_prefix2}_{snp_prefix}_{timestamp2}')
+make_dir(log_path2)
+
 Log.print_log("\nFile preparations completed")
 
-#################### Run main.py for analysis ####################
+#################### Run analysis.py for analysis ####################
 
 Log.print_log("\nStarting analysis..")
 with concurrent.futures.ProcessPoolExecutor(mp_context=mp.get_context('fork'), max_workers=threads_org) as executor:
@@ -643,16 +709,11 @@ Starter.check_return_codes(Log)
 
 snp_file2 = snp_file2_org
 
-if model == None:
-    path = out_dir2
-else:
-    path = os.path.join(out_dir2, model2)
-
 # summarizer and gene comparison
 if model not in ("-gk", "-eigen", None):
-    path2_temp = os.path.join(path, "summary", "temp")
+    path2_temp = os.path.join(path, "Summary", "temp")
     make_dir(path2_temp)
-    path2 = os.path.join(path, "summary", f'summary{pc_prefix2}_{snp_prefix}_{timestamp2}')
+    path2 = os.path.join(path, "Summary", f'summary{pc_prefix2}_{snp_prefix}_{timestamp2}')
     os.rename(path2_temp, path2)
     path3 = os.path.join(path2, "top_SNPs")
     prefix_list = []
@@ -682,30 +743,32 @@ if noqc == False:
         Log.print_log(f'\nQuality control files moved to {qc_path}')
 
 # move split up files (and reduce "files" folder)
-path5 = os.path.join(path, "files")
+path5 = os.path.join(path, "Files")
 pheno_temp = [f'files_{x.removesuffix(".csv")}_{snp_prefix}' for x in pheno_list]
 if switch == False:
     if len(pheno_list) > 1:
         for file in pheno_list:
             os.remove(os.path.join(pheno_files_path[0], file))
-        for folder in os.listdir(path5):
-            if pheno_temp[0] == folder:
-                folder2 = folder.replace(".part1", "")
-                folder2 = f'{folder2}_{timestamp2}'
-                #shutil.rmtree(os.path.join(path5, folder2), ignore_errors=True)
-                shutil.move(os.path.join(path5, folder), os.path.join(path5, folder2))
-                path6 = os.path.join(path5, folder2)
-                for file in os.listdir(path6):
-                    for string in [".log.txt", ".cXX.txt", ".log", ".bim", ".bed", ".nosex", ".covariates.txt"]:
-                        if file.endswith(string):
-                            os.rename(os.path.join(path6, file), os.path.join(path6, file.replace(".part1", "")))
-        for folder in os.listdir(path5):
-            for pheno in pheno_temp:
-                if pheno == folder:
-                    for file in os.listdir(os.path.join(path5, folder)):
-                        if file.endswith(".fam"):
-                            shutil.move(os.path.join(path5, folder, file), os.path.join(path5, folder2, file))
-                    shutil.rmtree(os.path.join(path5, folder))
+        c = 1
+        for pheno_t in pheno_temp:                
+            for folder in os.listdir(path5):
+                if pheno_t == folder:
+                    folder2 = folder.replace(f".{part_str}{c}", "")
+                    folder2 = f'{folder2}_{timestamp2}'
+                    shutil.move(os.path.join(path5, folder), os.path.join(path5, folder2))
+                    path6 = os.path.join(path5, folder2)
+                    for file in os.listdir(path6):
+                        for string in [".log.txt", ".cXX.txt", ".log", ".bim", ".bed", ".nosex", ".covariates.txt"]:
+                            if file.endswith(string):
+                                os.rename(os.path.join(path6, file), os.path.join(path6, file.replace(f".{part_str}{c}", "")))
+                    for folder3 in os.listdir(path5):
+                        for pheno in pheno_temp:
+                            if pheno == folder3:
+                                for file in os.listdir(os.path.join(path5, folder3)):
+                                    if file.endswith(".fam"):
+                                        shutil.move(os.path.join(path5, folder3, file), os.path.join(path5, folder2, file))
+                                shutil.rmtree(os.path.join(path5, folder3))
+            c += 1
     else:
         for folder in os.listdir(path5):
             if model in ["-gk", "-eigen"]:
@@ -723,7 +786,6 @@ if geno_pca_switch == True:
         if folder.endswith(timestamp2):
             shutil.copy(covar2, os.path.join(path5, folder, f'{snp_prefix}_PCA.csv'))
 
-
 # move umap/pca files
 if umap_switch == True or pca_switch ==True or umap_switch2 == True or pca_switch2 == True:
     switch_names = ["UMAP", "PCA"]
@@ -738,11 +800,27 @@ if umap_switch == True or pca_switch ==True or umap_switch2 == True or pca_switc
                 if umap_switch == True and pca_switch == True:
                     pheno_path = pheno_files_path[y//2]
                 for files in os.listdir(pheno_path):
-                    if files.startswith(f'{pheno_file.removesuffix(".csv")}_{switch_names[x%2].lower()}'):
-                        shutil.move(os.path.join(pheno_path, files), os.path.join(path4, files))
+                    if transform_switch == True:
+                        if files.startswith(f'{pheno_file.removesuffix(".csv")}_transformed_{switch_names[x%2].lower()}'):
+                            shutil.move(os.path.join(pheno_path, files), os.path.join(path4, files))
+                    else:
+                        if files.startswith(f'{pheno_file.removesuffix(".csv")}_{switch_names[x%2].lower()}'):
+                            shutil.move(os.path.join(pheno_path, files), os.path.join(path4, files))
                 y += 1
             Log.print_log(f'\nMoved {switch_names[x%2]} files to {path4}')
         x += 1
+
+# move transformed pheno files
+if transform_switch == True:
+    path5 = os.path.join(path, "Transformation", f'{"Transformation"}_{timestamp2}')
+    make_dir(path5)
+    y = 0 
+    for pheno_file in pheno_files:
+        pheno_path = pheno_files_path[y]
+        for files in os.listdir(pheno_path):
+            if files.startswith(f'{pheno_file.removesuffix(".csv")}_transformed'):
+                shutil.move(os.path.join(pheno_path, files), os.path.join(path5, files))
+        y += 1
 
 # remove temp covariate file
 Converter.remove_covar(covar)
@@ -766,10 +844,7 @@ if X != None:
         X1.append(f'{pca_n} principal components')
     if umap_switch == False and pca_switch == False:
         X, X_names = pheno_switcher2(pheno_files_temp, X_org, X)
-        #try:
         Summary.pheno_summary(filenames, filenames2, str_list, path2, X_names, name_list, snp_prefix)
-        #except Exception as e:
-        #    print(e)
         X_names = listtostring(X_names, ", ")
         X1 = X
     X = listtostring(X1, ', ')
@@ -794,20 +869,15 @@ if noplot == True:
 sig_level = Starter.get_count("vcf2gwas_sig_level.txt")
 ind_count = Starter.get_count("vcf2gwas_ind_count.txt")
 gemma_count = Starter.get_count("vcf2gwas_ind_gemma.txt")
+failed_count, failed_list = Starter.get_gemma_fail()
 Log.summary(
-    snp_file, pheno_files, covar, X, Y, model2, n, filename, min_af, A, B, 
+    snp_file, pheno_files, covar, X, Y, model2_temp, n, filename, min_af, A, B, 
     pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, umapmetric, pca_n, 
     out_dir2, analysis_num, sigval, nolabel, chr, chr3, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
-    input_str, noplot, ind_count, gemma_count, umap_switch2, pca_switch2, ascovariate
+    input_str, noplot, ind_count, gemma_count, umap_switch2, pca_switch2, ascovariate, transform_metric, failed_count, failed_list
 )
 
-log_path1 = os.path.join(path, "logs", "temp")
-log_path2 = os.path.join(path, "logs", f'logs{pc_prefix2}_{snp_prefix}_{timestamp2}')
-#if model in ["-gk", "-eigen"]:
-#    log_path2 = os.path.join(path, "logs", f'logs_{pc_prefix2}_{snp_prefix}_{timestamp2}')
-os.rename(log_path1, log_path2)
-
 if model != None:
-    shutil.move(os.path.join(out_dir2, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(out_dir2, model2, f'vcf2gwas_{snp_prefix}{pc_prefix2}_{timestamp2}.log.txt'))
+    shutil.move(os.path.join(path, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(path, f'vcf2gwas_{snp_prefix}{pc_prefix2}_{timestamp2}.log.txt'))
 
 shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)

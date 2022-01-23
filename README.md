@@ -270,7 +270,7 @@ if not specified, all available logical cores minus 1 will be used
 minimum allele frequency of sites to be used (default: 0.01)  
 input value needs to be a value between 0.0 and 1.0
   
-* `-t` / `--topsnp` <int>  
+* `-ts` / `--topsnp` <int>  
 number of top SNPs of each phenotype to be summarized (default: 15)  
 after analysis the specified amount of top SNPs from each phenotype will be considered
 
@@ -288,6 +288,12 @@ recommended amount of embeddings: 1 - 5
 choose the metric for UMAP to use to compute the distances in high dimensional space  
 Default: euclidean  
 Available metrics: euclidean, manhattan, braycurtis, cosine, hamming, jaccard, hellinger
+
+* `-t` / `--transform` <str>  
+transform the input phenotype file  
+applies the selected metric across rows  
+Default: wisconsin  
+Available metrics: total, max, normalize, range, standardize, hellinger, log, logp1, pa, wisconsin
 
 * `-asc` / `--ascovariate`
 Use dimensionality reduction of phenotype file via UMAP or PCA as covariates  
@@ -340,32 +346,34 @@ The exemplary directory and file structure of the output folder after running a 
 output/
 └── 'model'
     ├── 'phenotype'
-    │   ├── QQ
-    │   │   └── QQ plot figure (.png)
-    │   ├── GEMMA output file (.txt)
-    │   ├── GEMMA log file (.txt)
-    │   ├── best_p-values
-    │   │   ├── top 1% variants (.csv)
-    │   │   ├── top 0.1% variants (.csv)
-    │   │   └── top 0.01 variants (.csv)
-    │   └── manhattan
-    │       └── manhattan plot figure (.png)
+    │   ├── QQ
+    │   │   └── QQ plot figure (.png)
+    │   ├── summary file (.txt)
+    │   ├── GEMMA output file (.txt)
+    │   ├── GEMMA log file (.txt)
+    │   ├── best_p-values
+    │   │   ├── top 1% variants (.csv)
+    │   │   ├── top 0.1% variants (.csv)
+    │   │   └── top 0.01 variants (.csv)
+    │   ├── manhattan
+    │   │   └── manhattan plot figure (.png)
+    │   └── significant SNP summary file (.csv)
     ├── files
-    │   └── files_'file'
-    │       ├── PLINK BED files (.bed, .bim, .fam, .nosex)
-    │       ├── PLINK log file (.log)
-    │       ├── GEMMA relatedness matrix (.txt)
-    │       └── GEMMA log file (.log.txt)
+    │   └── files_'file'
+    │       ├── PLINK BED files (.bed, .bim, .fam, .nosex)
+    │       ├── PLINK log file (.log)
+    │       ├── GEMMA relatedness matrix (.txt)
+    │       └── GEMMA log file (.log.txt)
     ├── logs
-    │   └── analysis log file (.txt)
+    │   └── analysis log file (.txt)
     ├── QC
-    │   ├── phenotype QC plot (.png)
+    │   ├── phenotype QC plot (.png)
     │   └── genotype QC plots (.png)
-    ├── vcf2gwas log file (.txt)
-    └── summary
-        ├── summarized top SNPs (.csv)
-        └── top_SNPs
-            └── phenotype top SNPs (.csv)
+    ├── summary
+    │   ├── summarized top SNPs (.csv)
+    │   └── top_SNPs
+    │       └── phenotype top SNPs (.csv)
+    └── vcf2gwas log file (.txt)
 ```
 
 The names of the directories in quotes as well as the file names will vary based on the selected options and the file and phenotype names.

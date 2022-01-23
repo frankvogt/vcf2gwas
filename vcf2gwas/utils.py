@@ -19,25 +19,19 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import itertools
-from operator import index
-from numpy import intp, log10, rint
-from numpy.core.fromnumeric import repeat
 from vcf2gwas.parsing import Parser
-import warnings
 
-from matplotlib.pyplot import axes, text
-warnings.simplefilter(action='ignore', category=FutureWarning)
 import os
 import subprocess
 import sys
 import shutil
 import logging
-import argparse
 import multiprocessing as mp
 import random
 import time
+import warnings
 from collections import Counter
+from string import ascii_lowercase
 
 from psutil import virtual_memory
 try:
@@ -109,6 +103,14 @@ sns.set_color_codes()
 
 ############################## Functions ##############################
 
+def custom_warning(message, category, filename, lineno, file=None, line=None):
+    #msg = f'{filename}, line {lineno}:\n{category.__name__}: {message}'
+    msg = f'{category.__name__}: {message}'
+    print(msg)
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.showwarning = custom_warning
+
 def flatten_list(l):
     """Description:
     flattens list and removes duplicates"""
@@ -142,29 +144,45 @@ def read_timestamp():
     last = lines[-1].rstrip()
     return last      
 
+def raise_error(error, msg, Log):
+    Log.error_log(msg)
+    raise error(msg)
+
+def raise_warning(warning, msg, Log):
+    Log.warning_log(msg)
+    warnings.warn(msg, warning, stacklevel=2)
+
 def check_files(snp_file2, gene_file, gene_file_path):
     """Description:
     checks if input files exists (SNP file and Gene file)"""
 
     if os.path.isfile(snp_file2) == False:
-        sys.exit(print("Error: VCF file non existent"))
+        msg = "VCF file non existent"
+        raise FileNotFoundError(msg)
     if gene_file != None:
         for file in gene_file_path:
-            if os.path.isfile(file) == False: sys.exit(print("Error: Gene comparison file non existent, please check if file path was specified correctly"))
+            if os.path.isfile(file) == False: 
+                msg = "Gene comparison file non existent, please check if file path was specified correctly"
+                raise FileNotFoundError(msg)
+
 
 def check_files2(pheno_file, pheno_file2):
     """Description:
     checks if input files exists (Pheno file)"""
 
     if pheno_file != None:
-        if os.path.isfile(pheno_file2) == False: sys.exit(print("Error: Phenotype file non existent, please check if file path was specified correctly"))
+        if os.path.isfile(pheno_file2) == False: 
+            msg = "Phenotype file non existent, please check if file path was specified correctly"
+            raise FileNotFoundError(msg)
 
 def check_files3(covar_file, covar_file2):
     """Description:
     checks if input files exists (Covar file)"""
 
     if covar_file != None:
-        if os.path.isfile(covar_file2) == False: sys.exit(print("Error: Covariate file non existent, please check if file path was specified correctly"))
+        if os.path.isfile(covar_file2) == False: 
+            msg = "Covariate file non existent, please check if file path was specified correctly"
+            raise FileNotFoundError(msg)
 
 def make_dir(name):
     """Description: 
@@ -259,8 +277,8 @@ def pheno_switcher(genos, phenos):
                 switch = -1
 
         if switch == -1:
-            print("Error: Please make sure to only select existing phenotypes / covariates")
-            sys.exit(1)
+            msg = "Please make sure to only select phenotypes/covariates featured in the file"
+            raise ValueError(msg)
         elif switch == 1:
             phenos = [pdict[i] for i in phenos]
         elif switch == 0:
@@ -306,8 +324,8 @@ def pheno_switcher2(genos, phenos, phenos2):
                 switch = -1    
 
         if switch == -1:
-            print("Error: Please make sure to only select existing phenotypes / covariates")
-            sys.exit(1)
+            msg = "Please make sure to only select phenotypes/covariates featured in the file"
+            raise ValueError(msg)
         elif switch == 1:
             phenos2 = [pdict2[i] for i in phenos2]
             x_list = phenos2
@@ -335,16 +353,33 @@ def set_n(lm, gk, lmm, bslmm):
             n = str(i)
     return n
 
-def move_log(model, model2, pc_prefix, snp_prefix, out_dir, timestamp):
+def get_log_path(path, timestamp):
+
+    log_path = path
+    for dir in os.listdir(os.path.join(path, "Logs")):
+        if dir.endswith(timestamp):
+            log_path = os.path.join(path, "Logs", dir)
+    return log_path
+
+def move_log(model, pc_prefix, snp_prefix, timestamp, path):
 
     if model != None:
-        path = os.path.join(out_dir, model2, "logs", "temp")
-        make_dir(path)
-        if model in ["-gk", "-eigen"]:
-            shutil.move(os.path.join(out_dir, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(path, f'vcf2gwas_analysis_{snp_prefix}{pc_prefix}_{timestamp}.log.txt'))
-        else:
-            shutil.move(os.path.join(out_dir, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(path, f'vcf2gwas_analysis_{snp_prefix}_{pc_prefix}_{timestamp}.log.txt'))
+        shutil.move(os.path.join(path, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(path, f'vcf2gwas_analysis_{snp_prefix}{pc_prefix}_{timestamp}.log.txt'))
 
+def change_model_dir_names(name):
+
+    d = {
+        "-lm": "Linear Model",
+        "-gk": "Relatedness Matrix",
+        "-eigen": "Eigen Decomposition",
+        "-lmm": "Linear Mixed Model",
+        "-bslmm": "Bayesian Sparse Linear Mixed Model",
+    }
+
+    name2 = name.removeprefix("-")
+    if name in d:
+        name2 = d[name]    
+    return name2
 
 ############################## Classes ##############################
 
@@ -373,16 +408,28 @@ class Logger:
 
         self.logger.info(text)
     
+    def error_log(self, text):
+        """Description:
+        prints error to log file"""        
+
+        self.logger.error(text)
+
+    def warning_log(self, text):
+        """Description:
+        prints warning to log file"""    
+
+        self.logger.warning(text)
+    
     def summary(
         self, snp_file, pheno_file, covar_file, X, Y, model, N, filename, min_af, A, B, 
         pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, umapmetric, pca_n, 
         out_dir, analysis_num, sigval, nolabel, chr, chr2, chr_num, X_names, snp_total, snp_sig, sig_level, geno_pca_switch, burn, sampling, snpmax, noqc,
-        input_str, noplot, ind_count, gemma_count, umap_switch2, pca_switch2, ascovariate
+        input_str, noplot, ind_count, gemma_count, umap_switch2, pca_switch2, ascovariate, transform_metric, failed_count, failed_list
     ):
         """Description:
         prints summary of input variables and methods"""
 
-        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = al = am = an = ao = ap = aq = ""
+        a = b = c = d = e = f = g = h = i = j = k = l = m = n = o = p = q = r = s = t = u = v = w = x = y = z = aa = ab = ac = ad = ae = af = ag = ah = aj = ak = al = am = an = ao = ap = aq = ar = at = ""
 
         model_dict = {
             "lm" : "linear model",
@@ -444,11 +491,11 @@ class Logger:
                 e = ""                    
         if gene_file != None:
             q = []
-            for gf, s in zip(gene_file, species):
-                if s == "":
+            for gf, s_ in zip(gene_file, species):
+                if s_ == "":
                     q.append(f'\n- Gene comparison file: "{gf}"')
                 else:
-                    q.append(f'\n- Gene comparison with: {s}')
+                    q.append(f'\n- Gene comparison with: {s_}')
             q = listtostring(q)
             if gene_thresh != 100000:
                 r = f'\n- Gene comparison threshold: {gene_thresh}'
@@ -513,9 +560,17 @@ class Logger:
                 u = f'\n  --PCA {pca_n}'
         if ascovariate == True:
             aq = '\n  --ascovariate'
+        if transform_metric != None:
+            ar = '\n  --transform'
+            if transform_metric != "wisconsin":
+                ar = f'\n  --transform {transform_metric}'
+        if failed_count > 0:
+            at = f'\nGEMMA failed for {failed_count} phenotype(s) ({failed_list})'
+        else:
+            at = "\nGEMMA successful for all phenotypes"
 
         self.logger.info(
-            f'\nSummary:\n\nOutput directory:{v}\n\nIndividuals analyzed:\nCleared for analysis: {an}\nAnalyzed by GEMMA: {ao}\n\nPhenotypes analyzed in total:{w} {ab}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nCommand:{al}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{ap}{u}{aq}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{am}{o}{p}'
+            f'\nSummary:\n\nOutput directory:{v}\n\nIndividuals analyzed:\nCleared for analysis: {an}\nAnalyzed by GEMMA: {ao}\n\nPhenotypes analyzed in total:{w} {ab}{at}\n\nChromosomes analyzed in total:{z} ({ac})\n\nVariants analyzed: \nTotal: {ad} \nSignificant: {ae} \nLevel of significance: {af} \n\n\nInput:\n\nCommand:{al}\n\nFiles:{a}{b}{c}{d}{e}{q}{r}{h}\n\nGEMMA parameters:{f}{g}\n\nOptions:{t}{ap}{u}{aq}{ar}{s}{i}{aa}{j}{k}{l}{x}{ag}{ah}{aj}{m}{n}{y}{ak}{am}{o}{p}'
         )
 
 
@@ -579,8 +634,9 @@ class Starter:
                 species2.append("")
         if len(species) > 1:
             if len(species) == len(set(species)):
-                Log.print_log("Error: Two different species chosen for gene comparison")
-                sys.exit(1)
+                msg = "Two different species chosen for gene comparison"
+                raise_error(ValueError, msg, Log)
+
         
         gene_files2 = list(set(gene_files2))
 
@@ -608,11 +664,14 @@ class Starter:
 
     def check_vals(str, var, min, max, Log):
         if var == 0:
-            sys.exit(Log.print_log(f"Error: input value for dimension reduction ({str}) must be greater than zero!"))
+            msg = f"Input value for dimension reduction ({str}) must be greater than zero!"
+            raise_error(ValueError, msg, Log)
         elif var < min:
-            Log.print_log(f'Warning: input value for dimension reduction ({str}) is not recommended to be less than {min}!\n')
+            msg = f'Input value for dimension reduction ({str}) is not recommended to be less than {min}!\n'
+            raise_warning(UserWarning, msg, Log)
         elif var > max:
-            Log.print_log(f'Warning: input value for dimension reduction ({str}) is not recommended to be greater than {max}!\n')
+            msg = f'Input value for dimension reduction ({str}) is not recommended to be greater than {max}!\n'
+            raise_warning(UserWarning, msg, Log)
 
     def adjust_threads(list, threads, rest, threads_list):
         for i in range(len(list)):
@@ -635,7 +694,8 @@ class Starter:
         df = df.replace("NA",np.nan)
         df = df.dropna(how="any")
         if df.empty:
-            sys.exit(Log.print_log("Error: Too many missing values to perform UMAP!"))
+            msg = "Too many missing values to perform UMAP!"
+            raise_error(ValueError, msg, Log)
         x = df.values
         y = df.index.tolist()
         if seed == True:
@@ -680,7 +740,8 @@ class Starter:
         df = df.replace("NA",np.nan)
         df = df.dropna(how="any")
         if df.empty:
-            sys.exit(Log.print_log("Error: Too many missing values to perform PCA!"))
+            msg = "Too many missing values to perform PCA!"
+            raise_error(ValueError, msg, Log)
         x = df.values
         y = df.index.tolist()
 
@@ -726,19 +787,29 @@ class Starter:
         embeddingDf.index.name = None
         embeddingDf.to_csv(os.path.join(pheno_path, pheno_file))
 
-    def split_phenofile1(X, df, pheno_file, pheno_list, pheno_path):
+    def get_part_str(s, x):
+
+        if x in s:
+            for c in ascii_lowercase:
+                if x in s:
+                    if f'{x}{c}' not in s:
+                        x = f'{x}{c}'
+
+        return x
+
+    def split_phenofile1(X, df, pheno_file, pheno_list, pheno_path, part_str):
 
         ind = 1
         for i in X:
             df_new = df.iloc[:,i-1]
             df_new.fillna("NA", inplace=True)
             df_name = pheno_file.removesuffix(".csv")
-            df_name = f'{df_name}.part{ind}.csv'
+            df_name = f'{df_name}.{part_str}{ind}.csv'
             pheno_list.append(df_name)
             df_new.to_csv(os.path.join(pheno_path, df_name))
             ind += 1
 
-    def split_phenofile2(threads, threads3, rest2, col_dict, X, df, pheno_file, pheno_list, pheno_path):
+    def split_phenofile2(threads, threads3, rest2, col_dict, X, df, pheno_file, pheno_list, pheno_path, part_str):
 
         for i in range(threads):
 
@@ -754,7 +825,7 @@ class Starter:
             df_new = df.iloc[:,[X[i]-1 for i in col_dict[i]]]
             df_new.fillna("NA", inplace=True)
             df_name = pheno_file.removesuffix(".csv")
-            df_name = f'{df_name}.part{i+1}.csv'
+            df_name = f'{df_name}.{part_str}{i+1}.csv'
             pheno_list.append(df_name)
             df_new.to_csv(os.path.join(pheno_path, df_name))
 
@@ -808,15 +879,18 @@ class Starter:
         code_file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"), 'r')
         code_file_str = code_file.read()
         if "1" in code_file_str:
+            if "0" in code_file_str:
+                code_file.close()
+                Log.print_log("Most analyses successfully completed\n")
+            else:
+                code_file.close()
+                shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
+                raise SystemExit()
+        elif "0" not in code_file_str:
             code_file.close()
             shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
-            #os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"))
-            sys.exit()
-        if "0" not in code_file_str:
-            code_file.close()
-            shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
-            #os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"))
-            sys.exit(Log.print_log("Error: During the analysis, vcf2gwas encountered an unexpected error"))
+            msg = "During the analysis, vcf2gwas encountered an unexpected error"
+            raise_error(RuntimeError, msg, Log)
         else:
             code_file.close()
             os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"))
@@ -877,6 +951,16 @@ class Starter:
         os.remove(os.path.join("_vcf2gwas_temp", name))
         return x
 
+    def get_gemma_fail():
+
+        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_gemma_fail.txt"), 'r')
+        lines = file.readlines()
+        file.close()
+        lines = [i.rstrip() for i in lines]
+        failed = listtostring(lines, ",")
+
+        return len(lines), failed
+        
 
 class QC:
 
@@ -987,6 +1071,7 @@ class Processing:
         reads accession names from VCF file and returns them as list"""
 
         out = subprocess.run(['bcftools', 'query', '-l', snp_file], stdout=subprocess.PIPE, text=True)
+        out.check_returncode()
         ls = pd.Series(out.stdout)
         ls = ls.str.split(pat="\n", expand=True).T
         ls = ls[:-1].astype(str)
@@ -1008,6 +1093,7 @@ class Processing:
         else:
             remove = subprocess.run(['bcftools', 'view', '-S', f'^{subset}.txt', snp_file, '-Oz', '-o', f'{subset}.vcf.gz'], stdout=subprocess.PIPE, text=True)
             remove.stdout
+            remove.check_returncode()
 
     def rm_pheno(df, diff, File):
         """Description:
@@ -1057,7 +1143,7 @@ class Processing:
         fam.index = fam.index.astype(str).str.strip()
         return fam.drop(fam.columns[4], axis=1)
 
-    def edit_fam(fam, pheno_subset, subset2, X, char, string, Log, model, model2, pc_prefix):
+    def edit_fam(fam, pheno_subset, subset2, X, char, string, Log):
         """Description:
         sorts phenotype data according to .fam file then adds selected data to .fam file"""
 
@@ -1066,18 +1152,14 @@ class Processing:
             try:
                 fam[f'{i}{char}'] = pheno_subset_new.iloc[:,(i-1)]
             except IndexError:
-                for file in os.listdir():
-                    if file.startswith(subset2):
-                        os.remove(file)
-                move_log(model, model2, pc_prefix)
-                Log.print_log(f'Warning: selected {string}(s) not in {string} file')
-                sys.exit(1)
+                msg = f'Selected {string}(s) not in {string} file'
+                raise_error(IndexError, msg, Log)
         fam.fillna("NA", inplace=True)
         fam2 = fam
         fam2.dropna(axis=1, how="all", inplace=True)
         if len(fam2.columns) <= 4:
-            Log.print_log("Error: Please make sure that the individual names don't contain any special characters/delimiters/spaces")
-            sys.exit(1)
+            msg = "Please make sure that the individual names don't contain any special characters/delimiters/spaces"
+            raise_error(ValueError, msg, Log)
         fam.to_csv(f'{subset2}.fam', sep=' ', header=False)
         Log.print_log(f'{string}(s) added to .fam file')
         return pheno_subset_new.columns.tolist()
@@ -1092,11 +1174,8 @@ class Processing:
             try:
                 new[str(i)] = pheno_subset_new.iloc[:,(i-1)]
             except IndexError:
-                for file in os.listdir():
-                    if file.startswith(subset2):
-                        os.remove(file)
-                Log.print_log("Error: selected covariate(s) not in covariate file")
-                sys.exit(1)
+                msg = "Error: selected covariate(s) not in covariate file"
+                raise_error(IndexError, msg, Log)
         new["newindex"] = 1
         new.set_index("newindex", inplace=True)
         new.fillna("NA", inplace=True)
@@ -1114,12 +1193,15 @@ class Processing:
         
         for i in range(5):
             print(f'\nPruning iteration {str(i)}..')
-            subprocess.run(['plink', '--bfile', subset2, '--mind', '1', '--indep-pairwise', '100', '10', str(pca), '--allow-no-sex', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)])
-            subprocess.run(['plink', '--bfile', subset2, '--mind', '1', '--extract', 'plink.prune.in', '--make-bed', '--out', subset2,'--allow-no-sex', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)])
+            process = subprocess.run(['plink', '--bfile', subset2, '--mind', '1', '--indep-pairwise', '100', '10', str(pca), '--allow-no-sex', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)])
+            process.check_returncode()
+            process = subprocess.run(['plink', '--bfile', subset2, '--mind', '1', '--extract', 'plink.prune.in', '--make-bed', '--out', subset2,'--allow-no-sex', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)])
+            process.check_returncode()
 
         print("\nExtracting principal components..")
         do_pca = subprocess.run(['plink', '--pca', str(n), '--bfile', subset2, '--mind', '1', '--out', subset2, '--allow-no-sex', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
         do_pca.stdout
+        do_pca.check_returncode()
 
         df = pd.read_csv(f'{subset2}.eigenvec', header=None, sep="\s+")
         df = df.drop([0,1], axis=1)
@@ -1143,16 +1225,20 @@ class Processing:
             if chrom <= 24:
                 do_pca = subprocess.run(['plink', '--pca', str(n), '--vcf', snp_file, '--mind', '1', '--out', name, '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
                 do_pca.stdout
+                do_pca.check_returncode()
             else:
                 do_pca = subprocess.run(['plink', '--pca', str(n), '--vcf', snp_file, '--mind', '1', '--out', name, '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--double-id', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
                 do_pca.stdout
+                do_pca.check_returncode()
         else:
             if chrom <= 24:
                 do_pca = subprocess.run(['plink', '--pca', str(n), '--vcf', snp_file, '--mind', '1', '--out', name, '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
                 do_pca.stdout
+                do_pca.check_returncode()
             else:
                 do_pca = subprocess.run(['plink', '--pca', str(n), '--vcf', snp_file, '--mind', '1', '--out', name, '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
-                do_pca.stdout        
+                do_pca.stdout
+                do_pca.check_returncode()    
 
         df = pd.read_csv(f'{name}.eigenvec', header=None, sep="\s+")
         while len(df.columns) > n+1:
@@ -1178,7 +1264,8 @@ class Converter:
         """Description:
         compresses VCF file"""
 
-        subprocess.run(['bcftools', 'view', snp_file, '-Oz', '-o', f'{snp_file}.gz'])
+        process = subprocess.run(['bcftools', 'view', snp_file, '-Oz', '-o', f'{snp_file}.gz'])
+        process.check_returncode()
         return f'{snp_file}.gz'
 
     def index_vcf(snp_file):
@@ -1188,14 +1275,17 @@ class Converter:
         process = subprocess.run(['bcftools', 'index', '-f', snp_file])
         if process.returncode != 0:
             print("VCF unsorted \nSorting..")
-            subprocess.run(['bcftools', 'sort', snp_file, "-Oz", "-o", snp_file])
-            subprocess.run(['bcftools', 'index', '-f', snp_file])       
+            process = subprocess.run(['bcftools', 'sort', snp_file, "-Oz", "-o", snp_file])
+            process.check_returncode()
+            process = subprocess.run(['bcftools', 'index', '-f', snp_file])
+            process.check_returncode()
 
     def set_chrom(snp_file, switch=True):
         """Description:
         sets variable to amount of chromosomes"""
 
         out = subprocess.run(['bcftools', 'query', '-f', '%CHROM\n', snp_file], stdout=subprocess.PIPE, text=True)
+        out.check_returncode()
         ls = (out.stdout).split()
         ls_set = set(ls)
         if switch == True:
@@ -1208,6 +1298,7 @@ class Converter:
     def check_chrom(snp_file, chr):
 
         out = subprocess.run(['bcftools', 'query', '-f', '%CHROM\n', snp_file], stdout=subprocess.PIPE, text=True)
+        out.check_returncode()
         ls = (out.stdout).split()
         ls_set = set(ls)
 
@@ -1219,7 +1310,8 @@ class Converter:
             if chr_set.issubset(ls_set) == True:
                 pass
             else:
-                sys.exit("Error: please provide the chromosomes in the same format as in the VCF file")
+                msg = "Please provide the chromosomes in the same format as in the VCF file"
+                raise ValueError(msg)
         else:
             chr = sorted(ls_set)
             chr_num = len(ls_set)
@@ -1234,9 +1326,11 @@ class Converter:
         if chr == None:
             filtered = subprocess.run(['bcftools', 'view', '-m2', '-M2', '-v', 'snps', '-q', str(min_af), subset, '-Oz', '-o', subset2], stdout=subprocess.PIPE, text=True) 
             filtered.stdout
+            filtered.check_returncode()
         else:
             filtered = subprocess.run(['bcftools', 'view', "-r", chr, '-m2', '-M2', '-v', 'snps', '-q', str(min_af), subset, '-Oz', '-o', subset2], stdout=subprocess.PIPE, text=True) 
             filtered.stdout
+            filtered.check_returncode()
 
     def make_bed(subset2, chrom, memory, threads, list1):
         """Description:
@@ -1247,18 +1341,30 @@ class Converter:
         if list2 != None:
             if chrom <= 24:
                 make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
-                make_bed.stdout            
-            else:    
+                make_bed.stdout
+                make_bed.check_returncode()
+            elif chrom <= 95:    
                 make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--double-id', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
                 make_bed.stdout
+                make_bed.check_returncode()
+            else:
+                make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
+                make_bed.stdout
+                make_bed.check_returncode()
         else:
             #make_bed = subprocess.run(['plink', '--dummy', '15000', '2000000', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
             if chrom <= 24:            
                 make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)            
-                make_bed.stdout                            
-            else:
+                make_bed.stdout
+                make_bed.check_returncode()                
+            elif chrom <= 95:
                 make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
                 make_bed.stdout
+                make_bed.check_returncode()
+            else:
+                make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '0', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)            
+                make_bed.stdout
+                make_bed.check_returncode()
 
     def remove_files(subset, File, subset2, snp_file):
         """Description:
@@ -1296,10 +1402,10 @@ class Gemma:
     """Description:
     contains functions peforming GWAS analysis by calling GEMMA"""
 
-    def write_returncodes(code):
+    def write_returncodes(code, pc_prefix):
 
-        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"), 'a')
-        file.write(str(code))
+        file = open(os.path.join("_vcf2gwas_temp", f"vcf2gwas_process_report_{pc_prefix}.txt"), 'a')
+        file.write(code)
         file.close()
 
     def write_gemma_ind(path, prefix):
@@ -1307,7 +1413,7 @@ class Gemma:
         lines = file.readlines()
         file.close()
         lines = [i.rstrip() for i in lines]
-
+        
         for l in lines:
             if l.startswith("## number of analyzed individuals"):
                 n = [int(s) for s in l.split() if s.isdigit()]
@@ -1320,7 +1426,7 @@ class Gemma:
         file.write(f'Individuals used for analysis by GEMMA: {n}\n')
         file.close()
     
-    def rel_matrix(prefix, Log, covar_file_name, model='-gk', n='1'):
+    def rel_matrix(prefix, Log, covar_file_name, pc_prefix, model='-gk', n='1'):
         """Description:
         creates relatedness matrix and sets filename variable"""
 
@@ -1330,18 +1436,16 @@ class Gemma:
             process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-o', prefix, '-outdir', "."])
         else:
             process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-c', covar_file_name, '-o', prefix, '-outdir', "."])
-        Gemma.write_returncodes(process.returncode)
-        if process.returncode != 0:
-            Log.print_log(f'Error: GEMMA was not able to complete the analysis')
-            sys.exit(1)
+        code = str(process.returncode)
+        if code == "0":
+            Log.print_log("Relatedness matrix created successfully")
         if n == '1':
             filename = f'{prefix}.cXX.txt'
         if n == '2':
             filename = None
-        Log.print_log("Relatedness matrix created successfully")
-        return filename
+        return filename, code
 
-    def lm(prefix, prefix2, model, n, N, path, Log, covar_file_name):
+    def lm(prefix, prefix2, model, n, N, path, Log, covar_file_name, pc_prefix):
         """Description:
         performs GWAS with linear model"""
 
@@ -1350,61 +1454,61 @@ class Gemma:
             process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-o', prefix2, '-outdir', path])
         else:
             process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-c', covar_file_name, '-o', prefix2, '-outdir', path])
-        Gemma.write_returncodes(process.returncode)
-        if process.returncode != 0:
-            Log.print_log(f'Error: GEMMA was not able to complete the analysis')
-            sys.exit(1)
-        Gemma.write_gemma_ind(path, prefix2)
-        Log.print_log("Linear model calculated successfully")
+        code = str(process.returncode)
+        Gemma.write_returncodes(code, pc_prefix)
+        if code == "0":
+            Gemma.write_gemma_ind(path, prefix2)
+            Log.print_log("Linear model calculated successfully")
+        return code
 
-    def eigen(prefix, filename, model, Log):
+    def eigen(prefix, filename, model, Log, pc_prefix):
         """Description:
         performs eigen-decomposition of relatedness matrix"""
 
         Log.print_log('Decomposing relatedness matrix..')
         process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, '-o', prefix, '-outdir', "."])
-        Gemma.write_returncodes(process.returncode)
-        if process.returncode != 0:
-            Log.print_log(f'Error: GEMMA was not able to complete the analysis')
-            sys.exit(1)
-        Log.print_log("Eigen-decomposition of relatedness matrix successful")
+        code = str(process.returncode)
+        Gemma.write_returncodes(code, pc_prefix)
+        if code == "0":
+            Log.print_log("Eigen-decomposition of relatedness matrix successful")
+        return code
 
-    def lmm(pca, prefix, prefix2, filename, filename2, model, n, N, path, Log, covar_file_name):
+    def lmm(pca, prefix, prefix2, filename, filename2, model, n, N, path, Log, covar_file_name, pc_prefix):
         """Description:
         performs GWAS with linear mixed model"""
 
         Log.print_log('Calculating linear mixed model..')
         if covar_file_name == None:
             if pca != None:
-                process = subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path], check=True)
+                process = subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path])
             else:
-                process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path], check=True)
+                process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path])
         else:
             if pca != None:
-                process = subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, "-c", covar_file_name, '-o', prefix2, '-outdir', path], check=True)
+                process = subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, "-c", covar_file_name, '-o', prefix2, '-outdir', path])
             else:
-                process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, "-c", covar_file_name,'-o', prefix2, '-outdir', path], check=True)
-        Gemma.write_returncodes(process.returncode)
-        if process.returncode != 0:
-            Log.print_log(f'Error code: \n{process.returncode} \nPossibly not enough memory available to process files.')
-            sys.exit(1)
-        Gemma.write_gemma_ind(path, prefix2)
-        Log.print_log("Linear mixed model calculated successfully")
+                process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, "-c", covar_file_name,'-o', prefix2, '-outdir', path])
+        code = str(process.returncode)
+        Gemma.write_returncodes(code, pc_prefix)
+        if code == "0":
+            Gemma.write_gemma_ind(path, prefix2)
+            Log.print_log("Linear mixed model calculated successfully")
+        return code
 
-    def bslmm(prefix, prefix2, model, n, N, path, Log, burn, sampling, snpmax):
+    def bslmm(prefix, prefix2, model, n, N, path, Log, burn, sampling, snpmax, pc_prefix):
         """Description:
         performs GWAS with bayesian sparse linear mixed model"""
 
         Log.print_log('Calculating bayesian sparse linear mixed model..')
-        process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-w', burn, '-s', sampling, '-smax', snpmax, '-o', prefix2, '-outdir', path], check=True)
-        Gemma.write_returncodes(process.returncode)
-        if process.returncode != 0:
-            Log.print_log(f'Error: GEMMA was not able to complete the analysis')
-            sys.exit(1)
-        Gemma.write_gemma_ind(path, prefix2)
-        Log.print_log("Bayesian sparse linear mixed model calculated successfully")
+        process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-w', burn, '-s', sampling, '-smax', snpmax, '-o', prefix2, '-outdir', path])
+        code = str(process.returncode)
+        Gemma.write_returncodes(code, pc_prefix)
+        if code == "0":
+            Gemma.write_gemma_ind(path, prefix2)
+            Log.print_log("Bayesian sparse linear mixed model calculated successfully")
+        return code
 
-    def run_gemma(prefix, prefix2, model, n, N, path, Log, filename, filename2, pca, covar_file_name, i, burn, sampling, snpmax):
+    def run_gemma(prefix, prefix2, model, n, N, path, Log, filename, filename2, pca, covar_file_name, i, i_list2, burn, sampling, snpmax, pc_prefix):
         """Description:
         runs GEMMA dependent on input"""
 
@@ -1413,15 +1517,16 @@ class Gemma:
             Log.print_log(f'Output will be saved in {path}/')
 
         if model == "-lm":
-            Gemma.lm(prefix, prefix2, model, n, N, path, Log, covar_file_name)
+            code = Gemma.lm(prefix, prefix2, model, n, N, path, Log, covar_file_name, pc_prefix)
 
         elif model == "-gk":
-            Gemma.rel_matrix(prefix, Log, covar_file_name, model, n)
+            _f, code = Gemma.rel_matrix(prefix, Log, covar_file_name, pc_prefix, model, n)
+            Gemma.write_returncodes(code, pc_prefix)
 
         elif model == "-eigen":
             if filename != None:
                 Log.print_log("Reading relatedness matrix..")
-            Gemma.eigen(prefix, filename, model, Log)
+            code = Gemma.eigen(prefix, filename, model, Log, pc_prefix)
 
         elif model == "-lmm":
             if filename != None:
@@ -1429,30 +1534,56 @@ class Gemma:
                     Log.print_log("Reading eigenvalues and eigenvectors..")
                 else:
                     Log.print_log("Reading relatedness matrix..")
-            Gemma.lmm(pca, prefix, prefix2, filename, filename2, model, n, N, path, Log, covar_file_name)
+            code = Gemma.lmm(pca, prefix, prefix2, filename, filename2, model, n, N, path, Log, covar_file_name, pc_prefix)
 
         elif model == "-bslmm":
-            Gemma.bslmm(prefix, prefix2, model, n, N, path, Log, burn, sampling, snpmax)
+            code = Gemma.bslmm(prefix, prefix2, model, n, N, path, Log, burn, sampling, snpmax, pc_prefix)
 
         else:
             Log.print_log("No model was chosen!")
+            code = "0"
 
-        Log.print_log(f'GEMMA executed successfully on {i}')
+        if code == "0":
+            Log.print_log(f'GEMMA executed successfully on {i}')
+        else:
+            file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_gemma_fail.txt"), 'a')
+            file.write(f'{i}\n')
+            file.close()
 
 
 class Post_analysis:
     """Description:
     contains functions and subclasses regarding analysis of GWAS output"""
 
-    def check_return_codes():
+    def check_return_codes(pc_prefix):
 
-        code_file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"), 'r')
+        code_file = open(os.path.join("_vcf2gwas_temp", f"vcf2gwas_process_report_{pc_prefix}.txt"), 'r')
         code_file_str = code_file.read()
         if "0" not in code_file_str:
             code_file.close()
-            sys.exit(1)
+            raise ChildProcessError()
         else:
             code_file.close()
+
+    def get_gemma_success(l1, l2, l3, l4, lr):
+
+        indexes = []
+        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_gemma_fail.txt"), 'r')
+        lines = file.readlines()
+        file.close()
+        rm_list = [i.rstrip() for i in lines]
+        
+        for i in range(len(l1)):
+            for x in rm_list:
+                if x == l1[i]:
+                    indexes.append(i)
+
+        for index in sorted(indexes, reverse=True):
+            r = l1.pop(index)
+            lr.append(r)
+            del l2[index]
+            del l3[index]
+            del l4[index]
 
     def load_df(prefix, case, path):
         """Description:
@@ -2006,8 +2137,8 @@ class Summary:
                     values[1] = values[1].apply(pd.to_numeric)
                     values[1] = values[1].astype(int)
                 except:
-                    Log.print_log("Error: Non-numerical values of SNP positions")
-                    sys.exit(1)
+                    msg = "Non-numerical values of SNP positions"
+                    raise_error(ValueError, msg, Log)
                 try:
                     values[2] = values[2].apply(pd.to_numeric)
                     values[2] = values[2].astype(int)
@@ -2016,8 +2147,8 @@ class Summary:
                 try:
                     values[3] = values[3].apply(pd.to_numeric)
                 except:
-                    Log.print_log("Error: Non-numerical values of p-values")
-                    sys.exit(1)
+                    msg = "Non-numerical values of p-values"
+                    raise_error(ValueError, msg, Log)
                 values.columns = ["SNP_ID", "SNP_pos", "chr", "p_value"]
                 values.dropna(inplace=True)
                 if values.empty == True:
@@ -2041,8 +2172,8 @@ class Summary:
                     try:
                         values[["SNP_pos", "count"]] = values[["SNP_pos", "count"]].astype(int)
                     except:
-                        Log.print_log("Error: Couldn't format values as integer")
-                        sys.exit(1)
+                        msg = "Couldn't format values as integer"
+                        raise_error(ValueError, msg, Log)
                     try:
                         values["chr"] = values["chr"].astype(int)   
                     except:
@@ -2167,7 +2298,8 @@ class Summary:
             for i in range(len(keys)):
                 chr_dict[keys[i]] = values[i]
             if not chr_dict:
-                sys.exit("Error: Please make sure that the chromosomes in the VCF and gene file have the same format")
+                msg = "Please make sure that the chromosomes in the VCF and gene file have the same format"
+                raise ValueError(msg)
 
         df["chr"].replace(chr_dict, inplace=True)
         df = df[df["chr"].isin(chr_set)]
@@ -2514,3 +2646,117 @@ class Summary:
             path = os.path.split(name)[0]
             name_new = os.path.split(name)[1]
             df2.to_csv(os.path.join(path, f'Overview_{name_new}'), index=False)
+
+
+class pheno_transformation:
+    '''
+    The functions in this class are adapted from ecopy https://ecopy.readthedocs.io/en/latest/index.html
+    '''
+
+    def transform(x, pheno_file, pheno_path, method='wisconsin', axis=1, breakNA=True):
+        '''
+        Docstring for function ecopy.distance
+        ========================
+        Applies a transformation to a given matrix
+        Use
+        ----
+        transform(x, method='wisconsin', axis=1, breakNA=True)
+        Returns either a numpy.ndarray or pandas.DataFrame, depending
+            on input
+        Parameters
+        ----------
+        x: pandas dataframe or numpy array with observations as rows
+            and descriptors as columns
+        method: particular transformation
+            total: divides by the column or row sum
+            max: divides by the column or row max
+            normalize: makes the sum of squares = 1 along columns or rows (chord distance)
+            range: converts to a range of [0, 1]
+            standardize: calculates z-score along columns or rows
+            hellinger: square-root after transformation by total
+            log: return ln(x + 1) which automatically returns 0 if x = 0
+            pa: convert to binary presence/absence
+            wisconsin: the standard transformation, first by column maxima then by 
+                row totals (default)
+        axis: which axis should undergo transformation.
+            axis = 0 applies down columns
+            axis = 1 applies across rows (default)
+        breakNA: should the process halt if the matrix contains any NAs?
+            if False, then NA's are ignored during transformations
+        
+        Example
+        --------
+        import ecopy as ep
+        varespec = ep.load_data('varespec')
+        # divide each element by row total
+        ep.transform(varespec, method='total', axis=1)
+        '''
+        if not isinstance(breakNA, bool):
+            msg = 'breakNA must be boolean'
+            raise ValueError(msg)
+        if not isinstance(x, pd.DataFrame):
+            msg = 'x must be a pandas dataframe'
+            raise ValueError(msg)
+        if axis not in [0, 1]:
+            msg = 'Axis argument must be either 0 or 1'
+            raise ValueError(msg)
+        if method not in ['total', 'max', 'normalize', 'range', 'standardize', 'hellinger', 'log', 'logp1', 'pa', 'wisconsin']:
+            msg = '{0} not an accepted method'.format(method)
+            raise ValueError(msg)
+        if isinstance(x, pd.DataFrame):
+            if breakNA:
+                if x.isnull().any().any():
+                    msg = 'DataFrame contains null values'
+                    raise ValueError(msg)
+            if (x<0).any().any():
+                msg = 'DataFrame contains negative values'
+                raise ValueError(msg)
+            z = x.copy()
+            if method=='total':
+                data = z.apply(pheno_transformation.totalTrans, axis=axis)
+            if method=='max':
+                data = z.apply(pheno_transformation.maxTrans, axis=axis)
+            if method=='normalize':
+                data = z.apply(pheno_transformation.normTrans, axis=axis)
+            if method=='range':
+                data = z.apply(pheno_transformation.rangeTrans, axis=axis)
+            if method=='standardize':
+                data = z.apply(pheno_transformation.standTrans, axis=axis)
+            if method=='pa':
+                z[z>0] = 1
+                data = z
+            if method=='hellinger':
+                data = z.apply(pheno_transformation.totalTrans, axis=axis)
+                data = np.sqrt(data)
+            if method=='log':
+                if ((z > 0) & (z < 1)).any().any():
+                    msg = 'Log of values between 0 and 1 will return negative numbers\nwhich cannot be used in subsequent distance calculations'
+                    raise ValueError(msg)
+                data = z.applymap(lambda y: np.log(y+1))
+            if method=='logp1':
+                if ((z > 0) & (z < 1)).any().any():
+                    msg = 'Log of values between 0 and 1 will return negative numbers\nwhich cannot be used in subsequent distance calculations'
+                    raise ValueError(msg)
+                data = z.applymap(lambda y: np.log(y) + 1 if y>0 else 0)
+            if method=='wisconsin':
+                data = z.apply(pheno_transformation.maxTrans, axis=0)
+                data = data.apply(pheno_transformation.totalTrans, axis=1)
+        #df = pd.DataFrame(distMat, index=l2, columns=l2)
+        data.to_csv(os.path.join(pheno_path, pheno_file))
+        return data
+
+    def totalTrans(y):
+        return y/np.nansum(y)
+
+    def maxTrans(y):
+        return y/np.nanmax(y)
+
+    def normTrans(y):
+        denom = np.sqrt(np.nansum(y**2))
+        return y/denom
+
+    def rangeTrans(y):
+        return (y - np.nanmin(y))/(np.nanmax(y) - np.nanmin(y))
+
+    def standTrans(y):
+        return (y - np.nanmean(y))/np.nanstd(y, ddof=1)

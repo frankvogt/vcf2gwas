@@ -31,7 +31,8 @@ argvals = None
 
 def main(argvals=argvals):
     
-    print("\nvcf2gwas v0.8.4 \n")
+    version = set_version_number()
+    print(f"\nvcf2gwas v{version} \n")
     print("Initialising..\n")
     P = Parser(argvals)
     args = sys.argv[1:]
@@ -51,11 +52,21 @@ def main(argvals=argvals):
     covar = P.set_covar()
     if lm == None and lmm == None:
         if covar != None:
-            sys.exit(print("Error: A covariate file can only be added when using the linear model ('-lm') or the linear mixed model ('-lmm')"))
+            msg = "A covariate file can only be added when using the linear model ('-lm') or the linear mixed model ('-lmm')"
+            raise SyntaxError(msg)
 
-    subprocess.run(args)
+    process = subprocess.run(args)
 
-    shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
+    if process.returncode != 0:
+        shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
+
+    return process.returncode
 
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt as e:
+        print("\nvcf2gwas interrupted")
+        shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
+        print("Cleaned up temporary files\n")
+        sys.exit(1)

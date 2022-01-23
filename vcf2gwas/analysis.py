@@ -19,21 +19,17 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import sys
-from vcf2gwas.utils import make_dir, runtime_format
-from parsing import *
-from utils import *
+from vcf2gwas.parsing import *
+from vcf2gwas.utils import *
 
+import sys
 import time
 import concurrent.futures
 import multiprocessing as mp
 import itertools
 import os
 import shutil
-import signal
-
 import pandas as pd
-import seaborn as sns
 
 #os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -47,7 +43,7 @@ start = time.perf_counter()
 # set argument parser
 P = Parser(argvals)
 out_dir = P.set_out_dir()
-out_dir2 = os.path.join(out_dir, "output")
+out_dir2 = os.path.join(out_dir, "Output")
 dir_temp = "_vcf2gwas_temp"
 memory = P.set_memory()
 threads = P.set_threads()
@@ -80,14 +76,20 @@ bslmm = P.set_bslmm()
 model = set_model(lm, gk, eigen, lmm, bslmm)
 model2 = None
 if model != None:
-    model2 = model.removeprefix("-")
+    model2 = change_model_dir_names(model)
 
 pc_prefix = set_pc_prefix(pheno_file, covar_file, "_")
 if model in ["-gk", "-eigen"]:
     pc_prefix = set_pc_prefix(pheno_file, covar_file, "")
 
+if model == None:
+    path = out_dir2
+else:
+    path = os.path.join(out_dir2, model2)
+
 # configure logger
-Log = Logger(pc_prefix, out_dir2)
+log_path = get_log_path(path, timestamp2)
+Log = Logger(pc_prefix, log_path)
 
 Log.print_log(f'\nBeginning with analysis of {pheno_file}\n')
 
@@ -136,8 +138,7 @@ chrom, chrom_list = Converter.set_chrom(snp_file2)
 subset = f'sub{pc_prefix}_{snp_prefix}'
 subset_temp_1 = subset
 folder = f'files{pc_prefix}_{snp_prefix}'
-#if model in ["-gk", "-eigen"]:
-#    folder = f'files_{pc_prefix}_{snp_prefix}'
+
 subset2 = os.path.join(dir_temp, f'mod_{subset}')
 subset = os.path.join(dir_temp, subset)
 subset_temp = subset
@@ -199,10 +200,9 @@ diff_num = len(diff1a)+len(diff1b)-len(diff1c)
 if len(list1_org)-diff_num == 0:
     if keep == False:
         Converter.remove_files(subset, pheno_file, subset2, snp_file2)
-    Log.print_log("Error: No individuals left! Check if IDs in VCF and phenotype file are of the same format")
-    sys.exit(1)
+    msg = "No individuals left! Check if IDs in VCF and phenotype file are of the same format"
+    raise_error(ValueError, msg, Log)
 
-#PRINT len(list1)-diff_num TO FILE
 file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_ind_count.txt"), 'a')
 file.write(f'{len(list1_org)-diff_num}\n')
 file.close()
@@ -213,9 +213,6 @@ Log.print_log("Files successfully adjusted\n")
 ############################## Filter, make ped and bed ##############################
 
 Log.print_log("Filtering and converting files\n")
-#Log.print_log("Filtering SNPs..")
-#Converter.filter_snps(min_af, subset, subset2)
-#Log.print_log("SNPs successfully filtered")
 os.rename(f'{subset}.vcf.gz', f'{subset2}.vcf.gz')
 
 Log.print_log("Converting to PLINK BED..")
@@ -250,7 +247,7 @@ else:
         X = list(range(length1))
         X = [i+1 for i in X]
         Log.print_log("All phenotypes chosen")
-        cols1 = Processing.edit_fam(fam, pheno_subset1, subset2, X, "p", "Phenotype", Log, model, model2, pc_prefix)
+        cols1 = Processing.edit_fam(fam, pheno_subset1, subset2, X, "p", "Phenotype", Log)
         cols1 = [str(i) for i in cols1]
     else:
         cols1 = []
@@ -258,7 +255,7 @@ else:
             X = []
             Log.print_log("No phenotypes were specified, continuing without")
         else:
-            Processing.edit_fam(fam, pheno_subset1, subset2, X, "p", "Phenotype", Log, model, model2, pc_prefix)
+            Processing.edit_fam(fam, pheno_subset1, subset2, X, "p", "Phenotype", Log)
 
 if covar_file == None:
     Y = []
@@ -277,7 +274,7 @@ else:
         Y = list(range(length2))
         Y = [i+1 for i in Y]
         Log.print_log("All covariates chosen")
-        cols2 = Processing.edit_fam(fam, pheno_subset2, subset2, Y, "c", "Covariate", Log, model, model2, pc_prefix)
+        cols2 = Processing.edit_fam(fam, pheno_subset2, subset2, Y, "c", "Covariate", Log)
         cols2 = [str(i) for i in cols2]
     else:
         cols2 = []
@@ -285,7 +282,7 @@ else:
             Y = []
             Log.print_log("No covariates were specified, continuing without")
         else:
-            Processing.edit_fam(fam, pheno_subset2, subset2, Y, "c", "Covariate", Log, model, model2, pc_prefix)
+            Processing.edit_fam(fam, pheno_subset2, subset2, Y, "c", "Covariate", Log)
 
 if model in ("-gk", "-eigen"):
     if pheno_file == None and covar_file == None:
@@ -334,8 +331,12 @@ pd.options.mode.chained_assignment = None
 prefix_list = []
 prefix2_list = []
 i_list = []
+i_list2 = []
 N_list = []
 path_list = []
+
+file = open(os.path.join("_vcf2gwas_temp", f"vcf2gwas_process_report_{pc_prefix}.txt"), 'a')
+file.close()
 
 if model == None:
     Log.print_log("GEMMA can't be executed since no model was specified!\n")
@@ -362,12 +363,11 @@ else:
                 N = concat_lists(X, Y)
                 N = listtostring(N)
 
-        make_dir(os.path.join(out_dir2, model2))
-        path = None
+        path_temp = None
         if model not in ("-gk", "-eigen"):
-            path = os.path.join(out_dir2, model2, i, f'{i}_{timestamp2}')
-            make_dir(path)
-            file = open(os.path.join(path, f'Summary_{prefix2}.txt'), 'a')
+            path_temp = os.path.join(path, i, f'{i}_{timestamp2}')
+            make_dir(path_temp)
+            file = open(os.path.join(path_temp, f'Summary_{prefix2}.txt'), 'a')
             file.write(f'Individuals cleared for analyis: {len(list1_org)-diff_num}\n')
             file.close()
         
@@ -375,51 +375,49 @@ else:
         prefix2_list.append(prefix2)
         i_list.append(i)
         N_list.append(N)
-        path_list.append(path)
+        path_list.append(path_temp)
 
         if model in ("-eigen", "-lmm"):
             if filename == None:
-                filename = Gemma.rel_matrix(prefix, Log, covar_file_name)
+                filename, code = Gemma.rel_matrix(prefix, Log, covar_file_name, pc_prefix)
+                if code != "0":
+                    Gemma.write_returncodes(code, pc_prefix)
 
     # run GEMMA in parallel
     with concurrent.futures.ProcessPoolExecutor(mp_context=mp.get_context('fork'), max_workers=threads) as executor:
         executor.map(
             Gemma.run_gemma, prefix_list, prefix2_list, itertools.repeat(model), itertools.repeat(n), N_list, path_list, itertools.repeat(Log), itertools.repeat(filename), 
-            itertools.repeat(filename2), itertools.repeat(pca), itertools.repeat(covar_file_name), i_list, itertools.repeat(burn), itertools.repeat(sampling), itertools.repeat(snpmax)
+            itertools.repeat(filename2), itertools.repeat(pca), itertools.repeat(covar_file_name), i_list, itertools.repeat(i_list2),
+            itertools.repeat(burn), itertools.repeat(sampling), itertools.repeat(snpmax), itertools.repeat(pc_prefix)
         )
     timer_end = time.perf_counter()
     timer_total = round(timer_end - timer, 2)
-    Post_analysis.check_return_codes()
+    Post_analysis.check_return_codes(pc_prefix)
+    Post_analysis.get_gemma_success(i_list, prefix2_list, path_list, columns, i_list2)
     Log.print_log(f'\nGEMMA completed successfully (Duration: {runtime_format(timer_total)})\n')
 
     ############################## Processing and plotting ##############################
 
     Log.print_log("Analyzing GEMMA results\n")
-    for (top_ten, top_sig, top_all, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot) in zip(
+    for (top_ten, top_sig, top_all, Log, model, n, prefix2, path_temp, n_top, i, sigval, nolabel, noplot) in zip(
         itertools.repeat(top_ten), itertools.repeat(top_sig), itertools.repeat(top_all), itertools.repeat(Log), itertools.repeat(model), itertools.repeat(n), prefix2_list, path_list, 
         itertools.repeat(n_top), i_list, itertools.repeat(sigval), itertools.repeat(nolabel), itertools.repeat(noplot)
         ):
-        Post_analysis.run_postprocessing(top_ten, top_sig, top_all, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot)
+        Post_analysis.run_postprocessing(top_ten, top_sig, top_all, Log, model, n, prefix2, path_temp, n_top, i, sigval, nolabel, noplot)
     Log.print_log("Analysis of GEMMA results completed successfully\n")
 
 ############################## Summary and Clean up ##############################
 
 Log.print_log("Starting clean-up\n")
 
-if model == None:
-    path = out_dir2
-else:
-    path = os.path.join(out_dir2, model2)
-
 if model not in ("-gk", "-eigen", None):
-    #make_dir(os.path.join(path, "summary"))
-    path2 = os.path.join(path, "summary", "temp","top_SNPs")
+    path2 = os.path.join(path, "Summary", "temp","top_SNPs")
     make_dir(path2)
     Post_analysis.print_top_list(top_ten, top_sig, top_all, columns, path2, pc_prefix, snp_prefix)
     Log.print_log("Top SNPs saved")
 
-make_dir(os.path.join(path, "files"))
-path3 = os.path.join(path, "files", folder)
+make_dir(os.path.join(path, "Files"))
+path3 = os.path.join(path, "Files", folder)
 make_dir(path3)
 
 Log.print_log("Moving files..")
@@ -427,13 +425,13 @@ for files in os.listdir(dir_temp):
     if files.startswith((os.path.split(subset)[1], os.path.split(subset2)[1])):
         shutil.move(os.path.join(dir_temp, files), os.path.join(path3, files))
 if model == "-gk":
-    path2 = os.path.join(path, "rel_matrix", f'rel_matrix_{timestamp2}')
+    path2 = os.path.join(path, "Relatedness Matrix", f'rel_matrix_{timestamp2}')
     make_dir(path2)
     for files in os.listdir(path3):
         if files.endswith("XX.txt"):
             shutil.move(os.path.join(path3, files), os.path.join(path2, files))
 if model == "-eigen":
-    path2 = os.path.join(path, "eigen_v", f'rel_matrix_{timestamp2}')
+    path2 = os.path.join(path, "Eigen Vectors", f'rel_matrix_{timestamp2}')
     make_dir(path2)
     for files in os.listdir(path3):
         if files.endswith(("eigenD.txt", "eigenU.txt")):
@@ -445,6 +443,4 @@ time_total = runtime_format(time_total)
 
 Log.print_log(f'Clean up successful \n\nAnalysis of {pheno_file} finished successfully\nRuntime: {time_total}\n')
 
-move_log(model, model2, pc_prefix, snp_prefix, out_dir2, timestamp2)
-
-sys.exit(0)
+move_log(model, pc_prefix, snp_prefix, timestamp2, log_path)
