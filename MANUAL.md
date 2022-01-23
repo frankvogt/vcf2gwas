@@ -22,6 +22,7 @@ The phenotype file `example.csv` is made up of the `avrRpm1` phenotype from the 
 * [File related options](#file-related-options)
     * [Selecting multiple phenotype files](#selecting-multiple-phenotype-files)
     * [Analyzing multiple phenotypes](#analyzing-multiple-phenotypes)
+    * [Transforming phenotype values](#transforming-phenotype-values)
     * [Adding covariates](#adding-covariates)
     * [Comparing results to specific genes](#comparing-results-to-specific-genes)
     * [Adding a relatedness matrix](#adding-a-relatedness-matrix)
