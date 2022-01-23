@@ -24,8 +24,7 @@ import sys
 import os
 import subprocess
 
-#from vcf2gwas.parsing import *
-from parsing import *
+from vcf2gwas.parsing import *
 from vcf2gwas.install import main as installer
 
 argvals = None
