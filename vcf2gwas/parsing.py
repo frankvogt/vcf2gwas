@@ -31,7 +31,7 @@ except ModuleNotFoundError:
     from psutil import virtual_memory
 
 def set_version_number():
-    return "0.8.5"
+    return "0.8.6"
 
 def getArgs(argv=None):
     """Description:
