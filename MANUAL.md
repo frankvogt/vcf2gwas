@@ -3,6 +3,7 @@
 ## About
 
 This manual is meant to clarify the most important options and possibilities when running *vcf2gwas*.  
+**Note**: When running *vcf2gwas* via [docker](https://www.docker.com/), replace `vcf2gwas` in every command with `docker run -v /path/to/current-working-directory/:/vcf2gwas/ fvogt257/vcf2gwas`.  
 To obtain example files for running *vcf2gwas*, run:
 
 ```

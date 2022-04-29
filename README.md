@@ -9,7 +9,8 @@
     * [Built With](#built-with)
 * [Getting Started](#getting-started)
     * [Prerequisites](#prerequisites)
-    * [Installation](#installation)
+    * [Installation via conda](#installation-via-conda)
+    * [Installation via docker](#installation-via-docker)
 * [Usage](#usage)
     * [Input Files](#input-files)
     * [Running *vcf2gwas*](#running-vcf2gwas)
@@ -56,13 +57,13 @@ The exact versions of [Python](https://www.python.org/), [bcftools](http://samto
 ## Getting Started
 
 These instructions will provide an easy way to get *vcf2gwas* running on your local machine.  
-*vcf2gwas* works on macOS and Linux systems.
+*vcf2gwas* works on macOS and Linux systems when run via [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html). When running the [*vcf2gwas* docker image](https://hub.docker.com/r/fvogt257/vcf2gwas), *vcf2gwas* runs on all operating systems supported by [docker](https://www.docker.com/).
 
 ### Prerequisites
 
-The only requirement is an up to date version of [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) installed on your machine.
+The only requirement is an up to date version of either [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) or [docker](https://www.docker.com/products/docker-desktop/) installed on your machine.
 
-### Installation
+### Installation via conda
 
 It is a good practice to install the package in a clean environment.  
 So first create a new environment (you can name it as you like), here with the exemplary name 'myenv':
@@ -94,6 +95,21 @@ Once the analysis is completed, the environment can be deactivated:
 
 ```
 conda deactivate
+```
+
+### Installation via docker
+
+To download the [*vcf2gwas* docker image](https://hub.docker.com/r/fvogt257/vcf2gwas),  run the following command:
+
+```
+docker pull fvogt257/vcf2gwas
+```
+
+Everything is ready for analysis now.  
+Optionally, to test the image and copy the example files to your current working directory, run:
+
+```
+docker run -v /path/to/current-working-directory/:/vcf2gwas/ fvogt257/vcf2gwas -v test
 ```
 
 ## Usage
@@ -148,6 +164,12 @@ Once the virtual environment is activated, *vcf2gwas* can be run on the command-
 
 ```
 vcf2gwas -v example.vcf.gz -pf example.csv -ap -lmm
+```
+
+**Note**: When running *vcf2gwas* via [docker](https://www.docker.com/), replace in every command `vcf2gwas` with `docker run -v /path/to/current-working-directory/:/vcf2gwas/ fvogt257/vcf2gwas`:
+
+```
+docker run -v /path/to/current-working-directory/:/vcf2gwas/ fvogt257/vcf2gwas -v example.vcf.gz -pf example.csv -ap -lmm
 ```
 
 The available options will be elucidated in the next section.  
