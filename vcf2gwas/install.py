@@ -1,4 +1,3 @@
-import subprocess
 import os
 import shutil
 
@@ -22,16 +21,7 @@ along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 def main():
-    #print("Checking environment.. \nUpdating dependencies..")
-    #env_name = os.environ["CONDA_DEFAULT_ENV"]
-    #subprocess.run(["conda", "env", "update", "-n", env_name, "-f", os.path.join(os.path.dirname(__file__), 'environment.yml')])
-    #try:
-    #    #subprocess.run(["pip", "install", "umap-learn"])
-    #    subprocess.run(["conda", "env", "create", "-f",
-    #        os.path.join(os.path.dirname(__file__), 'environment.yml')])
-    #except Exception as e:
-    #    print(e)
-    #print("Environment is now up to date")
+
     print("Copying example input files to current working directory..")
     try:
         os.mkdir("input")
@@ -43,4 +33,3 @@ def main():
     print("Copying README and LICENSE files..")
     shutil.copy(os.path.join(os.path.dirname(__file__), 'README.pdf'), 'README.pdf')
     shutil.copy(os.path.join(os.path.dirname(__file__), 'LICENSE'), 'LICENSE')
-    #print("Installation complete\n")

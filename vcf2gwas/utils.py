@@ -19,7 +19,8 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from vcf2gwas.parsing import Parser
+#from vcf2gwas.parsing import Parser
+from parsing import *
 
 import os
 import subprocess
@@ -80,9 +81,7 @@ except ModuleNotFoundError:
 
 from parsing import *
 
-sns.set_style('white')
-#sns.set_style('ticks')
-#os.chdir(os.path.dirname(os.path.abspath(__file__)))
+sns.set_theme(style='white', palette='deep')
 
 #set fontsize
 argvals = None
@@ -99,7 +98,6 @@ plt.rc('font', size=fontsize3, weight="bold")
 plt.rc('axes', linewidth=fontsize5)
 plt.rc('xtick.major', width=fontsize5, size=fontsize4)
 plt.rc('ytick.major', width=fontsize5, size=fontsize4)
-sns.set_color_codes()
 
 ############################## Functions ##############################
 
@@ -1605,7 +1603,7 @@ class Post_analysis:
         data_grouped = data.groupby((chromosome))
         return data, data_grouped
 
-    def manh_plot(df, Log, prefix, pcol, path, sigval, x, nolabel, colors = ['#E24E42', '#008F95'], refSNP = False):
+    def manh_plot(df, Log, prefix, pcol, path, sigval, x, nolabel, colors = ['#4C72B0', '#C44E52'], refSNP = False):
         """Description:
         creates manhattan plot from prepared dataframe and saves plot
         based on: https://github.com/Pudkip/Pyhattan/blob/master/Pyhattan/__init__.py"""
