@@ -19,10 +19,10 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-#from vcf2gwas.parsing import *
-#from vcf2gwas.utils import *
-from parsing import *
-from utils import *
+from vcf2gwas.parsing import *
+from vcf2gwas.utils import *
+#from parsing import *
+#from utils import *
 
 import sys
 import time

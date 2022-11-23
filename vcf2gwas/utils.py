@@ -79,7 +79,7 @@ try:
 except ModuleNotFoundError:
     subprocess.run(["pip", "install", "scikit-allel"])
 
-from parsing import *
+#from parsing import *
 
 sns.set_theme(style='white', palette='deep')
 
