@@ -23,13 +23,15 @@ import shutil
 import sys
 import os
 import subprocess
+import time
 
-from vcf2gwas.parsing import *
+#from vcf2gwas.parsing import *
+from parsing import *
 from vcf2gwas.install import main as installer
 
 argvals = None
 
-def main(argvals=argvals):
+def main(timestamp, argvals=argvals):
     
     version = set_version_number()
     print(f"\nvcf2gwas v{version} \n")
@@ -39,13 +41,20 @@ def main(argvals=argvals):
     args.insert(0, 'python3.9')
     args.insert(1, os.path.join(os.path.dirname(__file__), 'starter.py'))
     
+    try:
+        args = delete_string(args, ['--timestamp'])
+    except:
+        pass
+    args.insert(2, timestamp)
+    args.insert(2, "--timestamp")
+    
     geno = P.set_geno()
     if geno == "test":
         source = os.path.join(os.path.dirname(__file__), 'starter.py')
         installer()
         vcf = os.path.join("input", "example.vcf.gz")
         pheno = os.path.join("input", "example.csv")
-        args = f'python3.9 {source} -v {vcf} -pf {pheno} -p 1 -lm'.split()
+        args = f'python3.9 {source} --timestamp {timestamp} -v {vcf} -pf {pheno} -p 1 -lm'.split()
     
     lm = P.set_lm()
     lmm = P.set_lmm()
@@ -59,19 +68,21 @@ def main(argvals=argvals):
     return process.returncode
 
 def run_main():
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
     try:
-        sys.exit(main())
+        sys.exit(main(timestamp))
     except KeyboardInterrupt as e:
         print("\nvcf2gwas interrupted")
         print("Cleaning up temporary files\n")
     finally:
-        shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
+        shutil.rmtree(f'_vcf2gwas_temp_{timestamp}', ignore_errors=True)
 
 if __name__ == '__main__':
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
     try:
-        sys.exit(main())
+        sys.exit(main(timestamp))
     except KeyboardInterrupt as e:
         print("\nvcf2gwas interrupted")
         print("Cleaning up temporary files\n")
     finally:
-        shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
+        shutil.rmtree(f'_vcf2gwas_temp_{timestamp}', ignore_errors=True)

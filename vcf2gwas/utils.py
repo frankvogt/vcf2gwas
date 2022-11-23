@@ -129,19 +129,6 @@ def set_pc_prefix(pheno_file, covar_file, string):
         pc_prefix = string
     return pc_prefix
 
-def write_timestamp(time):
-
-    file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_timestamp.txt"), 'a')
-    file.write(f'{time}\n')
-    file.close()
-
-def read_timestamp():
-
-    file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_timestamp.txt"), "r")
-    lines = file.readlines()
-    last = lines[-1].rstrip()
-    return last      
-
 def raise_error(error, msg, Log):
     Log.error_log(msg)
     raise error(msg)
@@ -367,11 +354,11 @@ def move_log(model, pc_prefix, snp_prefix, timestamp, path):
 def change_model_dir_names(name):
 
     d = {
-        "-lm": "Linear Model",
-        "-gk": "Relatedness Matrix",
-        "-eigen": "Eigen Decomposition",
-        "-lmm": "Linear Mixed Model",
-        "-bslmm": "Bayesian Sparse Linear Mixed Model",
+        "-lm": "Linear_Model",
+        "-gk": "Relatedness_Matrix",
+        "-eigen": "Eigen_Decomposition",
+        "-lmm": "Linear_Mixed_Model",
+        "-bslmm": "Bayesian_Sparse_Linear_Mixed_Model",
     }
 
     name2 = name.removeprefix("-")
@@ -576,10 +563,10 @@ class Starter:
     """Description:
     contains functions regarding the starter script taking care of multiprocessing"""
 
-    def run_vcf2gwas(args):
+    def run_vcf2gwas(args, dir_temp):
         process = subprocess.run(args)
         code = process.returncode
-        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"), 'a')
+        file = open(os.path.join(dir_temp, "vcf2gwas_process_report.txt"), 'a')
         file.write(str(code))
         file.close()
 
@@ -871,10 +858,9 @@ class Starter:
         args.insert(5, str(threads))
         args_list.append(args)
 
-    def check_return_codes(Log):
+    def check_return_codes(Log, dir_temp):
 
-        os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_timestamp.txt"))
-        code_file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"), 'r')
+        code_file = open(os.path.join(dir_temp, "vcf2gwas_process_report.txt"), 'r')
         code_file_str = code_file.read()
         if "1" in code_file_str:
             if "0" in code_file_str:
@@ -882,22 +868,22 @@ class Starter:
                 Log.print_log("Most analyses successfully completed\n")
             else:
                 code_file.close()
-                shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
+                shutil.rmtree(dir_temp, ignore_errors=True)
                 raise SystemExit()
         elif "0" not in code_file_str:
             code_file.close()
-            shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
+            shutil.rmtree(dir_temp, ignore_errors=True)
             msg = "During the analysis, vcf2gwas encountered an unexpected error"
             raise_error(RuntimeError, msg, Log)
         else:
             code_file.close()
-            os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_process_report.txt"))
+            os.remove(os.path.join(dir_temp, "vcf2gwas_process_report.txt"))
             Log.print_log("Analysis successfully completed\n")
             
-    def get_snpcounts():
+    def get_snpcounts(dir_temp):
 
-        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_total.txt"), "r")
-        file2 = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_sig.txt"), "r")
+        file = open(os.path.join(dir_temp, "vcf2gwas_snpcount_total.txt"), "r")
+        file2 = open(os.path.join(dir_temp, "vcf2gwas_snpcount_sig.txt"), "r")
         try:
             lines = file.readlines()
             file.close()
@@ -922,13 +908,13 @@ class Starter:
             n = n1
         else:
             n = listtostring([n1, n2], " - ")
-        os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_total.txt"))
-        os.remove(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_sig.txt"))
+        os.remove(os.path.join(dir_temp, "vcf2gwas_snpcount_total.txt"))
+        os.remove(os.path.join(dir_temp, "vcf2gwas_snpcount_sig.txt"))
         return x, n 
 
-    def get_count(name):
+    def get_count(name, dir_temp):
 
-        file = open(os.path.join("_vcf2gwas_temp", name), "r")
+        file = open(os.path.join(dir_temp, name), "r")
         try:
             lines = file.readlines()
             file.close()
@@ -946,12 +932,12 @@ class Starter:
                 x = "-"
         else:
             x = listtostring([x1, x2], " - ")
-        os.remove(os.path.join("_vcf2gwas_temp", name))
+        os.remove(os.path.join(dir_temp, name))
         return x
 
-    def get_gemma_fail():
+    def get_gemma_fail(dir_temp):
 
-        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_gemma_fail.txt"), 'r')
+        file = open(os.path.join(dir_temp, "vcf2gwas_gemma_fail.txt"), 'r')
         lines = file.readlines()
         file.close()
         lines = [i.rstrip() for i in lines]
@@ -1400,13 +1386,13 @@ class Gemma:
     """Description:
     contains functions peforming GWAS analysis by calling GEMMA"""
 
-    def write_returncodes(code, pc_prefix):
+    def write_returncodes(code, pc_prefix, dir_temp):
 
-        file = open(os.path.join("_vcf2gwas_temp", f"vcf2gwas_process_report_{pc_prefix}.txt"), 'a')
+        file = open(os.path.join(dir_temp, f"vcf2gwas_process_report_{pc_prefix}.txt"), 'a')
         file.write(code)
         file.close()
 
-    def write_gemma_ind(path, prefix):
+    def write_gemma_ind(path, prefix, dir_temp):
         file = open(os.path.join(path, f'{prefix}.log.txt'), "r")
         lines = file.readlines()
         file.close()
@@ -1417,12 +1403,17 @@ class Gemma:
                 n = [int(s) for s in l.split() if s.isdigit()]
                 n = listtostring(n)
         
-        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_ind_gemma.txt"), 'a')
+        file = open(os.path.join(dir_temp, "vcf2gwas_ind_gemma.txt"), 'a')
         file.write(f'{n}\n')
         file.close()
         file = open(os.path.join(path, f'Summary_{prefix}.txt'), 'a')
         file.write(f'Individuals used for analysis by GEMMA: {n}\n')
         file.close()
+
+    def insert_N(N, command, x):
+        for n in reversed(N):
+            command.insert(x, str(n))
+        return command
     
     def rel_matrix(prefix, Log, covar_file_name, pc_prefix, model='-gk', n='1'):
         """Description:
@@ -1443,70 +1434,91 @@ class Gemma:
             filename = None
         return filename, code
 
-    def lm(prefix, prefix2, model, n, N, path, Log, covar_file_name, pc_prefix):
+    def lm(prefix, prefix2, model, n, N, path, Log, covar_file_name, pc_prefix, dir_temp):
         """Description:
         performs GWAS with linear model"""
 
         Log.print_log('Calculating linear model..')
         if covar_file_name == None:
-            process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-o', prefix2, '-outdir', path])
+            command = ['gemma', '-bfile', prefix, model, n, '-n', '-o', prefix2, '-outdir', path]
+            command = Gemma.insert_N(N, command, 6)
+            process = subprocess.run(command)
+            #process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-o', prefix2, '-outdir', path])
         else:
-            process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-c', covar_file_name, '-o', prefix2, '-outdir', path])
+            command = ['gemma', '-bfile', prefix, model, n, '-n', '-c', covar_file_name, '-o', prefix2, '-outdir', path]
+            command = Gemma.insert_N(N, command, 6)
+            process = subprocess.run(process)
+            #process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-c', covar_file_name, '-o', prefix2, '-outdir', path])
         code = str(process.returncode)
-        Gemma.write_returncodes(code, pc_prefix)
+        Gemma.write_returncodes(code, pc_prefix, dir_temp)
         if code == "0":
-            Gemma.write_gemma_ind(path, prefix2)
+            Gemma.write_gemma_ind(path, prefix2, dir_temp)
             Log.print_log("Linear model calculated successfully")
         return code
 
-    def eigen(prefix, filename, model, Log, pc_prefix):
+    def eigen(prefix, filename, model, Log, pc_prefix, dir_temp):
         """Description:
         performs eigen-decomposition of relatedness matrix"""
 
         Log.print_log('Decomposing relatedness matrix..')
         process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, '-o', prefix, '-outdir', "."])
         code = str(process.returncode)
-        Gemma.write_returncodes(code, pc_prefix)
+        Gemma.write_returncodes(code, pc_prefix, dir_temp)
         if code == "0":
             Log.print_log("Eigen-decomposition of relatedness matrix successful")
         return code
 
-    def lmm(pca, prefix, prefix2, filename, filename2, model, n, N, path, Log, covar_file_name, pc_prefix):
+    def lmm(pca, prefix, prefix2, filename, filename2, model, n, N, path, Log, covar_file_name, pc_prefix, dir_temp):
         """Description:
         performs GWAS with linear mixed model"""
 
         Log.print_log('Calculating linear mixed model..')
         if covar_file_name == None:
             if pca != None:
-                process = subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path])
+                command = ['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', '-o', prefix2, '-outdir', path]
+                command = Gemma.insert_N(N, command, 10)
+                process = subprocess.run(command)
+                #process = subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path])
             else:
-                process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path])
+                command = ['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', '-o', prefix2, '-outdir', path]
+                command = Gemma.insert_N(N, command, 8)
+                process = subprocess.run(command)
+                #process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, '-o', prefix2, '-outdir', path])
         else:
             if pca != None:
-                process = subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, "-c", covar_file_name, '-o', prefix2, '-outdir', path])
+                command = ['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', "-c", covar_file_name, '-o', prefix2, '-outdir', path]
+                command = Gemma.insert_N(N, command, 10)
+                process = subprocess.run(command)
+                #process = subprocess.run(['gemma', '-bfile', prefix, '-d', filename2, '-u', filename, model, n, '-n', N, "-c", covar_file_name, '-o', prefix2, '-outdir', path])
             else:
-                process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, "-c", covar_file_name,'-o', prefix2, '-outdir', path])
+                command = ['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', "-c", covar_file_name,'-o', prefix2, '-outdir', path]
+                command = Gemma.insert_N(N, command, 8)
+                process = subprocess.run(command)
+                #process = subprocess.run(['gemma', '-bfile', prefix, '-k', filename, model, n, '-n', N, "-c", covar_file_name,'-o', prefix2, '-outdir', path])
         code = str(process.returncode)
-        Gemma.write_returncodes(code, pc_prefix)
+        Gemma.write_returncodes(code, pc_prefix, dir_temp)
         if code == "0":
-            Gemma.write_gemma_ind(path, prefix2)
+            Gemma.write_gemma_ind(path, prefix2, dir_temp)
             Log.print_log("Linear mixed model calculated successfully")
         return code
 
-    def bslmm(prefix, prefix2, model, n, N, path, Log, burn, sampling, snpmax, pc_prefix):
+    def bslmm(prefix, prefix2, model, n, N, path, Log, burn, sampling, snpmax, pc_prefix, dir_temp):
         """Description:
         performs GWAS with bayesian sparse linear mixed model"""
 
         Log.print_log('Calculating bayesian sparse linear mixed model..')
-        process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-w', burn, '-s', sampling, '-smax', snpmax, '-o', prefix2, '-outdir', path])
+        command = ['gemma', '-bfile', prefix, model, n, '-n', '-w', burn, '-s', sampling, '-smax', snpmax, '-o', prefix2, '-outdir', path]
+        command = Gemma.insert_N(N, command, 6)
+        process = subprocess.run(command)
+        #process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-w', burn, '-s', sampling, '-smax', snpmax, '-o', prefix2, '-outdir', path])
         code = str(process.returncode)
-        Gemma.write_returncodes(code, pc_prefix)
+        Gemma.write_returncodes(code, pc_prefix, dir_temp)
         if code == "0":
-            Gemma.write_gemma_ind(path, prefix2)
+            Gemma.write_gemma_ind(path, prefix2, dir_temp)
             Log.print_log("Bayesian sparse linear mixed model calculated successfully")
         return code
 
-    def run_gemma(prefix, prefix2, model, n, N, path, Log, filename, filename2, pca, covar_file_name, i, i_list2, burn, sampling, snpmax, pc_prefix):
+    def run_gemma(prefix, prefix2, model, n, N, path, Log, filename, filename2, pca, covar_file_name, i, i_list2, burn, sampling, snpmax, pc_prefix, dir_temp):
         """Description:
         runs GEMMA dependent on input"""
 
@@ -1515,16 +1527,16 @@ class Gemma:
             Log.print_log(f'Output will be saved in {path}/')
 
         if model == "-lm":
-            code = Gemma.lm(prefix, prefix2, model, n, N, path, Log, covar_file_name, pc_prefix)
+            code = Gemma.lm(prefix, prefix2, model, n, N, path, Log, covar_file_name, pc_prefix, dir_temp)
 
         elif model == "-gk":
             _f, code = Gemma.rel_matrix(prefix, Log, covar_file_name, pc_prefix, model, n)
-            Gemma.write_returncodes(code, pc_prefix)
+            Gemma.write_returncodes(code, pc_prefix, dir_temp)
 
         elif model == "-eigen":
             if filename != None:
                 Log.print_log("Reading relatedness matrix..")
-            code = Gemma.eigen(prefix, filename, model, Log, pc_prefix)
+            code = Gemma.eigen(prefix, filename, model, Log, pc_prefix, dir_temp)
 
         elif model == "-lmm":
             if filename != None:
@@ -1532,10 +1544,10 @@ class Gemma:
                     Log.print_log("Reading eigenvalues and eigenvectors..")
                 else:
                     Log.print_log("Reading relatedness matrix..")
-            code = Gemma.lmm(pca, prefix, prefix2, filename, filename2, model, n, N, path, Log, covar_file_name, pc_prefix)
+            code = Gemma.lmm(pca, prefix, prefix2, filename, filename2, model, n, N, path, Log, covar_file_name, pc_prefix, dir_temp)
 
         elif model == "-bslmm":
-            code = Gemma.bslmm(prefix, prefix2, model, n, N, path, Log, burn, sampling, snpmax, pc_prefix)
+            code = Gemma.bslmm(prefix, prefix2, model, n, N, path, Log, burn, sampling, snpmax, pc_prefix, dir_temp)
 
         else:
             Log.print_log("No model was chosen!")
@@ -1544,7 +1556,7 @@ class Gemma:
         if code == "0":
             Log.print_log(f'GEMMA executed successfully on {i}')
         else:
-            file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_gemma_fail.txt"), 'a')
+            file = open(os.path.join(dir_temp, "vcf2gwas_gemma_fail.txt"), 'a')
             file.write(f'{i}\n')
             file.close()
 
@@ -1553,9 +1565,9 @@ class Post_analysis:
     """Description:
     contains functions and subclasses regarding analysis of GWAS output"""
 
-    def check_return_codes(pc_prefix):
+    def check_return_codes(pc_prefix, dir_temp):
 
-        code_file = open(os.path.join("_vcf2gwas_temp", f"vcf2gwas_process_report_{pc_prefix}.txt"), 'r')
+        code_file = open(os.path.join(dir_temp, f"vcf2gwas_process_report_{pc_prefix}.txt"), 'r')
         code_file_str = code_file.read()
         if "0" not in code_file_str:
             code_file.close()
@@ -1563,10 +1575,10 @@ class Post_analysis:
         else:
             code_file.close()
 
-    def get_gemma_success(l1, l2, l3, l4, lr):
+    def get_gemma_success(l1, l2, l3, l4, lr, dir_temp):
 
         indexes = []
-        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_gemma_fail.txt"), 'r')
+        file = open(os.path.join(dir_temp, "vcf2gwas_gemma_fail.txt"), 'r')
         lines = file.readlines()
         file.close()
         rm_list = [i.rstrip() for i in lines]
@@ -1603,7 +1615,7 @@ class Post_analysis:
         data_grouped = data.groupby((chromosome))
         return data, data_grouped
 
-    def manh_plot(df, Log, prefix, pcol, path, sigval, x, nolabel, colors = ['#4C72B0', '#C44E52'], refSNP = False):
+    def manh_plot(df, dir_temp, Log, prefix, pcol, path, sigval, x, nolabel, colors = ['#4C72B0', '#C44E52'], refSNP = False):
         """Description:
         creates manhattan plot from prepared dataframe and saves plot
         based on: https://github.com/Pudkip/Pyhattan/blob/master/Pyhattan/__init__.py"""
@@ -1669,13 +1681,13 @@ class Post_analysis:
             timer_total = round(timer_end - timer, 2)
             Log.print_log(f'Manhattan plot saved as "{pcol}_manh_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
 
-        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_sig.txt"), 'a')
+        file = open(os.path.join(dir_temp, "vcf2gwas_snpcount_sig.txt"), 'a')
         file.write(f'{n}\n')
         file.close()
         file = open(os.path.join(path, f'Summary_{prefix}.txt'), 'a')
         file.write(f'Significant SNPs: {n}\n')
         file.close()
-        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_sig_level.txt"), 'a')
+        file = open(os.path.join(dir_temp, "vcf2gwas_sig_level.txt"), 'a')
         file.write(f'{np.format_float_scientific(sig_level, precision=2)}\n')
         file.close()
         file = open(os.path.join(path, f'Summary_{prefix}.txt'), 'a')
@@ -1743,7 +1755,7 @@ class Post_analysis:
             timer_total = round(timer_end - timer, 2)
             Log.print_log(f'QQ-plot saved as "{pcol}_qq_{prefix}.png" in {file_path} (Duration: {runtime_format(timer_total)})')
 
-    def make_top_list(df, top_list1, top_list2, top_list3, n, x, pcol, pheno, path, prefix):
+    def make_top_list(df, top_list1, top_list2, top_list3, n, x, pcol, pheno, path, prefix, dir_temp):
         """Description:
         returns list of the top n SNPs with highest p-value"""
 
@@ -1767,7 +1779,7 @@ class Post_analysis:
                 sig_df.columns = ["chr", "SNP_ID", "SNP_pos", "p_value", "phenotype"]
                 filename = os.path.join(path, f'sig_SNPs_{prefix}.csv')
                 sig_df.to_csv(filename, index=False)
-                file = open(os.path.join("_vcf2gwas_temp", f'vcf2gwas_summary_paths.txt'), 'a')
+                file = open(os.path.join(dir_temp, f'vcf2gwas_summary_paths.txt'), 'a')
                 file.write(f'{filename}\n')
                 file.close()
 
@@ -1783,7 +1795,7 @@ class Post_analysis:
             df.columns = multcols
             df.to_csv(os.path.join(path, f'{s}{pc_prefix}_{snp_prefix}.csv'), sep=',')
 
-    def run_postprocessing(top_ten, top_sig, top_all, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot):
+    def run_postprocessing(top_ten, top_sig, top_all, Log, model, n, prefix2, path, n_top, i, sigval, nolabel, noplot, dir_temp):
         """Description:
         runs post-processing dependent on input"""
 
@@ -1797,7 +1809,7 @@ class Post_analysis:
                 df = Lin_models.load_df(prefix2, "assoc", path)
                 x = len(df.index)
 
-                file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_total.txt"), 'a')
+                file = open(os.path.join(dir_temp, "vcf2gwas_snpcount_total.txt"), 'a')
                 file.write(f'{x}\n')
                 file.close()
                 file = open(os.path.join(path, f'Summary_{prefix2}.txt'), 'a')
@@ -1810,11 +1822,11 @@ class Post_analysis:
                 n = 0
                 if noplot == False:
                     df3 = Lin_models.format_data(prefix2, "assoc", p, path)
-                    n = Lin_models.manh_plot(df3, Log, prefix2, p, path, sigval, x, nolabel, refSNP="rs")
+                    n = Lin_models.manh_plot(df3, dir_temp, Log, prefix2, p, path, sigval, x, nolabel, refSNP="rs")
                     Lin_models.qq_plot(df, p, prefix2, path, Log)
                 p_col = p
 
-            Lin_models.make_top_list(df2, top_ten, top_sig, top_all, n_top, n, p_col, i, path, prefix2)
+            Lin_models.make_top_list(df2, top_ten, top_sig, top_all, n_top, n, p_col, i, path, prefix2, dir_temp)
 
         elif model == "-bslmm":
             # procedure based on steps outlined in: 
@@ -1838,7 +1850,7 @@ class Post_analysis:
             # load parameters
             df2 = Bslmm.load_df(prefix2, "param", path)
             x = len(df.index)
-            file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_snpcount_total.txt"), 'a')
+            file = open(os.path.join(dir_temp, "vcf2gwas_snpcount_total.txt"), 'a')
             file.write(f'{x}\n')
             file.close()
             file = open(os.path.join(path, f'Summary_{prefix2}.txt'), 'a')
@@ -1857,13 +1869,13 @@ class Post_analysis:
             if noplot == False:
                 # plot variants PIPs across linkage groups/chromosomes
                 df4 = Bslmm.format_data(prefix2, "param", "gamma", path)
-                n1 = Bslmm.manh_plot(df4, Log, prefix2, "gamma", path, sigval, x, nolabel, refSNP="rs")
+                n1 = Bslmm.manh_plot(df4, dir_temp, Log, prefix2, "gamma", path, sigval, x, nolabel, refSNP="rs")
                 # plot effect sizes
                 df5 = Bslmm.format_data(prefix2, "param", "eff", path)
-                n2 = Bslmm.manh_plot(df5, Log, prefix2, "eff", path, sigval, x, nolabel, refSNP="rs")
+                n2 = Bslmm.manh_plot(df5, dir_temp, Log, prefix2, "eff", path, sigval, x, nolabel, refSNP="rs")
                 n = max([n1, n2])
 
-            Bslmm.make_top_list(df3, top_ten, top_sig, top_all, n_top, n, "gamma", i, path, prefix2)
+            Bslmm.make_top_list(df3, top_ten, top_sig, top_all, n_top, n, "gamma", i, path, prefix2, dir_temp)
         
         else:
             Log.print_log("No post-processing necessary!")
@@ -1898,9 +1910,9 @@ class Lin_models(Post_analysis):
         #write files
         file_path = os.path.join(path, "best_p-values")
         make_dir(file_path)
-        top1.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top1%.csv'))
-        top01.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top01%.csv'))
-        top001.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top001%.csv'))
+        top1.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top0.01.csv'))
+        top01.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top0.001.csv'))
+        top001.to_csv(os.path.join(file_path, f'{pcol}_{prefix}_top0.0001.csv'))
         if df3.empty == True:
             df2["rs"] = "NaN"
             df2["chr"] = "NaN"
@@ -2552,9 +2564,9 @@ class Summary:
                     name_new = f'Summary_compared+{os.path.split(name)[1]}'       
             df_new.to_csv(os.path.join(path, name_new) , index=False)
 
-    def ind_summary(path, filenames, str_list):
+    def ind_summary(path, filenames, str_list, dir_temp):
         
-        file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_summary_paths.txt"), "r")
+        file = open(os.path.join(dir_temp, "vcf2gwas_summary_paths.txt"), "r")
         lines = file.readlines()
         file.close()
         lines = [i.rstrip() for i in lines]

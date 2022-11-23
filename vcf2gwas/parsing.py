@@ -31,7 +31,16 @@ except ModuleNotFoundError:
     from psutil import virtual_memory
 
 def set_version_number():
-    return "0.8.7"
+    return "0.8.8"
+
+def delete_string(args, strings):
+
+    for string in strings:
+        temp_list = [i for i, e in enumerate(args) if e == string]
+        temp_list2 = [x+1 for x in temp_list]
+        temp_list = temp_list+temp_list2
+        args = [j for i, j in enumerate(args) if i not in temp_list]
+    return args
 
 def getArgs(argv=None):
     """Description:
@@ -43,6 +52,9 @@ def getArgs(argv=None):
     # Options with variable input
     parser.add_argument(
         '--version', action='version', version='%(prog)s Version {}'.format(version)
+    )
+    parser.add_argument(
+        '--timestamp', type=str
     )
     parser.add_argument(
         "-v", "--vcf", metavar="<filename>", required=True, type=str, help="(required) Genotype .vcf or .vcf.gz filename"
@@ -211,6 +223,9 @@ class Parser:
     
     def __init__(self, args):
         self.args = getArgs(args)
+
+    def set_timestamp(self):
+        return self.args.timestamp
 
     def set_geno(self):
         return self.args.vcf

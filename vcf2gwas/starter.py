@@ -19,13 +19,16 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from vcf2gwas.parsing import *
-from vcf2gwas.utils import *
+#from vcf2gwas.parsing import *
+#from vcf2gwas.utils import *
+from parsing import *
+from utils import *
 
 import time
 import os
 import sys
 import math
+import itertools
 import concurrent.futures
 import multiprocessing as mp
 from psutil import virtual_memory
@@ -43,17 +46,20 @@ out_dir = P.set_out_dir()
 out_dir2 = os.path.join(out_dir, "Output")
 os.makedirs(out_dir2, exist_ok=True)
 
-timestamp = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
-timestamp2 = time.strftime("%Y%m%d_%H%M%S")
+timestamp = time.strftime("%a, %d %b %Y %H:%M", time.localtime())
+timestamp2 = P.set_timestamp()
+if timestamp2 == None:
+    # for testing
+    timestamp2 = time.strftime("%Y%m%d_%H%M%S")
+
 start = time.perf_counter()
 
 version = set_version_number()
 
-shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
-dir_temp = "_vcf2gwas_temp"
+shutil.rmtree(f'_vcf2gwas_temp_{timestamp2}', ignore_errors=True)
+dir_temp = f'_vcf2gwas_temp_{timestamp2}'
 qc_dir = os.path.join(dir_temp, f'QC_{timestamp2}')
 make_dir(qc_dir)
-write_timestamp(timestamp2)
 
 file = open(os.path.join(dir_temp, "vcf2gwas_process_report.txt"), 'a')
 file.close()
@@ -178,7 +184,7 @@ else:
     path = os.path.join(out_dir2, model2)
 make_dir(path)
 
-pc_prefix = set_pc_prefix(pheno, covar, ".")
+pc_prefix = set_pc_prefix(pheno, covar, timestamp2)
 pc_prefix2 = set_pc_prefix(pheno, covar, "_")
 if model in ["-gk", "-eigen"]:
     pc_prefix2 = set_pc_prefix(pheno, covar, "")
@@ -642,12 +648,15 @@ args = sys.argv[1:]
 # for testing
 if args == []:
     args = argvals
+args = Starter.delete_string(args, ['--timestamp'])
 input_str = f'vcf2gwas {listtostring(args)}'
 args = Starter.delete_string(args, ['-v', '--vcf', '-T', '--threads', '-M', '--memory'])
 if covar == None:
     args = Starter.delete_string(args, ['-cf', '--cfile', '-c', '--covar'])
 args.insert(0, snp_file2)
 args.insert(0, "--vcf")
+args.insert(0, timestamp2)
+args.insert(0, "--timestamp")
 args.insert(0, 'python3.9')
 args.insert(1, os.path.join(os.path.dirname(__file__), 'analysis.py'))
 args.insert(2, '--memory')
@@ -702,8 +711,8 @@ Log.print_log("\nFile preparations completed")
 
 Log.print_log("\nStarting analysis..")
 with concurrent.futures.ProcessPoolExecutor(mp_context=mp.get_context('fork'), max_workers=threads_org) as executor:
-        executor.map(Starter.run_vcf2gwas, args_list)
-Starter.check_return_codes(Log)
+        executor.map(Starter.run_vcf2gwas, args_list, itertools.repeat(dir_temp))
+Starter.check_return_codes(Log, dir_temp)
 
 #################### summary and clean-up ####################
 
@@ -721,7 +730,7 @@ if model not in ("-gk", "-eigen", None):
         pc_prefix3 = set_pc_prefix(pheno, covar, "_")
         prefix_list.append(pc_prefix3)
     filenames, str_list = Summary.summarizer(path3, path2, pc_prefix3, snp_prefix, n_top, Log, prefix_list)
-    temp, file_dict = Summary.ind_summary(path2, filenames, str_list)
+    temp, file_dict = Summary.ind_summary(path2, filenames, str_list, dir_temp)
     filenames = temp[0]
     str_list = temp[1]
     filenames2 = []
@@ -863,13 +872,13 @@ if pca_switch2 == True:
     Y = pca_n
 
 # print summary and move log files
-snp_total, snp_sig = Starter.get_snpcounts()
+snp_total, snp_sig = Starter.get_snpcounts(dir_temp)
 if noplot == True:
     snp_sig = "-"
-sig_level = Starter.get_count("vcf2gwas_sig_level.txt")
-ind_count = Starter.get_count("vcf2gwas_ind_count.txt")
-gemma_count = Starter.get_count("vcf2gwas_ind_gemma.txt")
-failed_count, failed_list = Starter.get_gemma_fail()
+sig_level = Starter.get_count("vcf2gwas_sig_level.txt", dir_temp)
+ind_count = Starter.get_count("vcf2gwas_ind_count.txt", dir_temp)
+gemma_count = Starter.get_count("vcf2gwas_ind_gemma.txt", dir_temp)
+failed_count, failed_list = Starter.get_gemma_fail(dir_temp)
 Log.summary(
     snp_file, pheno_files, covar, X, Y, model2_temp, n, filename, min_af, A, B, 
     pca, keep, memory, threads, n_top, gene_file, species, gene_thresh, multi, umap_n, umapmetric, pca_n, 
@@ -880,4 +889,4 @@ Log.summary(
 if model != None:
     shutil.move(os.path.join(path, f'vcf2gwas{pc_prefix}.log.txt'), os.path.join(path, f'vcf2gwas_{snp_prefix}{pc_prefix2}_{timestamp2}.log.txt'))
 
-shutil.rmtree("_vcf2gwas_temp", ignore_errors=True)
+shutil.rmtree(dir_temp, ignore_errors=True)

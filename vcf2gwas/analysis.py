@@ -19,8 +19,10 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from vcf2gwas.parsing import *
-from vcf2gwas.utils import *
+#from vcf2gwas.parsing import *
+#from vcf2gwas.utils import *
+from parsing import *
+from utils import *
 
 import sys
 import time
@@ -37,14 +39,13 @@ argvals = None
 
 ############################## Initialising Program ##############################
 
-timestamp = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
-timestamp2 = read_timestamp()
 start = time.perf_counter()
 # set argument parser
 P = Parser(argvals)
 out_dir = P.set_out_dir()
 out_dir2 = os.path.join(out_dir, "Output")
-dir_temp = "_vcf2gwas_temp"
+timestamp2 = P.set_timestamp()
+dir_temp = f'_vcf2gwas_temp_{timestamp2}'
 memory = P.set_memory()
 threads = P.set_threads()
 os.environ['NUMEXPR_MAX_THREADS'] = str(threads)
@@ -203,7 +204,7 @@ if len(list1_org)-diff_num == 0:
     msg = "No individuals left! Check if IDs in VCF and phenotype file are of the same format"
     raise_error(ValueError, msg, Log)
 
-file = open(os.path.join("_vcf2gwas_temp", "vcf2gwas_ind_count.txt"), 'a')
+file = open(os.path.join(dir_temp, "vcf2gwas_ind_count.txt"), 'a')
 file.write(f'{len(list1_org)-diff_num}\n')
 file.close()
 
@@ -335,7 +336,7 @@ i_list2 = []
 N_list = []
 path_list = []
 
-file = open(os.path.join("_vcf2gwas_temp", f"vcf2gwas_process_report_{pc_prefix}.txt"), 'a')
+file = open(os.path.join(dir_temp, f"vcf2gwas_process_report_{pc_prefix}.txt"), 'a')
 file.close()
 
 if model == None:
@@ -355,13 +356,15 @@ else:
             i = "results"
 
         if X == [] and Y == []:
-            N = "1"
+            N = [1]
+            #N = "1"
         else:
-            N = str(x)
+            N = [x]
+            #N = str(x)
             x = x + 1
             if multi == True:
                 N = concat_lists(X, Y)
-                N = listtostring(N)
+                #N = listtostring(N)
 
         path_temp = None
         if model not in ("-gk", "-eigen"):
@@ -388,12 +391,12 @@ else:
         executor.map(
             Gemma.run_gemma, prefix_list, prefix2_list, itertools.repeat(model), itertools.repeat(n), N_list, path_list, itertools.repeat(Log), itertools.repeat(filename), 
             itertools.repeat(filename2), itertools.repeat(pca), itertools.repeat(covar_file_name), i_list, itertools.repeat(i_list2),
-            itertools.repeat(burn), itertools.repeat(sampling), itertools.repeat(snpmax), itertools.repeat(pc_prefix)
+            itertools.repeat(burn), itertools.repeat(sampling), itertools.repeat(snpmax), itertools.repeat(pc_prefix), itertools.repeat(dir_temp)
         )
     timer_end = time.perf_counter()
     timer_total = round(timer_end - timer, 2)
-    Post_analysis.check_return_codes(pc_prefix)
-    Post_analysis.get_gemma_success(i_list, prefix2_list, path_list, columns, i_list2)
+    Post_analysis.check_return_codes(pc_prefix, dir_temp)
+    Post_analysis.get_gemma_success(i_list, prefix2_list, path_list, columns, i_list2, dir_temp)
     Log.print_log(f'\nGEMMA completed successfully (Duration: {runtime_format(timer_total)})\n')
 
     ############################## Processing and plotting ##############################
@@ -403,7 +406,7 @@ else:
         itertools.repeat(top_ten), itertools.repeat(top_sig), itertools.repeat(top_all), itertools.repeat(Log), itertools.repeat(model), itertools.repeat(n), prefix2_list, path_list, 
         itertools.repeat(n_top), i_list, itertools.repeat(sigval), itertools.repeat(nolabel), itertools.repeat(noplot)
         ):
-        Post_analysis.run_postprocessing(top_ten, top_sig, top_all, Log, model, n, prefix2, path_temp, n_top, i, sigval, nolabel, noplot)
+        Post_analysis.run_postprocessing(top_ten, top_sig, top_all, Log, model, n, prefix2, path_temp, n_top, i, sigval, nolabel, noplot, dir_temp)
     Log.print_log("Analysis of GEMMA results completed successfully\n")
 
 ############################## Summary and Clean up ##############################
