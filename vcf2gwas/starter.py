@@ -595,11 +595,14 @@ except Exception:
 
 #index VCF
 Log.print_log("\nIndexing VCF file..")
-timer = time.perf_counter()
-Converter.index_vcf(snp_file2)
-timer_end = time.perf_counter()
-timer_total = round(timer_end - timer, 2)
-Log.print_log(f'VCF file successfully indexed (Duration: {runtime_format(timer_total)})')
+if not os.path.exists(f"{snp_file2}.csi"):
+    timer = time.perf_counter()
+    Converter.index_vcf(snp_file2)
+    timer_end = time.perf_counter()
+    timer_total = round(timer_end - timer, 2)
+    Log.print_log(f'VCF file successfully indexed (Duration: {runtime_format(timer_total)})')
+else:
+    Log.print_log(f'VCF file already indexed')
 
 chr2, chr_num = Converter.check_chrom(snp_file2, chr)
 chr_list = chr2
