@@ -1447,7 +1447,7 @@ class Gemma:
         else:
             command = ['gemma', '-bfile', prefix, model, n, '-n', '-c', covar_file_name, '-o', prefix2, '-outdir', path]
             command = Gemma.insert_N(N, command, 6)
-            process = subprocess.run(process)
+            process = subprocess.run(command)
             #process = subprocess.run(['gemma', '-bfile', prefix, model, n, '-n', N, '-c', covar_file_name, '-o', prefix2, '-outdir', path])
         code = str(process.returncode)
         Gemma.write_returncodes(code, pc_prefix, dir_temp)
