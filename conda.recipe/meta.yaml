@@ -21,7 +21,7 @@ build:
 requirements:
   host:
     - python==3.9
-    - pip3
+    - pip
 
   run:
     - python==3.9
