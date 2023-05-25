@@ -8,7 +8,7 @@ requirements = [
     'scikit-allel==1.3*',
     'scikit-learn==1.2*',
     'psutil==5.9*',
-    'adjusttext==0.8*',
+    'adjusttext==0.7*',
     'bcftools==1.17*',
     'plink==1.90*',
     'gemma==0.98.3'
