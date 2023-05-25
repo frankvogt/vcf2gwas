@@ -36,15 +36,6 @@ requirements:
 
 test:
 
-outputs:
-  - name: vcf2gwas
-    files:
-      - vcf2gwas/*.yml
-      - vcf2gwas/input/example.*
-      - vcf2gwas/GFF_files/GFF*
-      - vcf2gwas/README.*
-      - vcf2gwas/LIC*
-
 about:
   home: https://github.com/frankvogt/vcf2gwas
   summary: Python API for comprehensive GWAS analysis using GEMMA
