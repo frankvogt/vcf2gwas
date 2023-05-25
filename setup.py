@@ -1,7 +1,7 @@
 from setuptools import setup
 
 requirements = [
-    'numpy==1.20*',
+    'numpy==1.23*',
     'pandas==1.5*',
     'matplotlib==3.7*',
     'seaborn==0.12*',
