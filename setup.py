@@ -2,7 +2,7 @@ from setuptools import setup
 
 requirements = [
     'numpy==1.24*',
-    'pandas==2.0*',
+    'pandas==1.5*',
     'matplotlib==3.7*',
     'seaborn==0.12*',
     'scikit-allel==1.3*',
