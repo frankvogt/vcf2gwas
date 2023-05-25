@@ -19,8 +19,8 @@ You should have received a copy of the GNU General Public License
 along with vcf2gwas.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-#from vcf2gwas.parsing import Parser
-from parsing import *
+from vcf2gwas.parsing import Parser
+#from parsing import *
 
 import os
 import subprocess
@@ -1264,6 +1264,35 @@ class Converter:
             process = subprocess.run(['bcftools', 'index', '-f', snp_file])
             process.check_returncode()
 
+    def check_chrom_exemption(ls_set):
+        #check for numbers in chromosome name strings
+        nr_list = []
+        for i in ls_set:
+            n = [None] * len(i)
+            m = 0
+            for char in i:
+                if char.isdigit() == True:
+                    if n[m] == None:
+                        n[m] = char
+                    else:
+                        char_new = n[m] + char
+                        n[m] = char_new
+                else:
+                    m += 1
+            n = [i for i in n if i != None]
+            nr_list.append(n)
+        nr_list = [int(char) for n in nr_list for char in n]
+        
+        #check if any of these numbers is greater than the lenght of the set of chromosome names
+        l = len(ls_set)
+        l2 = max(nr_list)
+        if l >= l2:
+            length = l
+        else:
+            length = l2
+
+        return length
+
     def set_chrom(snp_file, switch=True):
         """Description:
         sets variable to amount of chromosomes"""
@@ -1272,12 +1301,14 @@ class Converter:
         out.check_returncode()
         ls = (out.stdout).split()
         ls_set = set(ls)
+        length = Converter.check_chrom_exemption(ls_set)
         if switch == True:
             try:
                 print(f'Chromosomes: {listtostring(sorted(ls_set), ", ")}')
             except Exception:
                 pass
-        return len(ls_set), ls_set
+
+        return length, ls_set
 
     def check_chrom(snp_file, chr):
 
@@ -1308,11 +1339,11 @@ class Converter:
         Filters out SNPs with allele frequency below threshold via bcftools"""
 
         if chr == None:
-            filtered = subprocess.run(['bcftools', 'view', '-m2', '-M2', '-v', 'snps', '-q', str(min_af), subset, '-Oz', '-o', subset2], stdout=subprocess.PIPE, text=True) 
+            filtered = subprocess.run(['bcftools', 'view', '-m2', '-M2', '-v', 'snps', '-q', f'{str(min_af)}:minor', subset, '-Oz', '-o', subset2], stdout=subprocess.PIPE, text=True)
             filtered.stdout
             filtered.check_returncode()
         else:
-            filtered = subprocess.run(['bcftools', 'view', "-r", chr, '-m2', '-M2', '-v', 'snps', '-q', str(min_af), subset, '-Oz', '-o', subset2], stdout=subprocess.PIPE, text=True) 
+            filtered = subprocess.run(['bcftools', 'view', "-r", chr, '-m2', '-M2', '-v', 'snps', '-q', f'{str(min_af)}:minor', subset, '-Oz', '-o', subset2], stdout=subprocess.PIPE, text=True) 
             filtered.stdout
             filtered.check_returncode()
 

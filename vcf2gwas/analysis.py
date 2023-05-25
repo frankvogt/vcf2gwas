@@ -384,7 +384,7 @@ else:
             if filename == None:
                 filename, code = Gemma.rel_matrix(prefix, Log, covar_file_name, pc_prefix)
                 if code != "0":
-                    Gemma.write_returncodes(code, pc_prefix)
+                    Gemma.write_returncodes(code, pc_prefix, dir_temp)
 
     # run GEMMA in parallel
     with concurrent.futures.ProcessPoolExecutor(mp_context=mp.get_context('fork'), max_workers=threads) as executor:

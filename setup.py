@@ -1,23 +1,22 @@
 from setuptools import setup
 
 requirements = [
-    'numpy==1.20*',
-    'pandas==1.2*',
-    'matplotlib==3.4*',
-    'seaborn==0.11*',
+    'numpy==1.24*',
+    'pandas==2.0*',
+    'matplotlib==3.7*',
+    'seaborn==0.12*',
     'scikit-allel==1.3*',
-    'scikit-learn==0.24*',
-    'psutil==5.8*',
-    'adjusttext==0.7*',
-    'bcftools==1.12*',
+    'scikit-learn==1.2*',
+    'psutil==5.9*',
+    'adjusttext==0.8*',
+    'bcftools==1.17*',
     'plink==1.90*',
     'gemma==0.98.3'
-    # package requirements go here
 ]
 
 setup(
     name='vcf2gwas',
-    version='0.8.8',
+    version='0.8.9',
     description="Python API for comprehensive GWAS analysis using GEMMA",
     license="GNUv3",
     author="Frank Vogt",

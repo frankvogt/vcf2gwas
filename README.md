@@ -289,7 +289,7 @@ set core usage
 if not specified, all available logical cores minus 1 will be used
 
 * `-q` / `--minaf` <float>  
-minimum allele frequency of sites to be used (default: 0.01)  
+minimum minor allele frequency (MAF) of sites to be used (default: 0.01)  
 input value needs to be a value between 0.0 and 1.0
   
 * `-ts` / `--topsnp` <int>  

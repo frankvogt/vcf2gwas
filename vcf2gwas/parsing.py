@@ -31,7 +31,7 @@ except ModuleNotFoundError:
     from psutil import virtual_memory
 
 def set_version_number():
-    return "0.8.8"
+    return "0.8.9"
 
 def delete_string(args, strings):
 
@@ -85,7 +85,7 @@ def getArgs(argv=None):
     )
     parser.add_argument(
         "-q", "--minaf", metavar="<float>", type=float, default=0.01, 
-        help="minimum allele frequency of sites to be used (default: %(default)s) \ninput value needs to be a value between 0.0 and 1.0 "
+        help="minimum minor allele frequency (MAF) of sites to be used (default: %(default)s) \ninput value needs to be a value between 0.0 and 1.0 "
     )
     parser.add_argument(
         "-chr", "--chromosome", metavar="<int/str>", action="append", type=str, 

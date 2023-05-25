@@ -350,7 +350,7 @@ vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -KC 0.8
 
 ### Filter out SNPs
 
-By default, *vcf2gwas* will filter out SNPs with a minimum allele frequency of 0.01. To change this threshold use the `-q/--minaf` option:
+By default, *vcf2gwas* will filter out SNPs with a minor allele frequency > 0.01. To change this threshold use the `-q/--minaf` option:
 
 ```
 vcf2gwas -v [filename] -pf [filename] -p 1 -lmm -q 0.02
