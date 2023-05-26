@@ -27,7 +27,7 @@ import multiprocessing as mp
 try:
     from psutil import virtual_memory
 except ModuleNotFoundError:
-    subprocess.run(["conda", "install", "-c", "anaconda", "psutil==5.8*"])
+    subprocess.run(["conda", "install", "-c", "anaconda", "psutil==5.9*"])
     from psutil import virtual_memory
 
 def set_version_number():

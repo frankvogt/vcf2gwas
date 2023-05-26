@@ -38,27 +38,27 @@ from psutil import virtual_memory
 try:
     import numpy as np
 except ModuleNotFoundError:
-    subprocess.run(["conda", "install", "-c", "anaconda", "numpy==1.20*"])
+    subprocess.run(["conda", "install", "-c", "anaconda", "numpy==1.23*"])
     import numpy as np
 try:
     import pandas as pd
 except ModuleNotFoundError:
-    subprocess.run(["conda", "install", "-c", "anaconda", "pandas==1.2*"])
+    subprocess.run(["conda", "install", "-c", "anaconda", "pandas==1.5*"])
     import pandas as pd
 try:
     import matplotlib.pyplot as plt
 except ModuleNotFoundError:
-    subprocess.run(["conda", "install", "-c", "conda-forge", "matplotlib==3.4*"])
+    subprocess.run(["conda", "install", "-c", "conda-forge", "matplotlib==3.7*"])
     import matplotlib.pyplot as plt
 try:
     import seaborn as sns
 except ModuleNotFoundError:
-    subprocess.run(["conda", "install", "-c", "anaconda", "seaborn==0.11*"])
+    subprocess.run(["conda", "install", "-c", "anaconda", "seaborn==0.12*"])
     import seaborn as sns
 try:
     from sklearn.decomposition import PCA
 except ModuleNotFoundError:
-    subprocess.run(["conda", "install", "-c", "anaconda", "scikit-learn==0.24*"])
+    subprocess.run(["conda", "install", "-c", "anaconda", "scikit-learn==1.2*"])
     from sklearn.decomposition import PCA
 try:
     from adjustText import adjust_text

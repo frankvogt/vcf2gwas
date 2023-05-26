@@ -627,7 +627,7 @@ if noqc == False:
     timer_total = round(timer_end - timer, 2)
     Log.print_log(f'Quality control successful (Duration: {runtime_format(timer_total)})')
 
-Log.print_log(f'\nFiltering SNPs..\nMinimum allele frequency: {min_af}')
+Log.print_log(f'\nFiltering SNPs..\nMinor allele frequency: {min_af}')
 timer = time.perf_counter()
 Converter.filter_snps(min_af, snp_file2_org, snp_file2, chr2)
 timer_end = time.perf_counter()
