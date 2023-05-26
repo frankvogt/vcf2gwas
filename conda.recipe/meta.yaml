@@ -1,8 +1,8 @@
-{% set version = "0.8.9" %}
+{% set data = load_setup_py_data() %}
 
 package:
   name: vcf2gwas
-  version: {{ version }}
+  version: {{ data.get('version') }}
 
 source:
   git_url: https://github.com/frankvogt/vcf2gwas.git
@@ -37,8 +37,8 @@ requirements:
 test:
 
 about:
-  home: https://github.com/frankvogt/vcf2gwas
-  summary: Python API for comprehensive GWAS analysis using GEMMA
-  license: GNUv3
+  home: {{ data.get('url') }}
+  summary: {{ data.get('description') }}
+  license: {{ data.get('license') }}
   license_file: LICENSE
-  dev_url: https://github.com/frankvogt/vcf2gwas
+  dev_url: {{ data.get('url') }}
