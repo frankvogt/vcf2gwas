@@ -32,6 +32,7 @@ requirements:
     - adjusttext=0.7
     - bcftools=1.17
     - plink=1.90
+    - plink2=2.0
     - gemma==0.98.3
 
 test:
