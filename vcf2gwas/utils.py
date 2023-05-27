@@ -65,6 +65,8 @@ try:
 except ModuleNotFoundError:
     subprocess.run(["conda", "install", "-c", "conda-forge", "adjusttext==0.7*"])
     from adjustText import adjust_text
+import warnings
+warnings.filterwarnings("ignore", message=".*The 'nopython' keyword.*")
 try:
     import umap
 except ModuleNotFoundError:
@@ -1349,38 +1351,38 @@ class Converter:
 
     def make_bed(subset2, chrom, memory, threads, list1):
         """Description:
-        converts VCF file to PLINK BED files via plink"""
+        converts VCF file to PLINK BED files via plink2"""
 
         string = "_"
         list2 = [l for l in list1 if string in l]
         if list2 != []:
             if chrom <= 24:
-                make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
+                make_bed = subprocess.run(['plink2', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#\$r,\$a', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
                 make_bed.stdout
                 make_bed.check_returncode()
             elif chrom <= 95:    
-                make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
+                make_bed = subprocess.run(['plink2', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#\$r,\$a', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
                 make_bed.stdout
                 make_bed.check_returncode()
             else:
-                make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
+                make_bed = subprocess.run(['plink2', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#\$r,\$a', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
                 make_bed.stdout
                 make_bed.check_returncode()
         else:
             #make_bed = subprocess.run(['plink', '--dummy', '15000', '2000000', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
             if chrom <= 24:            
-                make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
+                make_bed = subprocess.run(['plink2', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#\$r,\$a', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)            
                 make_bed.stdout
                 make_bed.check_returncode()                
             elif chrom <= 95:
-                make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
+                make_bed = subprocess.run(['plink2', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#\$r,\$a', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads), '--chr-set', str(chrom)], stdout=subprocess.PIPE, text=True)
                 make_bed.stdout
                 make_bed.check_returncode()
             else:
-                make_bed = subprocess.run(['plink', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#', '--allow-extra-chr', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)
+                make_bed = subprocess.run(['plink2', '--vcf', f'{subset2}.vcf.gz', '--make-bed', '--out', subset2, '--mind', '1', '--set-missing-var-ids', '@:#\$r,\$a', '--allow-extra-chr', '--double-id', '--memory', str(memory),'--threads', str(threads)], stdout=subprocess.PIPE, text=True)            
                 make_bed.stdout
                 make_bed.check_returncode()
-
+        
     def remove_files(subset, File, subset2, snp_file):
         """Description:
         removes no longer needed files"""
