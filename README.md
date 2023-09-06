@@ -189,7 +189,7 @@ Type the phenotype name
 OR  
 '1' selects first phenotype from phenotype file (second column), '2' the second phenotype (third column) and so on.
 
-* `-ap` / `--allphentypes`  
+* `-ap` / `--allphenotypes`  
 All phenotypes in the phenotype file will be used.
 
 * `-cf` / `--cfile` <filename>  
