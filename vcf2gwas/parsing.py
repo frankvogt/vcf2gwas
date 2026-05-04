@@ -131,6 +131,12 @@ def getArgs(argv=None):
         "-sv", "--sigval", metavar="<float>", type=float, 
         help="set value where to draw significant line in manhattan plot \n<int> represents -log10(1e-<int>) \ndefault: Bonferroni corrected with total amount of SNPs used for analysis \nset <int> to '0' to disable line"
     )
+      parser.add_argument(
+    "-cm", "--correction", metavar="<method>", choices=["bonferroni", "fdr"], default="bonferroni",
+    help=(
+    "Multiple testing correction method to use for significance threshold and corrected p-values\n"
+    "Options: 'bonferroni' (default) or 'fdr'")
+    )    
     parser.add_argument(
         "-w", "--burn", metavar="<int>", type=int, default=100000,
         help="specify burn-in steps when using BSLMM model \ndefault: %(default)s"

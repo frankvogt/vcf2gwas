@@ -3,6 +3,42 @@
 [![Anaconda-Server Badge](https://anaconda.org/fvogt257/vcf2gwas/badges/license.svg)](https://anaconda.org/fvogt257/vcf2gwas)
 [![Anaconda-Server Badge](https://anaconda.org/fvogt257/vcf2gwas/badges/installer/conda.svg)](https://conda.anaconda.org/fvogt257)
 [![Anaconda-Server Badge](https://anaconda.org/fvogt257/vcf2gwas/badges/platforms.svg)](https://anaconda.org/fvogt257/vcf2gwas)
+
+## July 2025 Update: Enable User Selection Between Bonferroni and FDR Correction Methods
+In its current version, `vcf2gwas` defaults to a Bonferroni correction, which tends to be quite conservative, especially for genome-wide association studies. This fork enhances the statistical flexibility of `vcf2gwas` by incorporating a new flag (`--correction` or `-cm`) to allow users to specify their preferred significance threshold, supporting both Bonferroni (default) and False Discovery Rate (FDR) corrections.
+
+### Summary of modifications
+To implement this feature, I made the following changes:
+1. Updated `meta.yaml` to include the `statsmodel` package, which is used to perform the FDR correction.
+2. Added a new flag `-cm/--correction` in the parsing.py script, allowing users to choose between Bonferroni and FDR correction methods. If unspecified, the default remains Bonferroni, preserving the original functionality of the program.
+3. Modified the `manh_plot` function in `utils.py` to implement the Benjamini-Hochberg (BH) procedure for FDR correction using `statsmodels`. Additionally, I added log statements to indicate which multiple testing correction method was applied.
+
+### Installation via Conda/Mamba
+
+1. Clone this forked repository to your desired machine and navigate to the project directory:
+```
+git clone https://github.com/AllysonDekovich/vcf2gwas.git
+cd vcf2gwas
+```
+
+2. Use the provided YAML file (located in the `conda.recipe` folder) to create a Conda/Mamba environment. This file contains all the necessary dependencies needed for the program.
+```
+mamba env create -f ./conda.recipe/vcf2gwas_cm.yaml
+```
+3. Activate the new environment and install the package in "editable" mode to ensure that the `vcf2gwas` command properly points to the modified source code.
+```
+mamba activate vcf2gwas_cm
+pip install -e .
+```
+4. Check to see if the installation worked:
+```
+vcf2gwas --help
+```
+This should now produce documentation for the new `--correction/-cm`
+
+
+
+
 ## Contents
 
 * [About The Project](#about-the-project)

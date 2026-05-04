@@ -33,6 +33,8 @@ import time
 import warnings
 from collections import Counter
 from string import ascii_lowercase
+from statsmodels.stats.multitest import multipletests
+from parsing import getArgs
 
 from psutil import virtual_memory
 try:
@@ -83,6 +85,7 @@ except ModuleNotFoundError:
 
 #from parsing import *
 
+args = getArgs() 
 sns.set_theme(style='white', palette='deep')
 
 #set fontsize
@@ -1648,7 +1651,7 @@ class Post_analysis:
         data_grouped = data.groupby((chromosome))
         return data, data_grouped
 
-    def manh_plot(df, dir_temp, Log, prefix, pcol, path, sigval, x, nolabel, colors = ['#4C72B0', '#C44E52'], refSNP = False):
+    def manh_plot(df, dir_temp, Log, prefix, pcol, path, sigval, x, nolabel, colors = ['#4C72B0', '#C44E52'], refSNP = False, correction=args.correction):
         """Description:
         creates manhattan plot from prepared dataframe and saves plot
         based on: https://github.com/Pudkip/Pyhattan/blob/master/Pyhattan/__init__.py"""
@@ -1686,12 +1689,26 @@ class Post_analysis:
             plt.yticks(fontsize=fontsize2, fontweight="bold")
             np.random.seed(0)
 
-            # Bonferroni correction
-            if sigval != None:
+            # Multiple testing correction / significance threshold
+            if sigval is not None:
                 sig_level = sigval
-            if sigval == None and x != 0:
-                sig_level = (0.05 / x)
+            elif correction == "bonferroni" and x !=0:
+                sig_level = 0.05 / x
                 sigval = -np.log10(sig_level)
+                Log.print_log("Bonferroni correction applied, threshold set at -log10(p) = {:2f}".format(sigval))
+            elif correction == "fdr":
+                raw_pvals = data[pcol].values
+                reject, pvals_corrected = multipletests(raw_pvals, alpha=0.05, method="fdr_bh")[:2]
+                data['FDR_corrected'] = pvals_corrected
+                # Find max -log10(pval) among those significant
+                if any(reject):
+                    sigval = -np.log10(max(raw_pvals[reject]))
+                    Log.print_log("FDR correction applied, threshold set at -log10(p) = {:2f}".format(sigval))
+                else:
+                    sigval = -np.log10(0.05) # default to standard threshold if none pass
+                Log.print_log("FDR correction applied, threshold set at -long10(p) = {:.2f}".format(sigval))
+            else:
+                Log.print_log("No signficance threshold was applied")
 
             if refSNP:
                 for index, row in data.iterrows():
